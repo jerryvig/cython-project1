@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import datetime
 from datetime import date
 import json
@@ -149,14 +150,20 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
                     'period1=%d&period2=%d&interval=1d&events=history'
                     '&crumb=%s' % (ticker, ago_366_days_stamp, manana_stamp, crumb))
     print('download_url = %s' % download_url)
-    download_response = requests.get(download_url, cookies=cookie_jar)
+
+    title = None
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        request_future = executor.submit(requests.get, download_url, cookies=cookie_jar)
+        title_future = executor.submit(get_title, response)
+        title = title_future.result()
+        download_response = request_future.result()
 
     adj_close, changes_daily = get_adj_close_and_changes(download_response.text)
     if adj_close is None:
         return None
 
     sigma_data = get_sigma_data(changes_daily)
-    sigma_data['c_name'] = get_title(response)
+    sigma_data['c_name'] = title
     sigma_data['c_ticker'] = ticker
     return sigma_data
 
