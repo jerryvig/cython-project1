@@ -25,6 +25,7 @@ def get_timestamps():
     return (manana_stamp, ago_366_days_stamp)
 
 def get_title(response):
+    """Parses the title (Company Name) from the response text."""
     title_start_idx = response.text.find('<title>')
     title_start = response.text[title_start_idx:]
     pipe_start = title_start.find('|') + 2
@@ -109,6 +110,7 @@ def compute_sign_diff_pct(ticker_changes):
     }
 
 def get_sigma_data(changes_daily):
+    """Computes standard change/standard deviation and constructs dict object."""
     sign_diff_dict = compute_sign_diff_pct(changes_daily)
 
     changes_numpy = changes_daily[:-1]
