@@ -34,7 +34,7 @@ def get_title(response):
 
 def get_adj_close_and_changes(response_text):
     """Extracts prices from text and computes daily changes."""
-    start = time.time_ns()
+    #start = time.time_ns()
 
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
@@ -51,8 +51,8 @@ def get_adj_close_and_changes(response_text):
         adj_prices[i] = adj_close
         if i:
             changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
-    end = time.time_ns()
-    print('ran get_adj_close_and_changes() in %d.' % (end - start))
+    #end = time.time_ns()
+    #print('ran get_adj_close_and_changes() in %d.' % (end - start))
 
     return (adj_prices, changes)
 
@@ -61,16 +61,9 @@ def compute_sign_diff_pct(ticker_changes):
     changes_0 = ticker_changes[1:-1]
     changes_minus_one = ticker_changes[:-2]
 
-    changes_tuples = zip(changes_minus_one, changes_0)
-
     # You are trying to fix this up.
-    changes_tuples_numpy = numpy.column_stack([changes_minus_one, changes_0])
-
-    print(list(changes_tuples))
-    print(changes_tuples_numpy)
-    exit(0)
-
-    sorted_descending = list(reversed(sorted(changes_tuples, key=lambda b: b[0])))
+    changes_tuples = numpy.column_stack([changes_minus_one, changes_0])
+    sorted_descending = changes_tuples[changes_tuples[:, 0].argsort()[::-1]]
 
     # UP
     pct_sum_10_up = 0
