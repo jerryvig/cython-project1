@@ -66,7 +66,7 @@ def compute_sign_diff_pct(ticker_changes):
     # UP
     pct_sum_10_up = 0
     pct_sum_20_up = 0
-    np_avg_10_up = numpy.zeros(10)
+    np_avg_10_up = numpy.zeros(10, dtype=float)
     for i, ele in enumerate(sorted_descending[:20]):
         product = ele[0] * ele[1]
         if i < 10:
@@ -82,7 +82,7 @@ def compute_sign_diff_pct(ticker_changes):
     # DOWN
     pct_sum_10_down = 0
     pct_sum_20_down = 0
-    np_avg_10_down = numpy.zeros(10)
+    np_avg_10_down = numpy.zeros(10, dtype=float)
     for i, ele in enumerate(sorted_descending[-20:]):
         product = ele[0] * ele[1]
         if i > 9:
