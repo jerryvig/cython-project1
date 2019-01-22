@@ -153,6 +153,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     return sigma_data
 
 def process_tickers(ticker_list):
+    """Processes all of the input tickers by looping over the list."""
     (manana_stamp, ago_366_days_stamp) = get_timestamps()
     symbol_count = 0
 
@@ -167,6 +168,7 @@ def process_tickers(ticker_list):
             time.sleep(1.5)
 
 def main():
+    """The main routine and application entry point of this module."""
     if len(sys.argv) < 2:
         while True:
             raw_ticker_string = input('Enter ticker list: ')
