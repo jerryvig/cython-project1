@@ -34,13 +34,13 @@ def get_title(response):
 
 def get_adj_close_and_changes(response_text):
     """Extracts prices from text and computes daily changes."""
-    #start = time.time()
+    start = time.time_ns()
 
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
     len_data_lines = len(data_lines)
-    adj_prices = numpy.zeros(len_data_lines)
-    changes = numpy.zeros(len_data_lines - 1)
+    adj_prices = numpy.zeros(len_data_lines, dtype=float)
+    changes = numpy.zeros(len_data_lines - 1, dtype=float)
     for i, line in enumerate(data_lines):
         cols = line.split(',')
         if cols[5] == 'null':
@@ -51,8 +51,8 @@ def get_adj_close_and_changes(response_text):
         adj_prices[i] = adj_close
         if i:
             changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
-    #end = time.time()
-    #print('ran get_adj_close_and_changes() in %d.' % (end - start))
+    end = time.time_ns()
+    print('ran get_adj_close_and_changes() in %d.' % (end - start))
 
     return (adj_prices, changes)
 
@@ -179,13 +179,13 @@ def main():
         while True:
             raw_ticker_string = input('Enter ticker list: ')
 
-            #start = time.time()
+            start = time.time()
             ticker_list = raw_ticker_string.strip().split(' ')
 
             process_tickers(ticker_list)
 
-            #end = time.time()
-            #print('processed in %.6f' % (end - start))
+            end = time.time()
+            print('processed in %.6f' % (end - start))
         return
 
     ticker_list = [s.strip().upper() for s in sys.argv[1:]]
