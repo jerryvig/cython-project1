@@ -57,12 +57,15 @@ def get_adj_close_and_changes(response_text):
     return (adj_prices, changes)
 
 def compute_sign_diff_pct(ticker_changes):
+    """Computes sign-diffs for up and down 10 and 20 blocks."""
     changes_0 = ticker_changes[1:-1]
     changes_minus_one = ticker_changes[:-2]
 
     changes_tuples = zip(changes_minus_one, changes_0)
+
+    # You are trying to fix this up.
     changes_tuples_numpy = numpy.column_stack([changes_minus_one, changes_0])
-    
+
     print(list(changes_tuples))
     print(changes_tuples_numpy)
     exit(0)
