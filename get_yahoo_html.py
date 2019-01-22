@@ -8,6 +8,7 @@ import requests
 
 
 def get_crumb(response):
+    """Parses out the crumb needed for the CSV download request."""
     crumbstore_start_idx = response.text.find("CrumbStore")
     json_start = response.text[crumbstore_start_idx + 12:crumbstore_start_idx + 70]
     json_end_idx = json_start.find("},")
@@ -16,6 +17,7 @@ def get_crumb(response):
     return json_obj['crumb']
 
 def get_timestamps():
+    """Computes the start and end timestamps for the request."""
     manana = date.today() + datetime.timedelta(days=1)
     ago_366_days = manana + datetime.timedelta(days=-367)
     manana_stamp = time.mktime(manana.timetuple())
