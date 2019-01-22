@@ -30,6 +30,7 @@ def get_title(response):
     return title_start[pipe_start:hyphen_end].strip()
 
 def get_adj_close_and_changes(response_text):
+    """Extracts prices from text and computes daily changes."""
     #start = time.time()
 
     lines = response_text.split('\n')
@@ -130,6 +131,7 @@ def get_sigma_data(changes_daily):
     return sigma_data
 
 def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
+    """Makes requests to get crumb and data and call stats computation."""
     url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
     print('url = %s' % url)
 
