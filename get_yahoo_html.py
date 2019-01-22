@@ -61,6 +61,12 @@ def compute_sign_diff_pct(ticker_changes):
     changes_minus_one = ticker_changes[:-2]
 
     changes_tuples = zip(changes_minus_one, changes_0)
+    changes_tuples_numpy = numpy.column_stack([changes_minus_one, changes_0])
+    
+    print(list(changes_tuples))
+    print(changes_tuples_numpy)
+    exit(0)
+
     sorted_descending = list(reversed(sorted(changes_tuples, key=lambda b: b[0])))
 
     # UP
