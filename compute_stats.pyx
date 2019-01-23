@@ -1,7 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 import datetime
 from datetime import date
-import fastnumbers
 import json
 import sys
 import time
@@ -38,33 +37,23 @@ def get_adj_close_and_changes(response_text):
     """Extracts prices from text and computes daily changes."""
     start = time.time_ns()
 
-    cdef int i
-    cdef double adj_close
-
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
-    cdef int len_data_lines = len(data_lines)
-
+    len_data_lines = len(data_lines)
     adj_prices = numpy.zeros(len_data_lines, dtype=float)
-    cdef double[:] adj_prices_view = adj_prices
-
     changes = numpy.zeros(len_data_lines - 1, dtype=float)
-    cdef double[:] changes_view = changes
-
-    loop_start = time.time_ns()
-    for i in range(len_data_lines):
-        cols = data_lines[i].split(',')
+    for i, line in enumerate(data_lines):
+        cols = line.split(',')
         if cols[5] == 'null':
             print('===== "null" values found in the input ====')
             print('===== continuing ..... ====================')
             return (None, None)
-        adj_close = fastnumbers.fast_float(cols[5])
-        adj_prices_view[i] = adj_close
+        adj_close = float(cols[5])
+        adj_prices[i] = adj_close
         if i:
-            changes_view[i-1] = (adj_close - adj_prices_view[i-1])/adj_prices_view[i-1]
+            changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
     end = time.time_ns()
     print('ran get_adj_close_and_changes() in %d.' % (end - start))
-    print('loop time = %d' % (end - loop_start))
 
     return (adj_prices, changes)
 
@@ -127,8 +116,7 @@ def get_sigma_data(changes_daily):
     """Computes standard change/standard deviation and constructs dict object."""
     sign_diff_dict = compute_sign_diff_pct(changes_daily)
 
-    changes_numpy = changes_daily[:-1]
-    stdev = numpy.std(changes_numpy, ddof=1)
+    stdev = numpy.std(changes_daily[:-1], ddof=1)
     sigma_change = changes_daily[-1]/stdev
 
     sigma_data = {
@@ -154,7 +142,6 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     print('url = %s' % url)
 
     response = requests.get(url)
-    cookie_jar = response.cookies
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
@@ -165,7 +152,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     title = None
     with ThreadPoolExecutor(max_workers=2) as executor:
         request_future = executor.submit(
-            requests.get, download_url, cookies=cookie_jar)
+            requests.get, download_url, cookies=response.cookies)
         title_future = executor.submit(get_title, response)
         title = title_future.result()
         download_response = request_future.result()
