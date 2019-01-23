@@ -35,7 +35,7 @@ def get_title(response):
 
 def get_adj_close_and_changes(response_text):
     """Extracts prices from text and computes daily changes."""
-    #start = time.time_ns()
+    start = time.time_ns()
 
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
@@ -52,8 +52,8 @@ def get_adj_close_and_changes(response_text):
         adj_prices[i] = adj_close
         if i:
             changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
-    #end = time.time_ns()
-    #print('ran get_adj_close_and_changes() in %d.' % (end - start))
+    end = time.time_ns()
+    print('ran get_adj_close_and_changes() in %d.' % (end - start))
 
     return (adj_prices, changes)
 
@@ -143,7 +143,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     print('url = %s' % url)
 
     response = requests.get(url)
-    cookie_jar = response.cookies
+    # cookie_jar = response.cookies
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
@@ -153,7 +153,8 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     title = None
     with ThreadPoolExecutor(max_workers=2) as executor:
-        request_future = executor.submit(requests.get, download_url, cookies=cookie_jar)
+        request_future = executor.submit(
+            requests.get, download_url, cookies=response.cookies)
         title_future = executor.submit(get_title, response)
         title = title_future.result()
         download_response = request_future.result()
