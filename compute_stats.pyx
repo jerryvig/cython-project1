@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import datetime
 from datetime import date
+import fastnumbers
 import json
 import sys
 import time
@@ -37,21 +38,29 @@ def get_adj_close_and_changes(response_text):
     """Extracts prices from text and computes daily changes."""
     start = time.time_ns()
 
+    cdef int i
+    cdef double adj_close
+
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
-    len_data_lines = len(data_lines)
+    cdef int len_data_lines = len(data_lines)
+    
     adj_prices = numpy.zeros(len_data_lines, dtype=float)
+    cdef double[:] adj_prices_view = adj_prices
+
     changes = numpy.zeros(len_data_lines - 1, dtype=float)
-    for i, line in enumerate(data_lines):
-        cols = line.split(',')
+    cdef double[:] changes_view = changes
+
+    for i in range(len_data_lines):
+        cols = data_lines[i].split(',')
         if cols[5] == 'null':
             print('===== "null" values found in the input ====')
             print('===== continuing ..... ====================')
             return (None, None)
         adj_close = float(cols[5])
-        adj_prices[i] = adj_close
+        adj_prices_view[i] = adj_close
         if i:
-            changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
+            changes_view[i-1] = (adj_close - adj_prices_view[i-1])/adj_prices_view[i-1]
     end = time.time_ns()
     print('ran get_adj_close_and_changes() in %d.' % (end - start))
 
