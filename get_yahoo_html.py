@@ -116,8 +116,7 @@ def get_sigma_data(changes_daily):
     """Computes standard change/standard deviation and constructs dict object."""
     sign_diff_dict = compute_sign_diff_pct(changes_daily)
 
-    changes_numpy = changes_daily[:-1]
-    stdev = numpy.std(changes_numpy, ddof=1)
+    stdev = numpy.std(changes_daily[:-1], ddof=1)
     sigma_change = changes_daily[-1]/stdev
 
     sigma_data = {
