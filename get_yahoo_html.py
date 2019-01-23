@@ -142,7 +142,6 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     print('url = %s' % url)
 
     response = requests.get(url)
-    # cookie_jar = response.cookies
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
