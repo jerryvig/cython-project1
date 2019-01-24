@@ -39,16 +39,7 @@ cdef void get_title_c(const char* response_text, char* title):
     cdef const char* hyphen_end = strstr(&pipe_start[2], "-")
     cdef size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end)
     strncpy(title, &pipe_start[2], diff)
-    #printf("'%s'\n", title)
     return
-
-def get_title(response):
-    """Parses the title (Company Name) from the response text."""
-    title_start_idx = response.text.find('<title>')
-    title_start = response.text[title_start_idx:]
-    pipe_start = title_start.find('|') + 2
-    hyphen_end = title_start.find('-')
-    return title_start[pipe_start:hyphen_end].strip()
 
 cdef int get_adj_close_and_changes(response_text, double* adj_prices, double* changes):
     """Extracts prices from text and computes daily changes."""
@@ -175,6 +166,8 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     print('download_url = %s' % download_url)
 
     title = title_c.decode('UTF-8')
+    print('title = "%s"' % title)
+
     with ThreadPoolExecutor(max_workers=2) as executor:
         request_future = executor.submit(
             requests.get, download_url, cookies=response.cookies)
