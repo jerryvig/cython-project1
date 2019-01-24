@@ -9,6 +9,7 @@ import numpy
 import requests
 
 from libc.stdio cimport printf
+from libc.stdlib cimport atof
 from libc.stdlib cimport malloc
 from libc.stdlib cimport free
 from libc.string cimport memset
@@ -33,7 +34,7 @@ def get_timestamps():
     ago_366_days_stamp = time.mktime(ago_366_days.timetuple())
     return (manana_stamp, ago_366_days_stamp)
 
-cdef void get_title_c(const char* response_text, char* title):
+cdef void get_title(const char* response_text, char* title):
     cdef const char* title_start = strstr(response_text, "<title>")
     cdef const char* pipe_start = strstr(title_start, "|")
     cdef const char* hyphen_end = strstr(&pipe_start[2], "-")
@@ -41,16 +42,18 @@ cdef void get_title_c(const char* response_text, char* title):
     strncpy(title, &pipe_start[2], diff)
     return
 
-cdef int get_adj_close_and_changes(response_text, double* adj_prices, double* changes):
+cdef int get_adj_close_and_changes(const char *response_text, double *changes):
     """Extracts prices from text and computes daily changes."""
     #start = time.time_ns()
 
     cdef int i
+    cdef double adj_close
+    cdef double last_adj_close
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
 
     cdef int len_data_lines = len(data_lines)
-    adj_prices = <double*>malloc(len_data_lines * sizeof(double))
+    # adj_prices = <double*>malloc(len_data_lines * sizeof(double))
     changes = <double*>malloc((len_data_lines - 1) * sizeof(double))
 
     for i in range(len_data_lines):
@@ -59,16 +62,11 @@ cdef int get_adj_close_and_changes(response_text, double* adj_prices, double* ch
             print('===== "null" values found in the input ====')
             print('===== continuing ..... ====================')
             return 0
-        adj_prices[i] = float(cols[5])
+        adj_close = float(cols[5])
         if i:
-            changes[i-1] = (adj_prices[i] - adj_prices[i-1])/adj_prices[i-1]
-    #end = time.time_ns()
-    # free(adj_prices)
-    # free(changes)
-    #print('ran get_adj_close_and_changes() in %d.' % (end - start))
-
+            changes[i-1] = (adj_close - last_adj_close)/last_adj_close
+        last_adj_close = adj_close
     return 1
-    #return (None, None)
 
 def compute_sign_diff_pct(ticker_changes):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
@@ -157,7 +155,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     response = requests.get(url)
     cdef char title_c[128]
     memset(title_c, 0, 128)
-    get_title_c(response.text.encode('UTF-8'), title_c)
+    get_title(response.text.encode('UTF-8'), title_c)
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
@@ -175,18 +173,24 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
         # title = title_future.result()
         download_response = request_future.result()
 
-    cdef double* adj_close
+    # cdef double* adj_close
     cdef double* changes_daily
 
     #adj_close, changes_daily = get_adj_close_and_changes(download_response.text)
     start = time.time_ns()
-    cdef int get_adj_close_success = get_adj_close_and_changes(download_response.text, adj_close, changes_daily)
+    cdef int get_adj_close_success = get_adj_close_and_changes(download_response.text, changes_daily)
 
     end = time.time_ns()
     print('ran get_adj_close_and_changes() in %d ns' % (end - start))
 
+    
+
     if not get_adj_close_success:
         return None
+
+    free(changes_daily)
+
+    exit(0)
 
     changes_daily_ii = []
     sigma_data = get_sigma_data(changes_daily_ii)
