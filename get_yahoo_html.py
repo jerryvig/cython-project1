@@ -193,13 +193,13 @@ def main():
         while True:
             raw_ticker_string = input('Enter ticker list: ')
 
-            start = time.time()
+            #start = time.time()
             ticker_list = raw_ticker_string.strip().split(' ')
 
             process_tickers(ticker_list, timestamps)
 
-            end = time.time()
-            print('processed in %.6f' % (end - start))
+            #end = time.time()
+            #print('processed in %.6f' % (end - start))
         return
 
     ticker_list = [s.strip().upper() for s in sys.argv[1:]]
