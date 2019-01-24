@@ -1,11 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
 import datetime
 from datetime import date
-import json
 import sys
 import time
 import numpy
 import requests
+import ujson
 
 
 def get_crumb(response):
@@ -14,7 +14,7 @@ def get_crumb(response):
     json_start = response.text[crumbstore_start_idx + 12:crumbstore_start_idx + 70]
     json_end_idx = json_start.find("},")
     json_snippet = json_start[:json_end_idx + 1]
-    json_obj = json.loads(json_snippet)
+    json_obj = ujson.loads(json_snippet)
     return json_obj['crumb']
 
 def get_timestamps():
@@ -175,7 +175,7 @@ def process_tickers(ticker_list):
         ticker = symbol.strip().upper()
         sigma_data = process_ticker(ticker, manana_stamp, ago_366_days_stamp)
         if sigma_data:
-            print(json.dumps(sigma_data, sort_keys=True, indent=2))
+            print(ujson.dumps(sigma_data, sort_keys=True, indent=2))
 
         symbol_count += 1
         if symbol_count < len(sys.argv[1:]):
