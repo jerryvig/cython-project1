@@ -11,6 +11,7 @@ import requests
 from libc.stdio cimport printf
 from libc.stdlib cimport malloc
 from libc.stdlib cimport free
+from libc.string cimport memset
 from libc.string cimport strlen
 from libc.string cimport strstr
 from libc.string cimport strncpy
@@ -38,7 +39,7 @@ cdef void get_title_c(const char* response_text, char* title):
     cdef const char* hyphen_end = strstr(&pipe_start[2], "-")
     cdef size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end)
     strncpy(title, &pipe_start[2], diff)
-    printf("%s\n", title)
+    #printf("'%s'\n", title)
     return
 
 def get_title(response):
@@ -163,10 +164,9 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     print('url = %s' % url)
 
     response = requests.get(url)
-    cdef char title_c[128] 
+    cdef char title_c[128]
+    memset(title_c, 0, 128)
     get_title_c(response.text.encode('UTF-8'), title_c)
-
-    exit(0)
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
@@ -174,12 +174,12 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
                     '&crumb=%s' % (ticker, ago_366_days_stamp, manana_stamp, crumb))
     print('download_url = %s' % download_url)
 
-    title = None
+    title = title_c.decode('UTF-8')
     with ThreadPoolExecutor(max_workers=2) as executor:
         request_future = executor.submit(
             requests.get, download_url, cookies=response.cookies)
-        title_future = executor.submit(get_title, response)
-        title = title_future.result()
+        # title_future = executor.submit(get_title, response)
+        # title = title_future.result()
         download_response = request_future.result()
 
     cdef double* adj_close

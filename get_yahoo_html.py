@@ -35,13 +35,14 @@ def get_title(response):
 
 def get_adj_close_and_changes(response_text):
     """Extracts prices from text and computes daily changes."""
-    start = time.time_ns()
+    # start = time.time_ns()
 
     lines = response_text.split('\n')
     data_lines = lines[1:-1]
     len_data_lines = len(data_lines)
-    adj_prices = numpy.zeros(len_data_lines, dtype=float)
+    # adj_prices = numpy.zeros(len_data_lines, dtype=float)
     changes = numpy.zeros(len_data_lines - 1, dtype=float)
+    last_adj_close = None
     for i, line in enumerate(data_lines):
         cols = line.split(',')
         if cols[5] == 'null':
@@ -49,13 +50,16 @@ def get_adj_close_and_changes(response_text):
             print('===== continuing ..... ====================')
             return (None, None)
         adj_close = float(cols[5])
-        adj_prices[i] = adj_close
+        #adj_prices[i] = adj_close
         if i:
-            changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
-    end = time.time_ns()
-    print('ran get_adj_close_and_changes() in %d.' % (end - start))
+            #changes[i-1] = (adj_close - adj_prices[i-1])/adj_prices[i-1]
+            changes[i-1] = (adj_close - last_adj_close)/last_adj_close
 
-    return (adj_prices, changes)
+        last_adj_close = adj_close
+    # end = time.time_ns()
+    # print('ran get_adj_close_and_changes() in %d.' % (end - start))
+
+    return (None, changes)
 
 def compute_sign_diff_pct(ticker_changes):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
@@ -158,7 +162,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
         download_response = request_future.result()
 
     adj_close, changes_daily = get_adj_close_and_changes(download_response.text)
-    if adj_close is None:
+    if changes_daily is None:
         return None
 
     sigma_data = get_sigma_data(changes_daily)
@@ -166,9 +170,10 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     sigma_data['c_ticker'] = ticker
     return sigma_data
 
-def process_tickers(ticker_list):
+def process_tickers(ticker_list, timestamps):
     """Processes all of the input tickers by looping over the list."""
-    (manana_stamp, ago_366_days_stamp) = get_timestamps()
+    manana_stamp = timestamps[0]
+    ago_366_days_stamp = timestamps[1]
     symbol_count = 0
 
     for symbol in ticker_list:
@@ -183,6 +188,7 @@ def process_tickers(ticker_list):
 
 def main():
     """The main routine and application entry point of this module."""
+    timestamps = get_timestamps()
     if len(sys.argv) < 2:
         while True:
             raw_ticker_string = input('Enter ticker list: ')
@@ -190,14 +196,14 @@ def main():
             start = time.time()
             ticker_list = raw_ticker_string.strip().split(' ')
 
-            process_tickers(ticker_list)
+            process_tickers(ticker_list, timestamps)
 
             end = time.time()
             print('processed in %.6f' % (end - start))
         return
 
     ticker_list = [s.strip().upper() for s in sys.argv[1:]]
-    process_tickers(ticker_list)
+    process_tickers(ticker_list, timestamps)
 
 if __name__ == '__main__':
     main()
