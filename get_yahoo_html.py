@@ -143,7 +143,7 @@ def get_sigma_data(changes_daily):
 def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     """Makes requests to get crumb and data and call stats computation."""
     url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
-    print('url = %s' % url)
+    # print('url = %s' % url)
 
     response = requests.get(url)
     crumb = get_crumb(response)
@@ -151,7 +151,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
                     'period1=%d&period2=%d&interval=1d&events=history'
                     '&crumb=%s' % (ticker, ago_366_days_stamp, manana_stamp, crumb))
-    print('download_url = %s' % download_url)
+    # print('download_url = %s' % download_url)
 
     title = None
     with ThreadPoolExecutor(max_workers=2) as executor:
