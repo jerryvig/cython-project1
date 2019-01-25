@@ -182,12 +182,12 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     title = title_c.decode('UTF-8')
     print('title = "%s"' % title)
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        request_future = executor.submit(
-            requests.get, download_url, cookies=response.cookies)
+    #with ThreadPoolExecutor(max_workers=2) as executor:
+    #    request_future = executor.submit(
+    #        requests.get, download_url, cookies=response.cookies)
         # title_future = executor.submit(get_title, response)
         # title = title_future.result()
-        download_response = request_future.result()
+    download_response = requests.get(download_url, cookies=response.cookies)
 
     # cdef double* adj_close
     cdef double changes_daily[512]
@@ -206,9 +206,6 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     if not get_adj_close_success:
         return None
-
-    # free(changes_daily)
-
     exit(0)
 
     changes_daily_ii = []
