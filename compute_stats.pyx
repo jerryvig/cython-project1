@@ -20,14 +20,13 @@ from libc.string cimport strcpy
 from libc.string cimport strncpy
 from libc.string cimport strtok
 
-def get_crumb(response):
-    """Parses out the crumb needed for the CSV download request."""
-    crumbstore_start_idx = response.text.find("CrumbStore")
-    json_start = response.text[crumbstore_start_idx + 12:crumbstore_start_idx + 70]
-    json_end_idx = json_start.find("},")
-    json_snippet = json_start[:json_end_idx + 1]
-    json_obj = json.loads(json_snippet)
-    return json_obj['crumb']
+
+cdef void get_crumb(const char *response_text, char *crumb):
+    cdef const char *crumbstore = strstr(response_text, "CrumbStore")
+    cdef const char *colon_quote = strstr(crumbstore, ":\"")
+    cdef const char *end_quote = strstr(&colon_quote[2], "\"")
+    strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote))
+    return
 
 def get_timestamps():
     """Computes the start and end timestamps for the request."""
@@ -37,7 +36,7 @@ def get_timestamps():
     ago_366_days_stamp = time.mktime(ago_366_days.timetuple())
     return (manana_stamp, ago_366_days_stamp)
 
-cdef void get_title(const char* response_text, char* title):
+cdef void get_title(const char *response_text, char *title):
     cdef const char* title_start = strstr(response_text, "<title>")
     cdef const char* pipe_start = strstr(title_start, "|")
     cdef const char* hyphen_end = strstr(&pipe_start[2], "-")
@@ -163,13 +162,19 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     print('url = %s' % url)
 
     response = requests.get(url)
+    
     cdef char title_c[128]
     memset(title_c, 0, 128)
+
+    cdef char crumb_c[128]
+    memset(crumb_c, 0, 128)
+
     resp_encode = response.text.encode('UTF-8')
     cdef const char* response_text_char = resp_encode
     get_title(response_text_char, title_c)
-    crumb = get_crumb(response)
+    get_crumb(response_text_char, crumb_c)
 
+    crumb = crumb_c.decode('UTF-8')
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
                     'period1=%d&period2=%d&interval=1d&events=history'
                     '&crumb=%s' % (ticker, ago_366_days_stamp, manana_stamp, crumb))
