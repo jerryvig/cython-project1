@@ -8,6 +8,7 @@ import numpy
 import requests
 
 from libc.stdio cimport printf
+from libc.stdio cimport sprintf
 from libc.stdlib cimport atof
 from libc.stdlib cimport malloc
 from libc.stdlib cimport free
@@ -34,15 +35,19 @@ cdef void get_crumb(const char *response_text, char *crumb):
     return
 
 
-cdef void get_timestamps(time_t timestamps[]):
+cdef void get_timestamps(char timestamps[][12]):
+    memset(timestamps[0], 0, 12)
+    memset(timestamps[1], 0, 12)    
     cdef time_t now = ctime(NULL)
     cdef tm *now_tm = localtime(&now)
     now_tm.tm_sec = 0
     now_tm.tm_min = 0
     now_tm.tm_hour = 0
     cdef time_t today_time = mktime(now_tm)
-    timestamps[0] = today_time + 86400
-    timestamps[1] = today_time - 31622400
+    cdef time_t manana = today_time + 86400
+    cdef time_t ago_366_days = today_time - 31622400
+    sprintf(timestamps[0], "%ld", manana)
+    sprintf(timestamps[1], "%ld", ago_366_days)
     return
 
 cdef void get_title(const char *response_text, char *title):
@@ -165,7 +170,7 @@ def get_sigma_data(changes_daily):
     }
     return sigma_data
 
-def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
+cdef process_ticker(ticker, char timestamps[][12]):
     """Makes requests to get crumb and data and call stats computation."""
     url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
     print('url = %s' % url)
@@ -185,14 +190,17 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     crumb = crumb_c.decode('UTF-8')
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
-                    'period1=%d&period2=%d&interval=1d&events=history'
-                    '&crumb=%s' % (ticker, ago_366_days_stamp, manana_stamp, crumb))
+                    'period1=%s&period2=%s&interval=1d&events=history'
+                    '&crumb=%s' % (ticker, timestamps[1].decode('UTF-8'), timestamps[0].decode('UTF-8'), crumb))
     print('download_url = %s' % download_url)
 
     title = title_c.decode('UTF-8')
     print('title = "%s"' % title)
 
     download_response = requests.get(download_url, cookies=response.cookies)
+
+    print('dl resp = %s' % download_response.text)
+    exit(0)
 
     # cdef double* adj_close
     cdef double changes_daily[512]
@@ -216,16 +224,16 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     return sigma_data
 
-cdef process_tickers(ticker_list, const time_t timestamps[]):
+cdef process_tickers(ticker_list, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
-    manana_stamp = timestamps[0]
-    ago_366_days_stamp = timestamps[1]
+    #manana_stamp = timestamps[0]
+    #ago_366_days_stamp = timestamps[1]
 
     symbol_count = 0
 
     for symbol in ticker_list:
         ticker = symbol.strip().upper()
-        sigma_data = process_ticker(ticker, manana_stamp, ago_366_days_stamp)
+        sigma_data = process_ticker(ticker, timestamps)
         if sigma_data:
             print(ujson.dumps(sigma_data, sort_keys=True, indent=2))
 
@@ -235,7 +243,7 @@ cdef process_tickers(ticker_list, const time_t timestamps[]):
 
 def main():
     """The main routine and application entry point of this module."""
-    cdef time_t timestamps[2]
+    cdef char timestamps[2][12]
     get_timestamps(timestamps)
 
     if len(sys.argv) < 2:
