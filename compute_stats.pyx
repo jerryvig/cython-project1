@@ -18,6 +18,12 @@ from libc.string cimport strstr
 from libc.string cimport strcpy
 from libc.string cimport strncpy
 from libc.string cimport strtok
+from libc.time cimport asctime
+from libc.time cimport localtime
+from libc.time cimport mktime
+from libc.time cimport time as ctime
+from libc.time cimport time_t
+from libc.time cimport tm
 
 
 cdef void get_crumb(const char *response_text, char *crumb):
@@ -27,13 +33,17 @@ cdef void get_crumb(const char *response_text, char *crumb):
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote))
     return
 
-def get_timestamps():
-    """Computes the start and end timestamps for the request."""
-    manana = date.today() + datetime.timedelta(days=1)
-    ago_366_days = manana + datetime.timedelta(days=-367)
-    manana_stamp = time.mktime(manana.timetuple())
-    ago_366_days_stamp = time.mktime(ago_366_days.timetuple())
-    return (manana_stamp, ago_366_days_stamp)
+
+cdef void get_timestamps(time_t timestamps[]):
+    cdef time_t now = ctime(NULL)
+    cdef tm *now_tm = localtime(&now)
+    now_tm.tm_sec = 0
+    now_tm.tm_min = 0
+    now_tm.tm_hour = 0
+    cdef time_t today_time = mktime(now_tm)
+    timestamps[0] = today_time + 86400
+    timestamps[1] = today_time - 31622400
+    return
 
 cdef void get_title(const char *response_text, char *title):
     cdef const char* title_start = strstr(response_text, "<title>")
@@ -206,9 +216,11 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     return sigma_data
 
-def process_tickers(ticker_list):
+cdef process_tickers(ticker_list, const time_t timestamps[]):
     """Processes all of the input tickers by looping over the list."""
-    (manana_stamp, ago_366_days_stamp) = get_timestamps()
+    manana_stamp = timestamps[0]
+    ago_366_days_stamp = timestamps[1]
+
     symbol_count = 0
 
     for symbol in ticker_list:
@@ -223,6 +235,11 @@ def process_tickers(ticker_list):
 
 def main():
     """The main routine and application entry point of this module."""
+    cdef time_t timestamps[2]
+    get_timestamps(timestamps)
+
+    printf("manana, -366 = %ld, %ld\n", timestamps[0], timestamps[1])
+
     if len(sys.argv) < 2:
         while True:
             raw_ticker_string = input('Enter ticker list: ')
@@ -230,14 +247,14 @@ def main():
             start = time.time()
             ticker_list = raw_ticker_string.strip().split(' ')
 
-            process_tickers(ticker_list)
+            process_tickers(ticker_list, timestamps)
 
             end = time.time()
             print('processed in %.6f' % (end - start))
         return
 
     ticker_list = [s.strip().upper() for s in sys.argv[1:]]
-    process_tickers(ticker_list)
+    process_tickers(ticker_list, timestamps)
 
 if __name__ == '__main__':
     main()
