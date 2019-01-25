@@ -238,8 +238,6 @@ def main():
     cdef time_t timestamps[2]
     get_timestamps(timestamps)
 
-    printf("manana, -366 = %ld, %ld\n", timestamps[0], timestamps[1])
-
     if len(sys.argv) < 2:
         while True:
             raw_ticker_string = input('Enter ticker list: ')
