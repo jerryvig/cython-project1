@@ -172,13 +172,11 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
 def process_tickers(ticker_list, timestamps):
     """Processes all of the input tickers by looping over the list."""
-    manana_stamp = timestamps[0]
-    ago_366_days_stamp = timestamps[1]
     symbol_count = 0
 
     for symbol in ticker_list:
         ticker = symbol.strip().upper()
-        sigma_data = process_ticker(ticker, manana_stamp, ago_366_days_stamp)
+        sigma_data = process_ticker(ticker, timestamps[0], timestamps[1])
         if sigma_data:
             print(ujson.dumps(sigma_data, sort_keys=True, indent=2))
 
@@ -191,7 +189,7 @@ def main():
     timestamps = get_timestamps()
     if len(sys.argv) < 2:
         while True:
-            raw_ticker_string = input('Enter ticker list: ')
+            raw_ticker_string = input('Enter tickers: ')
 
             #start = time.time()
             ticker_list = raw_ticker_string.strip().split(' ')
