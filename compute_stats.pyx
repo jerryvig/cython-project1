@@ -13,9 +13,12 @@ from libc.stdlib cimport atof
 from libc.stdlib cimport malloc
 from libc.stdlib cimport free
 from libc.string cimport memset
+from libc.string cimport strcmp
 from libc.string cimport strlen
 from libc.string cimport strstr
+from libc.string cimport strcpy
 from libc.string cimport strncpy
+from libc.string cimport strtok
 
 def get_crumb(response):
     """Parses out the crumb needed for the CSV download request."""
@@ -42,30 +45,37 @@ cdef void get_title(const char* response_text, char* title):
     strncpy(title, &pipe_start[2], diff)
     return
 
-cdef int get_adj_close_and_changes(const char *response_text, double *changes):
+cdef int get_adj_close_and_changes(char *response_text, double *changes):
     """Extracts prices from text and computes daily changes."""
-    #start = time.time_ns()
-
-    cdef int i
+    cdef int i = 0
+    cdef int j
     cdef double adj_close
     cdef double last_adj_close
-    lines = response_text.split('\n')
-    data_lines = lines[1:-1]
+    cdef char line[512]
+    cdef char adj_close_str[128]
+    cdef char *last_column
 
-    cdef int len_data_lines = len(data_lines)
-    # adj_prices = <double*>malloc(len_data_lines * sizeof(double))
-    changes = <double*>malloc((len_data_lines - 1) * sizeof(double))
-
-    for i in range(len_data_lines):
-        cols = data_lines[i].split(',')
-        if cols[5] == 'null':
-            print('===== "null" values found in the input ====')
-            print('===== continuing ..... ====================')
-            return 0
-        adj_close = float(cols[5])
+    cdef char *token = strtok(response_text, "\n")
+    while token:
         if i:
-            changes[i-1] = (adj_close - last_adj_close)/last_adj_close
-        last_adj_close = adj_close
+            memset(line, 0, 512)
+            memset(adj_close_str, 0, 128)
+            strcpy(line, token)
+
+            for j in range(5):
+                line = strstr(&line[1], ",")
+            last_column = strstr(&line[1], ",")
+            strncpy(adj_close_str, &line[1], strlen(&line[1]) - strlen(last_column))
+            if strcmp(adj_close_str, "null") == 0:
+                return 0
+
+            adj_close = atof(adj_close_str)
+            if i > 1:
+                changes[i-1] = (adj_close - last_adj_close)/last_adj_close
+            last_adj_close = adj_close
+
+        token = strtok(NULL, "\n")
+        i += 1
     return 1
 
 def compute_sign_diff_pct(ticker_changes):
@@ -155,7 +165,9 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     response = requests.get(url)
     cdef char title_c[128]
     memset(title_c, 0, 128)
-    get_title(response.text.encode('UTF-8'), title_c)
+    resp_encode = response.text.encode('UTF-8')
+    cdef const char* response_text_char = resp_encode
+    get_title(response_text_char, title_c)
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
@@ -174,11 +186,14 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
         download_response = request_future.result()
 
     # cdef double* adj_close
-    cdef double* changes_daily
+    cdef double changes_daily[512]
+
+    dl_resp_char = download_response.text.encode('UTF-8')
+    cdef char *download_response_char = dl_resp_char
 
     #adj_close, changes_daily = get_adj_close_and_changes(download_response.text)
     start = time.time_ns()
-    cdef int get_adj_close_success = get_adj_close_and_changes(download_response.text, changes_daily)
+    cdef int get_adj_close_success = get_adj_close_and_changes(download_response_char, changes_daily)
 
     end = time.time_ns()
     print('ran get_adj_close_and_changes() in %d ns' % (end - start))
@@ -188,7 +203,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     if not get_adj_close_success:
         return None
 
-    free(changes_daily)
+    # free(changes_daily)
 
     exit(0)
 
