@@ -25,6 +25,8 @@ from libc.time cimport time as ctime
 from libc.time cimport time_t
 from libc.time cimport tm
 
+cdef extern from "gsl/gsl_statistics_double.h":
+    double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
 
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
@@ -236,6 +238,17 @@ def main():
     """The main routine and application entry point of this module."""
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
+
+    cdef double input_data[5]
+    input_data[0] = 1.1
+    input_data[1] = 2.2
+    input_data[2] = 3.3
+    input_data[3] = 4.4
+    input_data[4] = 5.5
+
+    cdef double stdev = gsl_stats_sd(input_data, 1, 5)
+    printf("stdev = %f\n", stdev)
+    exit(0)
 
     if len(sys.argv) < 2:
         while True:

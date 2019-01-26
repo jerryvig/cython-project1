@@ -1,4 +1,12 @@
 from distutils.core import setup
+from distutils.extension import Extension
 from Cython.Build import cythonize
 
-setup(name='compute stats app', ext_modules=cythonize('compute_stats.pyx'))
+EXT_MODULES = [
+    Extension("compute_stats",
+              sources=["compute_stats.pyx"],
+              libraries=["gsl", "gslcblas"]
+              )
+]
+
+setup(name='compute stats app', ext_modules=cythonize(EXT_MODULES))
