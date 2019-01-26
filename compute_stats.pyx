@@ -19,7 +19,6 @@ from libc.string cimport strstr
 from libc.string cimport strcpy
 from libc.string cimport strncpy
 from libc.string cimport strtok
-from libc.time cimport asctime
 from libc.time cimport localtime
 from libc.time cimport mktime
 from libc.time cimport time as ctime
@@ -147,7 +146,7 @@ def compute_sign_diff_pct(ticker_changes):
 
 def get_sigma_data(changes_daily):
     """Computes standard change/standard deviation and constructs dict object."""
-    # sign_diff_dict = compute_sign_diff_pct(changes_daily)
+    sign_diff_dict = compute_sign_diff_pct(changes_daily)
 
     # you need to compute the stddev using the gsl.
     stdev = numpy.std(changes_daily[:-1], ddof=1)
