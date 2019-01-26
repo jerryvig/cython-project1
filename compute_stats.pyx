@@ -34,7 +34,6 @@ cdef void get_crumb(const char *response_text, char *crumb):
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote))
     return
 
-
 cdef void get_timestamps(char timestamps[][12]):
     memset(timestamps[0], 0, 12)
     memset(timestamps[1], 0, 12)    
@@ -148,10 +147,13 @@ def compute_sign_diff_pct(ticker_changes):
 
 def get_sigma_data(changes_daily):
     """Computes standard change/standard deviation and constructs dict object."""
-    sign_diff_dict = compute_sign_diff_pct(changes_daily)
+    # sign_diff_dict = compute_sign_diff_pct(changes_daily)
 
+    # you need to compute the stddev using the gsl.
     stdev = numpy.std(changes_daily[:-1], ddof=1)
     sigma_change = changes_daily[-1]/stdev
+
+    exit(0)
 
     sigma_data = {
         'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
@@ -195,12 +197,8 @@ cdef process_ticker(ticker, char timestamps[][12]):
     print('download_url = %s' % download_url)
 
     title = title_c.decode('UTF-8')
-    print('title = "%s"' % title)
 
     download_response = requests.get(download_url, cookies=response.cookies)
-
-    print('dl resp = %s' % download_response.text)
-    exit(0)
 
     # cdef double* adj_close
     cdef double changes_daily[512]
@@ -215,10 +213,8 @@ cdef process_ticker(ticker, char timestamps[][12]):
 
     if not get_adj_close_success:
         return None
-    exit(0)
 
-    changes_daily_ii = []
-    sigma_data = get_sigma_data(changes_daily_ii)
+    sigma_data = get_sigma_data(changes_daily)
     sigma_data['c_name'] = title
     sigma_data['c_ticker'] = ticker
 
@@ -226,11 +222,7 @@ cdef process_ticker(ticker, char timestamps[][12]):
 
 cdef process_tickers(ticker_list, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
-    #manana_stamp = timestamps[0]
-    #ago_366_days_stamp = timestamps[1]
-
     symbol_count = 0
-
     for symbol in ticker_list:
         ticker = symbol.strip().upper()
         sigma_data = process_ticker(ticker, timestamps)
