@@ -94,10 +94,10 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
     # printf("changes count = %d\n", (i-1))
     return i - 1
 
-def compute_sign_diff_pct(const double *changes_daily):
+cdef compute_sign_diff_pct(const double *changes_daily):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
-    changes_0 = ticker_changes[1:-1]
-    changes_minus_one = ticker_changes[:-2]
+    changes_0 = changes_daily[1:-1]
+    changes_minus_one = changes_daily[:-2]
 
     # You are trying to fix this up.
     changes_tuples = numpy.column_stack([changes_minus_one, changes_0])
