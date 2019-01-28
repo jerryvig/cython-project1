@@ -14,7 +14,11 @@ def get_crumb(response):
     json_start = response.text[crumbstore_start_idx + 12:crumbstore_start_idx + 70]
     json_end_idx = json_start.find("},")
     json_snippet = json_start[:json_end_idx + 1]
-    json_obj = ujson.loads(json_snippet)
+    try:
+        json_obj = ujson.loads(json_snippet)
+    except ValueError:
+        print('Unable to load JSON crumb info.')
+        return None
     return json_obj['crumb']
 
 def get_timestamps():
@@ -74,6 +78,11 @@ def compute_sign_diff_pct(ticker_changes):
     pct_sum_10_up = 0
     pct_sum_20_up = 0
     np_avg_10_up = numpy.zeros(10, dtype=float)
+
+    pct_sum_10_down = 0
+    pct_sum_20_down = 0
+    np_avg_10_down = numpy.zeros(10, dtype=float)
+
     for i, ele in enumerate(sorted_descending[:20]):
         product = ele[0] * ele[1]
         if i < 10:
@@ -87,9 +96,9 @@ def compute_sign_diff_pct(ticker_changes):
     stdev_10_up = numpy.std(np_avg_10_up, ddof=1)
 
     # DOWN
-    pct_sum_10_down = 0
-    pct_sum_20_down = 0
-    np_avg_10_down = numpy.zeros(10, dtype=float)
+    # pct_sum_10_down = 0
+    # pct_sum_20_down = 0
+    # np_avg_10_down = numpy.zeros(10, dtype=float)
     for i, ele in enumerate(sorted_descending[-20:]):
         product = ele[0] * ele[1]
         if i > 9:
@@ -147,6 +156,8 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     response = requests.get(url)
     crumb = get_crumb(response)
+    if crumb is None:
+        return None
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
                     'period1=%s&period2=%s&interval=1d&events=history'
@@ -167,7 +178,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
 
     sigma_data = get_sigma_data(changes_daily)
     sigma_data['c_name'] = title
-    sigma_data['c_ticker'] = ticker
+    # sigma_data['c_ticker'] = ticker
     return sigma_data
 
 def process_tickers(ticker_list, timestamps):
