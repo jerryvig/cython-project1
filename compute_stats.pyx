@@ -97,9 +97,6 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
 
 cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
-    #changes_0 = changes_daily[1:-1]
-    #changes_minus_one = changes_daily[:-2]
-
     cdef double changes_minus_one[changes_length - 2]
     cdef double changes_0[changes_length - 2]
 
@@ -108,7 +105,6 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
         changes_0[i] = changes_daily[i+1]
 
     cdef double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2)
-    # self_correlation = numpy.corrcoef([changes_minus_one, changes_0])[1, 0]
 
     # You are trying to fix this up.
     #changes_tuples = numpy.column_stack([changes_minus_one, changes_0])
