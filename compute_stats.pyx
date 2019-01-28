@@ -28,6 +28,7 @@ from libc.time cimport tm
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
 
+# Looks like there is an issue here for some cases.
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
@@ -89,7 +90,9 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
 
         token = strtok(NULL, "\n")
         i += 1
-    return 1
+
+    # printf("changes count = %d\n", (i-1))
+    return i - 1
 
 def compute_sign_diff_pct(ticker_changes):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
@@ -146,30 +149,28 @@ def compute_sign_diff_pct(ticker_changes):
         'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
     }
 
-def get_sigma_data(changes_daily):
+cdef get_sigma_data(const double *changes_daily, int changes_length):
     """Computes standard change/standard deviation and constructs dict object."""
-    sign_diff_dict = compute_sign_diff_pct(changes_daily)
+    # sign_diff_dict = compute_sign_diff_pct(changes_daily)
+    sign_diff_dict = {}
 
-    # you need to compute the stddev using the gsl.
-    stdev = numpy.std(changes_daily[:-1], ddof=1)
-    sigma_change = changes_daily[-1]/stdev
-
-    exit(0)
+    stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
+    sigma_change = changes_daily[changes_length - 1]/stdev
 
     sigma_data = {
-        'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
-        'avg_move_10_down': sign_diff_dict['avg_move_10_down'],
-        'change': str(round(changes_daily[-1] * 100, 3)) + '%',
-        'record_count': len(changes_daily),
-        'self_correlation': sign_diff_dict['self_correlation'],
+        #'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
+        #'avg_move_10_down': sign_diff_dict['avg_move_10_down'],
+        'change': str(round(changes_daily[changes_length - 1] * 100, 3)) + '%',
+        'record_count': changes_length,
+        #'self_correlation': sign_diff_dict['self_correlation'],
         'sigma': str(round(stdev * 100, 3)) + '%',
         'sigma_change': round(sigma_change, 3),
-        'sign_diff_pct_10_up':  sign_diff_dict['sign_diff_pct_10_up'],
-        'sign_diff_pct_20_up':  sign_diff_dict['sign_diff_pct_20_up'],
-        'sign_diff_pct_10_down':  sign_diff_dict['sign_diff_pct_10_down'],
-        'sign_diff_pct_20_down':  sign_diff_dict['sign_diff_pct_20_down'],
-        'stdev_10_up': sign_diff_dict['stdev_10_up'],
-        'stdev_10_down': sign_diff_dict['stdev_10_down']
+        #'sign_diff_pct_10_up':  sign_diff_dict['sign_diff_pct_10_up'],
+        #'sign_diff_pct_20_up':  sign_diff_dict['sign_diff_pct_20_up'],
+        #'sign_diff_pct_10_down':  sign_diff_dict['sign_diff_pct_10_down'],
+        #'sign_diff_pct_20_down':  sign_diff_dict['sign_diff_pct_20_down'],
+        #'stdev_10_up': sign_diff_dict['stdev_10_up'],
+        #'stdev_10_down': sign_diff_dict['stdev_10_down']
     }
     return sigma_data
 
@@ -208,14 +209,14 @@ cdef process_ticker(ticker, char timestamps[][12]):
     cdef char *download_response_char = dl_resp_char
 
     start = time.time_ns()
-    cdef int get_adj_close_success = get_adj_close_and_changes(download_response_char, changes_daily)
+    cdef int changes_length = get_adj_close_and_changes(download_response_char, changes_daily)
     end = time.time_ns()
     print('ran get_adj_close_and_changes() in %d ns' % (end - start))
 
-    if not get_adj_close_success:
+    if not changes_length:
         return None
 
-    sigma_data = get_sigma_data(changes_daily)
+    sigma_data = get_sigma_data(changes_daily, changes_length)
     sigma_data['c_name'] = title
     sigma_data['c_ticker'] = ticker
 
@@ -239,16 +240,8 @@ def main():
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
 
-    cdef double input_data[5]
-    input_data[0] = 1.1
-    input_data[1] = 2.2
-    input_data[2] = 3.3
-    input_data[3] = 4.4
-    input_data[4] = 5.5
-
-    cdef double stdev = gsl_stats_sd(input_data, 1, 5)
-    printf("stdev = %f\n", stdev)
-    exit(0)
+    # cdef double stdev = gsl_stats_sd(input_data, 1, 3)
+    # exit(0)
 
     if len(sys.argv) < 2:
         while True:
