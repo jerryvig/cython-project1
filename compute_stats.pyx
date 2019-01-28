@@ -251,24 +251,6 @@ def main():
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
 
-    # cdef double data[5]
-    # data[0] = 0.5
-    # data[1] = -0.5
-    # data[2] = 0.5
-    # data[3] = -0.5
-    # data[4] = 0.5
-
-    # cdef double in_data[4]
-    # cdef double out_data[4]
-
-    # for i in range(4):
-    #     in_data[i] = data[i]
-    #     out_data[i] = data[i+1]
-
-    # cdef double ac = gsl_stats_correlation(in_data, 1, out_data, 1, 4)
-    # printf("ac = %f\n", ac)
-    # exit(0)
-
     if len(sys.argv) < 2:
         while True:
             raw_ticker_string = input('Enter ticker list: ')
