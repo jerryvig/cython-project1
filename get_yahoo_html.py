@@ -23,7 +23,7 @@ def get_timestamps():
     ago_366_days = manana + datetime.timedelta(days=-367)
     manana_stamp = time.mktime(manana.timetuple())
     ago_366_days_stamp = time.mktime(ago_366_days.timetuple())
-    return (manana_stamp, ago_366_days_stamp)
+    return (str(int(manana_stamp)), str(int(ago_366_days_stamp)))
 
 def get_title(response):
     """Parses the title (Company Name) from the response text."""
@@ -59,7 +59,7 @@ def get_adj_close_and_changes(response_text):
     # end = time.time_ns()
     # print('ran get_adj_close_and_changes() in %d.' % (end - start))
 
-    return (None, changes)
+    return changes
 
 def compute_sign_diff_pct(ticker_changes):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
@@ -149,7 +149,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
     crumb = get_crumb(response)
 
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
-                    'period1=%d&period2=%d&interval=1d&events=history'
+                    'period1=%s&period2=%s&interval=1d&events=history'
                     '&crumb=%s' % (ticker, ago_366_days_stamp, manana_stamp, crumb))
     # print('download_url = %s' % download_url)
 
@@ -161,7 +161,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
         title = title_future.result()
         download_response = request_future.result()
 
-    adj_close, changes_daily = get_adj_close_and_changes(download_response.text)
+    changes_daily = get_adj_close_and_changes(download_response.text)
     if changes_daily is None:
         return None
 
