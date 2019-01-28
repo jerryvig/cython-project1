@@ -70,7 +70,8 @@ def compute_sign_diff_pct(ticker_changes):
     changes_0 = ticker_changes[1:-1]
     changes_minus_one = ticker_changes[:-2]
 
-    # You are trying to fix this up.
+    self_correlation = numpy.corrcoef([changes_minus_one, changes_0])[1, 0]
+
     changes_tuples = numpy.column_stack([changes_minus_one, changes_0])
     sorted_descending = changes_tuples[changes_tuples[:, 0].argsort()[::-1]]
 
@@ -108,8 +109,6 @@ def compute_sign_diff_pct(ticker_changes):
     avg_10_down = numpy.average(np_avg_10_down)
     stdev_10_down = numpy.std(np_avg_10_down, ddof=1)
 
-    self_correlation = numpy.corrcoef([changes_minus_one, changes_0])[1, 0]
-
     return {
         'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
         'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
@@ -124,7 +123,11 @@ def compute_sign_diff_pct(ticker_changes):
 
 def get_sigma_data(changes_daily):
     """Computes standard change/standard deviation and constructs dict object."""
+    st = time.time_ns()
     sign_diff_dict = compute_sign_diff_pct(changes_daily)
+    en = time.time_ns()
+    print('compute_sign_diff_pct in %d ns.' % (en - st))
+    exit(0)
 
     stdev = numpy.std(changes_daily[:-1], ddof=1)
     sigma_change = changes_daily[-1]/stdev
