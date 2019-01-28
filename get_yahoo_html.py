@@ -65,10 +65,10 @@ def get_adj_close_and_changes(response_text):
 
     return changes
 
-def compute_sign_diff_pct(ticker_changes):
+def compute_sign_diff_pct(changes_daily):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
-    changes_0 = ticker_changes[1:-1]
-    changes_minus_one = ticker_changes[:-2]
+    changes_0 = changes_daily[1:-1]
+    changes_minus_one = changes_daily[:-2]
 
     self_correlation = numpy.corrcoef([changes_minus_one, changes_0])[1, 0]
 
@@ -123,11 +123,7 @@ def compute_sign_diff_pct(ticker_changes):
 
 def get_sigma_data(changes_daily):
     """Computes standard change/standard deviation and constructs dict object."""
-    st = time.time_ns()
     sign_diff_dict = compute_sign_diff_pct(changes_daily)
-    en = time.time_ns()
-    print('compute_sign_diff_pct in %d ns.' % (en - st))
-    exit(0)
 
     stdev = numpy.std(changes_daily[:-1], ddof=1)
     sigma_change = changes_daily[-1]/stdev
@@ -198,6 +194,7 @@ def process_tickers(ticker_list, timestamps):
 def main():
     """The main routine and application entry point of this module."""
     timestamps = get_timestamps()
+
     if len(sys.argv) < 2:
         while True:
             raw_ticker_string = input('Enter tickers: ')
