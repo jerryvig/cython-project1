@@ -86,14 +86,13 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
 
             adj_close = atof(adj_close_str)
             if i > 1:
-                changes[i-1] = (adj_close - last_adj_close)/last_adj_close
+                changes[i-2] = (adj_close - last_adj_close)/last_adj_close
             last_adj_close = adj_close
 
         token = strtok(NULL, "\n")
         i += 1
 
-    # printf("changes count = %d\n", (i-1))
-    return i - 1
+    return i - 2
 
 cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
