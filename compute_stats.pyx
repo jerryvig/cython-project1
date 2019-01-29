@@ -30,10 +30,10 @@ cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
     double gsl_stats_correlation(const double data1[], const size_t stride1,const double data2[], const size_t stride2, const size_t n);
 
-cdef struct changes_tuple_struct:
+ctypedef struct changes_tuple:
     double change_0
     double change_plus_one
-ctypedef changes_tuple_struct changes_tuple
+# ctypedef changes_tuple_struct changes_tuple
 
 # Looks like there is an issue here for some cases.
 cdef void get_crumb(const char *response_text, char *crumb):
@@ -102,9 +102,10 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
 
 cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
+    cdef int j
     cdef double changes_minus_one[changes_length - 2]
     cdef double changes_0[changes_length - 2]
-    cdef changes_tuple changes_tuples[changes_length - 2]
+    cdef changes_tuple changes_tuples[512]
 
     for i in range(changes_length - 2):
         changes_minus_one[i] = changes_daily[i]
@@ -113,6 +114,13 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
         changes_tuples[i].change_plus_one = changes_daily[i+1]
 
     cdef double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2)
+
+    # qsort(changes_tuples, changes_length - 2, sizeof(double), compare_changes_tuples)
+    
+    for j in range(changes_length - 2):
+        print(changes_tuples[j].change_0)
+        print("changes_tuples[%d] = %f, %f\n" % (j, changes_tuples[j].changes_0, changes_tuples[j].change_plus_one))
+
 
     # compute sorted changes_tuples here.
 
@@ -253,14 +261,14 @@ cdef process_tickers(ticker_list, char timestamps[][12]):
         if symbol_count < len(sys.argv[1:]):
             time.sleep(1.5)
 
-cdef int compare_ints(const void *a, const void *b) nogil:
-    cdef int a_val = (<const int*>a)[0]
-    cdef int b_val = (<const int*>b)[0]
+cdef int compare_changes_tuples(const void *a, const void *b) nogil:
+    cdef changes_tuple a_val = (<const changes_tuple*>a)[0]
+    cdef changes_tuple b_val = (<const changes_tuple*>b)[0]
 
-    if a_val < b_val:
-        return 1
-    if a_val > b_val:
+    if a_val.change_0 < b_val.change_0:
         return -1
+    if a_val.change_0 > b_val.change_0:
+        return 1
     return 0
 
 def main():
