@@ -128,11 +128,16 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2)
     qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples)
 
-    for i in range(10):
-        np_avg_10_up[i] = changes_tuples[i].change_plus_one
+    for i in range(20):
+        if i < 10:
+            np_avg_10_up[i] = changes_tuples[i].change_plus_one
+            np_avg_10_down[i] = changes_tuples[changes_length - 12 + i].change_plus_one
 
     cdef double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10)
     cdef double stdev_10_up = gsl_stats_sd(np_avg_10_up, 1, 10)
+
+    cdef double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10)
+    cdef double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10)
 
     #for j in range(10):
     #    printf("%f, %f\n", changes_tuples[j].change_0, changes_tuples[j].change_plus_one)
@@ -179,15 +184,15 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     
 
     return {
-        #'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
-        #'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
+        'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
+        'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
         'self_correlation': str(round(self_correlation * 100, 3)) + '%',
         #'sign_diff_pct_10_up':  str(round(pct_sum_10_up * 10, 4)) + '%',
         #'sign_diff_pct_20_up':  str(round(pct_sum_20_up * 5, 4)) + '%',
         #'sign_diff_pct_10_down': str(round(pct_sum_10_down * 10, 4)) + '%',
         #'sign_diff_pct_20_down': str(round(pct_sum_20_down * 5, 4)) + '%',
-        #'stdev_10_up': str(round(stdev_10_up * 100, 4)) + '%',
-        #'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
+        'stdev_10_up': str(round(stdev_10_up * 100, 4)) + '%',
+        'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
     }
 
 cdef get_sigma_data(const double *changes_daily, const int changes_length):
@@ -199,8 +204,8 @@ cdef get_sigma_data(const double *changes_daily, const int changes_length):
     sigma_change = changes_daily[changes_length - 1]/stdev
 
     sigma_data = {
-        #'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
-        #'avg_move_10_down': sign_diff_dict['avg_move_10_down'],
+        'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
+        'avg_move_10_down': sign_diff_dict['avg_move_10_down'],
         'change': str(round(changes_daily[changes_length - 1] * 100, 3)) + '%',
         'record_count': changes_length,
         'self_correlation': sign_diff_dict['self_correlation'],
@@ -210,8 +215,8 @@ cdef get_sigma_data(const double *changes_daily, const int changes_length):
         #'sign_diff_pct_20_up':  sign_diff_dict['sign_diff_pct_20_up'],
         #'sign_diff_pct_10_down':  sign_diff_dict['sign_diff_pct_10_down'],
         #'sign_diff_pct_20_down':  sign_diff_dict['sign_diff_pct_20_down'],
-        #'stdev_10_up': sign_diff_dict['stdev_10_up'],
-        #'stdev_10_down': sign_diff_dict['stdev_10_down']
+        'stdev_10_up': sign_diff_dict['stdev_10_up'],
+        'stdev_10_down': sign_diff_dict['stdev_10_down']
     }
     return sigma_data
 
