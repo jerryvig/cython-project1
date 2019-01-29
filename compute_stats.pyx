@@ -10,8 +10,9 @@ import requests
 from libc.stdio cimport printf
 from libc.stdio cimport sprintf
 from libc.stdlib cimport atof
-from libc.stdlib cimport malloc
 from libc.stdlib cimport free
+from libc.stdlib cimport malloc
+from libc.stdlib cimport qsort
 from libc.string cimport memset
 from libc.string cimport strcmp
 from libc.string cimport strlen
@@ -241,10 +242,28 @@ cdef process_tickers(ticker_list, char timestamps[][12]):
         if symbol_count < len(sys.argv[1:]):
             time.sleep(1.5)
 
+cdef int compare_ints(const void *a, const void *b) nogil:
+    cdef int a_val = (<const int*>a)[0]
+    cdef int b_val = (<const int*>b)[0]
+
+    if a_val < b_val:
+        return -1
+    if a_val > b_val:
+        return 1
+    return 0
+
 def main():
     """The main routine and application entry point of this module."""
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
+
+    cdef int ints[5]
+    ints[:] = [-9, -17, 14, 28, -31]
+
+    qsort(&ints[0], 5, sizeof(int), compare_ints)
+    for i in range(5):
+        printf("ints[%ld] = %d\n", i, ints[i])
+    exit(0)
 
     if len(sys.argv) < 2:
         while True:
