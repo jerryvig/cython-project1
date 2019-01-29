@@ -30,6 +30,11 @@ cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
     double gsl_stats_correlation(const double data1[], const size_t stride1,const double data2[], const size_t stride2, const size_t n);
 
+cdef struct changes_tuple_struct:
+    double change_0
+    double change_plus_one
+ctypedef changes_tuple_struct changes_tuple
+
 # Looks like there is an issue here for some cases.
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
@@ -247,9 +252,9 @@ cdef int compare_ints(const void *a, const void *b) nogil:
     cdef int b_val = (<const int*>b)[0]
 
     if a_val < b_val:
-        return -1
-    if a_val > b_val:
         return 1
+    if a_val > b_val:
+        return -1
     return 0
 
 def main():
@@ -257,13 +262,13 @@ def main():
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
 
-    cdef int ints[5]
-    ints[:] = [-9, -17, 14, 28, -31]
+    #cdef int ints[5]
+    #ints[:] = [-9, -17, 14, 28, -31]
 
-    qsort(&ints[0], 5, sizeof(int), compare_ints)
-    for i in range(5):
-        printf("ints[%ld] = %d\n", i, ints[i])
-    exit(0)
+    #qsort(&ints[0], 5, sizeof(int), compare_ints)
+    #for i in range(5):
+    #    printf("ints[%ld] = %d\n", i, ints[i])
+    #exit(0)
 
     if len(sys.argv) < 2:
         while True:
