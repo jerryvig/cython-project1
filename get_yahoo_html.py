@@ -52,7 +52,7 @@ def get_adj_close_and_changes(response_text):
         if cols[5] == 'null':
             print('===== "null" values found in the input ====')
             print('===== continuing ..... ====================')
-            return (None, None)
+            return None
         adj_close = float(cols[5])
         #adj_prices[i] = adj_close
         if i:
@@ -169,6 +169,7 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
         download_response = request_future.result()
 
     changes_daily = get_adj_close_and_changes(download_response.text)
+    print('changes daily = %s' % str(changes_daily))
     if changes_daily is None:
         return None
 
