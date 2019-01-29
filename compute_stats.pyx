@@ -105,7 +105,7 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef int j
     cdef double changes_minus_one[changes_length - 2]
     cdef double changes_0[changes_length - 2]
-    cdef changes_tuple changes_tuples[512]
+    cdef changes_tuple changes_tuples[changes_length - 2]
 
     for i in range(changes_length - 2):
         changes_minus_one[i] = changes_daily[i]
@@ -115,12 +115,11 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
 
     cdef double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2)
 
+    # it seems that qsort is screwing this up.
     # qsort(changes_tuples, changes_length - 2, sizeof(double), compare_changes_tuples)
     
-    for j in range(changes_length - 2):
-        print(changes_tuples[j].change_0)
-        print("changes_tuples[%d] = %f, %f\n" % (j, changes_tuples[j].changes_0, changes_tuples[j].change_plus_one))
-
+    for j in range(10):
+        printf("%f, %f\n", changes_tuples[j].change_0, changes_tuples[j].change_plus_one)
 
     # compute sorted changes_tuples here.
 
