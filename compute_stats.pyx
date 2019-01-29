@@ -130,21 +130,27 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
 
     cdef int pct_sum_10_up = 0
     cdef int pct_sum_10_down = 0
+    cdef int pct_sum_20_up = 0
+    cdef int pct_sum_20_down = 0
     cdef double product_up
     cdef double product_down
 
     for i in range(20):
         product_up = changes_tuples[i].change_0 * changes_tuples[i].change_plus_one
-        product_down = changes_tuples[i - 12 + i].change_0 * changes_tuples[i - 12 + i].change_plus_one
+        product_down = changes_tuples[changes_length - 22 + i].change_0 * changes_tuples[changes_length - 22 + i].change_plus_one
 
         if i < 10:
             np_avg_10_up[i] = changes_tuples[i].change_plus_one
             np_avg_10_down[i] = changes_tuples[changes_length - 12 + i].change_plus_one
+
         if product_up and product_up < 0:
+            pct_sum_20_up += 1
             if i < 10:
-                pct_sum_10_up += 1                
+                pct_sum_10_up += 1
+
         if product_down and product_down < 0:
-            if i < 10:
+            pct_sum_20_down += 1
+            if i > 9:
                 pct_sum_10_down += 1
 
     cdef double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10)
@@ -153,58 +159,14 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10)
     cdef double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10)
 
-    #for j in range(10):
-    #    printf("%f, %f\n", changes_tuples[j].change_0, changes_tuples[j].change_plus_one)
-
-    # compute sorted changes_tuples here.
-
-
-    # You are trying to fix this up.
-    #changes_tuples = numpy.column_stack([changes_minus_one, changes_0])
-    #sorted_descending = changes_tuples[changes_tuples[:, 0].argsort()[::-1]]
-
-    # UP
-    # pct_sum_10_up = 0
-    # pct_sum_20_up = 0
-    # np_avg_10_up = numpy.zeros(10, dtype=float)
-    # for i, ele in enumerate(sorted_descending[:20]):
-    #     product = ele[0] * ele[1]
-    #     if i < 10:
-    #         np_avg_10_up[i] = ele[1]
-    #     if product:
-    #         is_diff = -0.5*numpy.sign(product) + 0.5
-    #         if i < 10:
-    #             pct_sum_10_up += is_diff
-    #         pct_sum_20_up += is_diff
-    # avg_10_up = numpy.average(np_avg_10_up)
-    # stdev_10_up = numpy.std(np_avg_10_up, ddof=1)
-
-    # # DOWN
-    # pct_sum_10_down = 0
-    # pct_sum_20_down = 0
-    # np_avg_10_down = numpy.zeros(10, dtype=float)
-    # for i, ele in enumerate(sorted_descending[-20:]):
-    #     product = ele[0] * ele[1]
-    #     if i > 9:
-    #         np_avg_10_down[i-10] = ele[1]
-    #     if product:
-    #         is_diff = -0.5*numpy.sign(product) + 0.5
-    #         if i > 9:
-    #             pct_sum_10_down += is_diff
-    #         pct_sum_20_down += is_diff
-    # avg_10_down = numpy.average(np_avg_10_down)
-    # stdev_10_down = numpy.std(np_avg_10_down, ddof=1)
-
-    
-
     return {
         'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
         'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
         'self_correlation': str(round(self_correlation * 100, 3)) + '%',
         'sign_diff_pct_10_up':  str(round(pct_sum_10_up * 10, 4)) + '%',
-        #'sign_diff_pct_20_up':  str(round(pct_sum_20_up * 5, 4)) + '%',
+        'sign_diff_pct_20_up':  str(round(pct_sum_20_up * 5, 4)) + '%',
         'sign_diff_pct_10_down': str(round(pct_sum_10_down * 10, 4)) + '%',
-        #'sign_diff_pct_20_down': str(round(pct_sum_20_down * 5, 4)) + '%',
+        'sign_diff_pct_20_down': str(round(pct_sum_20_down * 5, 4)) + '%',
         'stdev_10_up': str(round(stdev_10_up * 100, 4)) + '%',
         'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
     }
@@ -212,7 +174,6 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
 cdef get_sigma_data(const double *changes_daily, const int changes_length):
     """Computes standard change/standard deviation and constructs dict object."""
     sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length)
-    # sign_diff_dict = {}
 
     stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
     sigma_change = changes_daily[changes_length - 1]/stdev
@@ -225,10 +186,10 @@ cdef get_sigma_data(const double *changes_daily, const int changes_length):
         'self_correlation': sign_diff_dict['self_correlation'],
         'sigma': str(round(stdev * 100, 3)) + '%',
         'sigma_change': round(sigma_change, 3),
-        #'sign_diff_pct_10_up':  sign_diff_dict['sign_diff_pct_10_up'],
-        #'sign_diff_pct_20_up':  sign_diff_dict['sign_diff_pct_20_up'],
-        #'sign_diff_pct_10_down':  sign_diff_dict['sign_diff_pct_10_down'],
-        #'sign_diff_pct_20_down':  sign_diff_dict['sign_diff_pct_20_down'],
+        'sign_diff_pct_10_up':  sign_diff_dict['sign_diff_pct_10_up'],
+        'sign_diff_pct_20_up':  sign_diff_dict['sign_diff_pct_20_up'],
+        'sign_diff_pct_10_down':  sign_diff_dict['sign_diff_pct_10_down'],
+        'sign_diff_pct_20_down':  sign_diff_dict['sign_diff_pct_20_down'],
         'stdev_10_up': sign_diff_dict['stdev_10_up'],
         'stdev_10_down': sign_diff_dict['stdev_10_down']
     }
@@ -278,8 +239,7 @@ cdef process_ticker(ticker, char timestamps[][12]):
 
     sigma_data = get_sigma_data(changes_daily, changes_length)
     sigma_data['c_name'] = title
-    sigma_data['c_ticker'] = ticker
-
+    # sigma_data['c_ticker'] = ticker
     return sigma_data
 
 cdef process_tickers(ticker_list, char timestamps[][12]):
