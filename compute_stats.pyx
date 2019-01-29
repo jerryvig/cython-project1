@@ -1,9 +1,6 @@
-import datetime
-from datetime import date
 import ujson
 import sys
 import time
-import numpy
 import requests
 
 from libc.stdio cimport printf
