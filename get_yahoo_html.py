@@ -182,7 +182,7 @@ def process_tickers(ticker_list, timestamps):
     symbol_count = 0
 
     for symbol in ticker_list:
-        ticker = symbol.strip().upper()
+        ticker = symbol.strip()
         sigma_data = process_ticker(ticker, timestamps[0], timestamps[1])
         if sigma_data:
             print(ujson.dumps(sigma_data, sort_keys=True, indent=2))
@@ -200,7 +200,7 @@ def main():
             raw_ticker_string = input('Enter tickers: ')
 
             #start = time.time()
-            ticker_list = raw_ticker_string.strip().split(' ')
+            ticker_list = raw_ticker_string.strip().upper().split(' ')
 
             process_tickers(ticker_list, timestamps)
 
