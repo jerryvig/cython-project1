@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 import datetime
 from datetime import date
 import ujson
