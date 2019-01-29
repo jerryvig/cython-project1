@@ -128,10 +128,24 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2)
     qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples)
 
+    cdef int pct_sum_10_up = 0
+    cdef int pct_sum_10_down = 0
+    cdef double product_up
+    cdef double product_down
+
     for i in range(20):
+        product_up = changes_tuples[i].change_0 * changes_tuples[i].change_plus_one
+        product_down = changes_tuples[i - 12 + i].change_0 * changes_tuples[i - 12 + i].change_plus_one
+
         if i < 10:
             np_avg_10_up[i] = changes_tuples[i].change_plus_one
             np_avg_10_down[i] = changes_tuples[changes_length - 12 + i].change_plus_one
+        if product_up and product_up < 0:
+            if i < 10:
+                pct_sum_10_up += 1                
+        if product_down and product_down < 0:
+            if i < 10:
+                pct_sum_10_down += 1
 
     cdef double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10)
     cdef double stdev_10_up = gsl_stats_sd(np_avg_10_up, 1, 10)
@@ -187,9 +201,9 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
         'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
         'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
         'self_correlation': str(round(self_correlation * 100, 3)) + '%',
-        #'sign_diff_pct_10_up':  str(round(pct_sum_10_up * 10, 4)) + '%',
+        'sign_diff_pct_10_up':  str(round(pct_sum_10_up * 10, 4)) + '%',
         #'sign_diff_pct_20_up':  str(round(pct_sum_20_up * 5, 4)) + '%',
-        #'sign_diff_pct_10_down': str(round(pct_sum_10_down * 10, 4)) + '%',
+        'sign_diff_pct_10_down': str(round(pct_sum_10_down * 10, 4)) + '%',
         #'sign_diff_pct_20_down': str(round(pct_sum_20_down * 5, 4)) + '%',
         'stdev_10_up': str(round(stdev_10_up * 100, 4)) + '%',
         'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
