@@ -169,7 +169,6 @@ def process_ticker(ticker, manana_stamp, ago_366_days_stamp):
         download_response = request_future.result()
 
     changes_daily = get_adj_close_and_changes(download_response.text)
-    print('changes daily = %s' % str(changes_daily))
     if changes_daily is None:
         return None
 
@@ -195,8 +194,9 @@ def process_tickers(ticker_list, timestamps):
 def main():
     """The main routine and application entry point of this module."""
     timestamps = get_timestamps()
+    len_sys_argv = len(sys.argv)
 
-    if len(sys.argv) < 2:
+    if len_sys_argv < 2:
         while True:
             raw_ticker_string = input('Enter tickers: ')
 
