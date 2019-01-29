@@ -219,7 +219,6 @@ cdef process_ticker(ticker, char timestamps[][12]):
 
     download_response = requests.get(download_url, cookies=response.cookies)
 
-    # cdef double* adj_close
     cdef double changes_daily[512]
 
     dl_resp_char = download_response.text.encode('UTF-8')
@@ -255,14 +254,6 @@ def main():
     """The main routine and application entry point of this module."""
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
-
-    #cdef int ints[5]
-    #ints[:] = [-9, -17, 14, 28, -31]
-
-    #qsort(&ints[0], 5, sizeof(int), compare_ints)
-    #for i in range(5):
-    #    printf("ints[%ld] = %d\n", i, ints[i])
-    #exit(0)
 
     if len(sys.argv) < 2:
         while True:
