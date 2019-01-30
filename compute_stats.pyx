@@ -55,6 +55,7 @@ ctypedef struct sign_diff_pct:
     char sign_diff_pct_20_up[16]
     char sign_diff_pct_10_down[16]
     char sign_diff_pct_20_down[16]
+    char title[128]
 
 # Looks like there is an issue here for some cases.
 cdef void get_crumb(const char *response_text, char *crumb):
@@ -193,15 +194,13 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
         'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
     }
 
-cdef get_sigma_data(const double *changes_daily, const int changes_length):
+cdef get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
     """Computes standard change/standard deviation and constructs dict object."""
     #st = time.time_ns()
-
-    cdef sign_diff_pct sign_diff_values
-    sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length, &sign_diff_values)
+    # cdef sign_diff_pct sign_diff_values
+    sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values)
     #en = time.time_ns()
     #print('ran compute_sign_diff_pct in %d ns' % (en - st))
-    #exit(0)
 
     stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
     sigma_change = changes_daily[changes_length - 1]/stdev
@@ -234,16 +233,18 @@ cdef process_ticker(ticker, char timestamps[][12]):
     print('url = %s' % url)
 
     response = requests.get(url)
-    
-    cdef char title_c[128]
-    memset(title_c, 0, 128)
 
     cdef char crumb_c[128]
     memset(crumb_c, 0, 128)
 
     resp_encode = response.text.encode('UTF-8')
     cdef const char* response_text_char = resp_encode
-    get_title(response_text_char, title_c)
+    
+    cdef sign_diff_pct sign_diff_values
+
+    memset(sign_diff_values.title, 0, 128)
+    get_title(response_text_char, sign_diff_values.title)
+
     get_crumb(response_text_char, crumb_c)
 
     crumb = crumb_c.decode('UTF-8')
@@ -251,8 +252,6 @@ cdef process_ticker(ticker, char timestamps[][12]):
                     'period1=%s&period2=%s&interval=1d&events=history'
                     '&crumb=%s' % (ticker, timestamps[1].decode('UTF-8'), timestamps[0].decode('UTF-8'), crumb))
     print('download_url = %s' % download_url)
-
-    title = title_c.decode('UTF-8')
 
     download_response = requests.get(download_url, cookies=response.cookies)
 
@@ -269,9 +268,25 @@ cdef process_ticker(ticker, char timestamps[][12]):
     if not changes_length:
         return None
 
-    sigma_data = get_sigma_data(changes_daily, changes_length)
-    sigma_data['c_name'] = title
+    sigma_data = get_sigma_data(changes_daily, changes_length, &sign_diff_values)
+    sigma_data['c_name'] = sign_diff_values.title.decode('UTF-8')
     # sigma_data['c_ticker'] = ticker
+
+    #print the sign_diff_values here
+    printf("  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down)
+    printf("  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_up)
+    printf("  \"title\": \"%s\"\n", sign_diff_values.title)
+    printf("  \"change\": %s\n", sign_diff_values.change)
+    printf("  \"record_count\": %s\n", sign_diff_values.record_count)
+    printf("  \"self_correlation\": %s\n", sign_diff_values.self_correlation)
+    printf("  \"sigma\": %s\n", sign_diff_values.sigma)
+    printf("  \"sigma_change\": %s\n", sign_diff_values.sigma_change)
+    printf("  \"sign_diff_pct_10_down\": %s\n", sign_diff_values.sign_diff_pct_10_down)
+    printf("  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_up)
+    printf("  \"sign_diff_pct_20_down\": %s\n", sign_diff_values.sign_diff_pct_20_down)
+    printf("  \"sign_diff_pct_20_up\": %s\n", sign_diff_values.sign_diff_pct_20_up)
+    printf("  \"stdev_10_down\": %s\n", sign_diff_values.stdev_10_down)
+    printf("  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_up)
     return sigma_data
 
 cdef process_tickers(ticker_list, char timestamps[][12]):
