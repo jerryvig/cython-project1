@@ -171,7 +171,6 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10)
     cdef double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10)
 
-    # cdef sign_diff_pct sign_diff_values
     sprintf(sign_diff_values.avg_move_10_up, "%.4f%%", avg_10_up * 100)
     sprintf(sign_diff_values.avg_move_10_down, "%.4f%%", avg_10_down * 100)
     sprintf(sign_diff_values.stdev_10_up, "%.4f%%", stdev_10_up * 100)
@@ -182,25 +181,12 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values.sign_diff_pct_20_up, "%.1f%%", pct_sum_20_up * 5.0)
     sprintf(sign_diff_values.sign_diff_pct_20_down, "%.1f%%", pct_sum_20_down * 5.0)
 
-    return {
-        'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
-        'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
-        'self_correlation': str(round(self_correlation * 100, 3)) + '%',
-        'sign_diff_pct_10_up':  str(round(pct_sum_10_up * 10, 4)) + '%',
-        'sign_diff_pct_20_up':  str(round(pct_sum_20_up * 5, 4)) + '%',
-        'sign_diff_pct_10_down': str(round(pct_sum_10_down * 10, 4)) + '%',
-        'sign_diff_pct_20_down': str(round(pct_sum_20_down * 5, 4)) + '%',
-        'stdev_10_up': str(round(stdev_10_up * 100, 4)) + '%',
-        'stdev_10_down': str(round(stdev_10_down * 100, 4)) + '%'
-    }
-
 cdef get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
     """Computes standard change/standard deviation and constructs dict object."""
-    #st = time.time_ns()
-    # cdef sign_diff_pct sign_diff_values
-    sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values)
-    #en = time.time_ns()
-    #print('ran compute_sign_diff_pct in %d ns' % (en - st))
+    st = time.time_ns()
+    compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values)
+    en = time.time_ns()
+    print('ran compute_sign_diff_pct in %d ns' % (en - st))
 
     stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
     sigma_change = changes_daily[changes_length - 1]/stdev
@@ -209,23 +195,6 @@ cdef get_sigma_data(const double *changes_daily, const int changes_length, sign_
     sprintf(sign_diff_values.sigma, "%.3f%%", stdev * 100)
     sprintf(sign_diff_values.sigma_change, "%.3f", sigma_change)
     sprintf(sign_diff_values.record_count, "%d", changes_length)
-
-    sigma_data = {
-        'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
-        'avg_move_10_down': sign_diff_dict['avg_move_10_down'],
-        'change': str(round(changes_daily[changes_length - 1] * 100, 3)) + '%',
-        'record_count': changes_length,
-        'self_correlation': sign_diff_dict['self_correlation'],
-        'sigma': str(round(stdev * 100, 3)) + '%',
-        'sigma_change': round(sigma_change, 3),
-        'sign_diff_pct_10_up':  sign_diff_dict['sign_diff_pct_10_up'],
-        'sign_diff_pct_20_up':  sign_diff_dict['sign_diff_pct_20_up'],
-        'sign_diff_pct_10_down':  sign_diff_dict['sign_diff_pct_10_down'],
-        'sign_diff_pct_20_down':  sign_diff_dict['sign_diff_pct_20_down'],
-        'stdev_10_up': sign_diff_dict['stdev_10_up'],
-        'stdev_10_down': sign_diff_dict['stdev_10_down']
-    }
-    return sigma_data
 
 cdef process_ticker(ticker, char timestamps[][12]):
     """Makes requests to get crumb and data and call stats computation."""
@@ -268,8 +237,7 @@ cdef process_ticker(ticker, char timestamps[][12]):
     if not changes_length:
         return None
 
-    sigma_data = get_sigma_data(changes_daily, changes_length, &sign_diff_values)
-    sigma_data['c_name'] = sign_diff_values.title.decode('UTF-8')
+    get_sigma_data(changes_daily, changes_length, &sign_diff_values)
 
     printf("===============================\n")
     printf("  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down)
@@ -286,16 +254,13 @@ cdef process_ticker(ticker, char timestamps[][12]):
     printf("  \"sign_diff_pct_20_up\": %s\n", sign_diff_values.sign_diff_pct_20_up)
     printf("  \"stdev_10_down\": %s\n", sign_diff_values.stdev_10_down)
     printf("  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_up)
-    return sigma_data
 
 cdef process_tickers(ticker_list, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
     symbol_count = 0
     for symbol in ticker_list:
         ticker = symbol.strip().upper()
-        sigma_data = process_ticker(ticker, timestamps)
-        if sigma_data:
-            print(ujson.dumps(sigma_data, sort_keys=True, indent=2))
+        process_ticker(ticker, timestamps)
 
         symbol_count += 1
         if symbol_count < len(sys.argv[1:]):
