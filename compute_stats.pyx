@@ -155,6 +155,7 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10)
     cdef double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10)
 
+    # redo this in C.
     return {
         'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
         'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
@@ -169,7 +170,10 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
 
 cdef get_sigma_data(const double *changes_daily, const int changes_length):
     """Computes standard change/standard deviation and constructs dict object."""
+    st = time.time_ns()
     sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length)
+    en = time.time_ns()
+    print('ran compute_sign_diff_pct in %d ns' % (en - st))
 
     stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
     sigma_change = changes_daily[changes_length - 1]/stdev
