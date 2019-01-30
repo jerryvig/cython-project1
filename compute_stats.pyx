@@ -1,4 +1,3 @@
-import ujson
 import sys
 import time
 import requests
@@ -122,7 +121,7 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
 
     return i - 2
 
-cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
+cdef void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
     cdef int i
     cdef double changes_minus_one[changes_length - 2]
@@ -181,15 +180,15 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values.sign_diff_pct_20_up, "%.1f%%", pct_sum_20_up * 5.0)
     sprintf(sign_diff_values.sign_diff_pct_20_down, "%.1f%%", pct_sum_20_down * 5.0)
 
-cdef get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
+cdef void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
     """Computes standard change/standard deviation and constructs dict object."""
-    st = time.time_ns()
+    # st = time.time_ns()
     compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values)
-    en = time.time_ns()
-    print('ran compute_sign_diff_pct in %d ns' % (en - st))
+    # en = time.time_ns()
+    # print('ran compute_sign_diff_pct in %d ns' % (en - st))
 
-    stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
-    sigma_change = changes_daily[changes_length - 1]/stdev
+    cdef double stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
+    cdef double sigma_change = changes_daily[changes_length - 1]/stdev
 
     sprintf(sign_diff_values.change, "%.3f%%", changes_daily[changes_length - 1] * 100)
     sprintf(sign_diff_values.sigma, "%.3f%%", stdev * 100)
@@ -229,10 +228,10 @@ cdef process_ticker(ticker, char timestamps[][12]):
     dl_resp_char = download_response.text.encode('UTF-8')
     cdef char *download_response_char = dl_resp_char
 
-    start = time.time_ns()
+    # start = time.time_ns()
     cdef int changes_length = get_adj_close_and_changes(download_response_char, changes_daily)
-    end = time.time_ns()
-    print('ran get_adj_close_and_changes() in %d ns' % (end - start))
+    # end = time.time_ns()
+    # print('ran get_adj_close_and_changes() in %d ns' % (end - start))
 
     if not changes_length:
         return None
