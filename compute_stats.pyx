@@ -45,6 +45,7 @@ ctypedef struct sign_diff_pct:
     char avg_move_10_up[16]
     char avg_move_10_down[16]
     char change[16]
+    char record_count[8]
     char self_correlation[16]
     char sigma[16]
     char sigma_change[16]
@@ -207,7 +208,8 @@ cdef get_sigma_data(const double *changes_daily, const int changes_length):
 
     sprintf(sign_diff_values.change, "%.3f%%", changes_daily[changes_length - 1] * 100)
     sprintf(sign_diff_values.sigma, "%.3f%%", stdev * 100)
-    sprintf(sign_diff_values.sigma_change, "%.3f%%", sigma_change)
+    sprintf(sign_diff_values.sigma_change, "%.3f", sigma_change)
+    sprintf(sign_diff_values.record_count, "%d", changes_length)
 
     sigma_data = {
         'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
