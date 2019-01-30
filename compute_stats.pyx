@@ -270,9 +270,8 @@ cdef process_ticker(ticker, char timestamps[][12]):
 
     sigma_data = get_sigma_data(changes_daily, changes_length, &sign_diff_values)
     sigma_data['c_name'] = sign_diff_values.title.decode('UTF-8')
-    # sigma_data['c_ticker'] = ticker
 
-    #print the sign_diff_values here
+    printf("===============================\n")
     printf("  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down)
     printf("  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_up)
     printf("  \"title\": \"%s\"\n", sign_diff_values.title)
