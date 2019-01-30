@@ -195,12 +195,20 @@ cdef void get_sigma_data(const double *changes_daily, const int changes_length, 
     sprintf(sign_diff_values.sigma_change, "%.3f", sigma_change)
     sprintf(sign_diff_values.record_count, "%d", changes_length)
 
-cdef process_ticker(ticker, char timestamps[][12]):
+cdef void process_ticker(ticker, char timestamps[][12]):
     """Makes requests to get crumb and data and call stats computation."""
-    url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
-    print('url = %s' % url)
+    #url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
+    #print('url = %s' % url)
+    cdef char url[128]
+    memset(url, 0, 128)
 
-    response = requests.get(url)
+    cdef char ticker_c[8]
+    memset(ticker_c, 0, 8)
+    strcpy(ticker_c, ticker.encode('UTF-8'))
+    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_c, ticker_c)
+    printf("url = %s\n", url)
+
+    response = requests.get(url.decode('UTF-8'))
 
     cdef char crumb_c[128]
     memset(crumb_c, 0, 128)
@@ -234,7 +242,7 @@ cdef process_ticker(ticker, char timestamps[][12]):
     # print('ran get_adj_close_and_changes() in %d ns' % (end - start))
 
     if not changes_length:
-        return None
+        return
 
     get_sigma_data(changes_daily, changes_length, &sign_diff_values)
 
