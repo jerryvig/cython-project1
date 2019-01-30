@@ -41,6 +41,20 @@ cdef int compare_changes_tuples(const void *a, const void *b) nogil:
         return -1
     return 0
 
+ctypedef struct sign_diff_pct:
+    char avg_move_10_up[16]
+    char avg_move_10_down[16]
+    char change[16]
+    char self_correlation[16]
+    char sigma[16]
+    char sigma_change[16]
+    char stdev_10_up[16]
+    char stdev_10_down[16]
+    char sign_diff_pct_10_up[16]
+    char sign_diff_pct_20_up[16]
+    char sign_diff_pct_10_down[16]
+    char sign_diff_pct_20_down[16]
+
 # Looks like there is an issue here for some cases.
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
@@ -106,7 +120,7 @@ cdef int get_adj_close_and_changes(char *response_text, double *changes):
 
     return i - 2
 
-cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length):
+cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values):
     """Computes sign-diffs for up and down 10 and 20 blocks."""
     cdef int i
     cdef double changes_minus_one[changes_length - 2]
@@ -155,7 +169,17 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
     cdef double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10)
     cdef double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10)
 
-    # redo this in C.
+    # cdef sign_diff_pct sign_diff_values
+    sprintf(sign_diff_values.avg_move_10_up, "%.4f%%", avg_10_up * 100)
+    sprintf(sign_diff_values.avg_move_10_down, "%.4f%%", avg_10_down * 100)
+    sprintf(sign_diff_values.stdev_10_up, "%.4f%%", stdev_10_up * 100)
+    sprintf(sign_diff_values.stdev_10_down, "%.4f%%", stdev_10_down * 100)
+    sprintf(sign_diff_values.self_correlation, "%.3f%%", self_correlation * 100)
+    sprintf(sign_diff_values.sign_diff_pct_10_up, "%.1f%%", pct_sum_10_up * 10.0)
+    sprintf(sign_diff_values.sign_diff_pct_10_down, "%.1f%%", pct_sum_10_down * 10.0)
+    sprintf(sign_diff_values.sign_diff_pct_20_up, "%.1f%%", pct_sum_20_up * 5.0)
+    sprintf(sign_diff_values.sign_diff_pct_20_down, "%.1f%%", pct_sum_20_down * 5.0)
+
     return {
         'avg_move_10_up': str(round(avg_10_up * 100, 4)) + '%',
         'avg_move_10_down': str(round(avg_10_down * 100, 4)) + '%',
@@ -170,13 +194,20 @@ cdef compute_sign_diff_pct(const double *changes_daily, const int changes_length
 
 cdef get_sigma_data(const double *changes_daily, const int changes_length):
     """Computes standard change/standard deviation and constructs dict object."""
-    st = time.time_ns()
-    sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length)
-    en = time.time_ns()
-    print('ran compute_sign_diff_pct in %d ns' % (en - st))
+    #st = time.time_ns()
+
+    cdef sign_diff_pct sign_diff_values
+    sign_diff_dict = compute_sign_diff_pct(changes_daily, changes_length, &sign_diff_values)
+    #en = time.time_ns()
+    #print('ran compute_sign_diff_pct in %d ns' % (en - st))
+    #exit(0)
 
     stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1))
     sigma_change = changes_daily[changes_length - 1]/stdev
+
+    sprintf(sign_diff_values.change, "%.3f%%", changes_daily[changes_length - 1] * 100)
+    sprintf(sign_diff_values.sigma, "%.3f%%", stdev * 100)
+    sprintf(sign_diff_values.sigma_change, "%.3f%%", sigma_change)
 
     sigma_data = {
         'avg_move_10_up': sign_diff_dict['avg_move_10_up'],
