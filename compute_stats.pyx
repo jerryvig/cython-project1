@@ -195,17 +195,13 @@ cdef void get_sigma_data(const double *changes_daily, const int changes_length, 
     sprintf(sign_diff_values.sigma_change, "%.3f", sigma_change)
     sprintf(sign_diff_values.record_count, "%d", changes_length)
 
-cdef void process_ticker(ticker, char timestamps[][12]):
+cdef void process_ticker(char *ticker, char timestamps[][12]):
     """Makes requests to get crumb and data and call stats computation."""
     #url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
     #print('url = %s' % url)
     cdef char url[128]
     memset(url, 0, 128)
-
-    cdef char ticker_c[8]
-    memset(ticker_c, 0, 8)
-    strcpy(ticker_c, ticker.encode('UTF-8'))
-    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_c, ticker_c)
+    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker)
     printf("url = %s\n", url)
 
     response = requests.get(url.decode('UTF-8'))
@@ -226,7 +222,7 @@ cdef void process_ticker(ticker, char timestamps[][12]):
     crumb = crumb_c.decode('UTF-8')
     download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
                     'period1=%s&period2=%s&interval=1d&events=history'
-                    '&crumb=%s' % (ticker, timestamps[1].decode('UTF-8'), timestamps[0].decode('UTF-8'), crumb))
+                    '&crumb=%s' % (ticker.decode('UTF-8'), timestamps[1].decode('UTF-8'), timestamps[0].decode('UTF-8'), crumb))
     print('download_url = %s' % download_url)
 
     download_response = requests.get(download_url, cookies=response.cookies)
@@ -264,10 +260,14 @@ cdef void process_ticker(ticker, char timestamps[][12]):
 
 cdef process_tickers(ticker_list, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
+    cdef char ticker_c[8]
+    memset(ticker_c, 0, 8)
+    
     symbol_count = 0
     for symbol in ticker_list:
-        ticker = symbol.strip().upper()
-        process_ticker(ticker, timestamps)
+        ticker = symbol.strip().upper().encode('UTF-8')
+        strcpy(ticker_c, ticker)
+        process_ticker(ticker_c, timestamps)
 
         symbol_count += 1
         if symbol_count < len(sys.argv[1:]):
