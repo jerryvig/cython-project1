@@ -264,8 +264,6 @@ cdef process_tickers(ticker_list, char timestamps[][12]):
     # make this block c compliant.
     cdef int i = 0
     cdef int len_ticker_list = len(ticker_list)
-    symbol_count = 0
-    #for symbol in ticker_list:
     for i in range(len_ticker_list):
         symbol = ticker_list[i]
         ticker = symbol.strip().upper().encode('UTF-8')
