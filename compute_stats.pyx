@@ -269,7 +269,12 @@ cdef process_tickers(char *ticker_string, char timestamps[][12]):
     cdef char ticker_c[8]
     memset(ticker_c, 0, 8)
 
-    printf("\"%s\"\n", ticker_string)    
+    printf("\"%s\"\n", ticker_string)
+    cdef char *token = strtok(ticker_string, " ")
+    while token:
+        printf("token = \"%s\"\n", token)
+        token = strtok(NULL, " ")
+
     return
 
     ticker_list = []
@@ -295,12 +300,12 @@ def main():
 
     cdef int ticker_strlen
     cdef char ticker_string[128]
-    memset(ticker_string, 0, 128)
     cdef char ticker_string_strip[128]
-    memset(ticker_string_strip, 0, 128)
 
     if len(sys.argv) < 2:
         while True:
+            memset(ticker_string, 0, 128)
+            memset(ticker_string_strip, 0, 128)
             printf("%s", "Enter ticker list: ")
             fflush(cstdout)
             fgets(ticker_string, 128, cstdin)
