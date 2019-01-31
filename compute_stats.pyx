@@ -25,6 +25,10 @@ from libc.time cimport time as ctime
 from libc.time cimport time_t
 from libc.time cimport tm
 
+
+cdef extern from "ctype.h":
+    int toupper(int c)
+
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
@@ -260,10 +264,15 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
     printf("  \"stdev_10_down\": %s\n", sign_diff_values.stdev_10_down)
     printf("  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_up)
 
-cdef process_tickers(ticker_list, char timestamps[][12]):
+cdef process_tickers(char *ticker_string, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
     cdef char ticker_c[8]
     memset(ticker_c, 0, 8)
+
+    printf("\"%s\"\n", ticker_string)    
+    return
+
+    ticker_list = []
 
     # make this block c compliant.
     cdef int i = 0
@@ -284,6 +293,7 @@ def main():
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
 
+    cdef int ticker_strlen
     cdef char ticker_string[128]
     memset(ticker_string, 0, 128)
     cdef char ticker_string_strip[128]
@@ -291,19 +301,16 @@ def main():
 
     if len(sys.argv) < 2:
         while True:
-            # raw_ticker_string = input('Enter ticker list: ')
-            raw_ticker_string = ''
             printf("%s", "Enter ticker list: ")
             fflush(cstdout)
             fgets(ticker_string, 128, cstdin)
-            strncpy(ticker_string_strip, ticker_string, strlen(ticker_string) - 1)
-            exit(0)
-
+            ticker_strlen = strlen(ticker_string) - 1
+            strncpy(ticker_string_strip, ticker_string, ticker_strlen)
+            for i in range(ticker_strlen):
+                ticker_string_strip[i] = toupper(ticker_string_strip[i])
+            
             start = time.time()
-            ticker_list = raw_ticker_string.strip().split(' ')
-
-            process_tickers(ticker_list, timestamps)
-
+            process_tickers(ticker_string_strip, timestamps)
             end = time.time()
             print('processed in %.6f' % (end - start))
         return
