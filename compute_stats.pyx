@@ -263,14 +263,18 @@ cdef process_tickers(ticker_list, char timestamps[][12]):
     cdef char ticker_c[8]
     memset(ticker_c, 0, 8)
 
+    # make this block c compliant.
+    cdef int i = 0
+    cdef int len_ticker_list = len(ticker_list)
     symbol_count = 0
-    for symbol in ticker_list:
+    #for symbol in ticker_list:
+    for i in range(len_ticker_list):
+        symbol = ticker_list[i]
         ticker = symbol.strip().upper().encode('UTF-8')
         strcpy(ticker_c, ticker)
         process_ticker(ticker_c, timestamps)
 
-        symbol_count += 1
-        if symbol_count < len(sys.argv[1:]):
+        if (i + 1) < len_ticker_list:
             time.sleep(1.5)
 
 def main():
