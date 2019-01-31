@@ -276,7 +276,7 @@ cdef process_tickers(char *ticker_string, char timestamps[][12]):
 
     # make this block c compliant.
     cdef int i = 0
-    # not c 
+    # not c - we will make this use strtok()
     cdef int len_ticker_list = len(ticker_list)
     for i in range(len_ticker_list):
         symbol = ticker_list[i]
