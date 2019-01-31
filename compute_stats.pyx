@@ -206,8 +206,8 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
 
     response = requests.get(url.decode('UTF-8'))
 
-    cdef char crumb_c[128]
-    memset(crumb_c, 0, 128)
+    cdef char crumb[128]
+    memset(crumb, 0, 128)
 
     resp_encode = response.text.encode('UTF-8')
     cdef const char* response_text_char = resp_encode
@@ -217,15 +217,15 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
     memset(sign_diff_values.title, 0, 128)
     get_title(response_text_char, sign_diff_values.title)
 
-    get_crumb(response_text_char, crumb_c)
+    get_crumb(response_text_char, crumb)
 
-    crumb = crumb_c.decode('UTF-8')
-    download_url = ('https://query1.finance.yahoo.com/v7/finance/download/%s?'
-                    'period1=%s&period2=%s&interval=1d&events=history'
-                    '&crumb=%s' % (ticker.decode('UTF-8'), timestamps[1].decode('UTF-8'), timestamps[0].decode('UTF-8'), crumb))
-    print('download_url = %s' % download_url)
+    cdef char download_url[256]
+    memset(download_url, 0, 256)
 
-    download_response = requests.get(download_url, cookies=response.cookies)
+    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb)
+    printf("download_url = %s\n", download_url)
+
+    download_response = requests.get(download_url.decode('UTF-8'), cookies=response.cookies)
 
     cdef double changes_daily[512]
 
@@ -262,7 +262,7 @@ cdef process_tickers(ticker_list, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
     cdef char ticker_c[8]
     memset(ticker_c, 0, 8)
-    
+
     symbol_count = 0
     for symbol in ticker_list:
         ticker = symbol.strip().upper().encode('UTF-8')
