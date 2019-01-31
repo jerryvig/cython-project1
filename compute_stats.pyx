@@ -197,8 +197,6 @@ cdef void get_sigma_data(const double *changes_daily, const int changes_length, 
 
 cdef void process_ticker(char *ticker, char timestamps[][12]):
     """Makes requests to get crumb and data and call stats computation."""
-    #url = 'https://finance.yahoo.com/quote/%s/history?p=%s' % (ticker, ticker)
-    #print('url = %s' % url)
     cdef char url[128]
     memset(url, 0, 128)
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker)
