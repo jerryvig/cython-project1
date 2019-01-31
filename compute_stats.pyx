@@ -2,8 +2,12 @@ import sys
 import time
 import requests
 
+from libc.stdio cimport fflush
+from libc.stdio cimport fgets
 from libc.stdio cimport printf
 from libc.stdio cimport sprintf
+from libc.stdio cimport stdin as cstdin
+from libc.stdio cimport stdout as cstdout
 from libc.stdlib cimport atof
 from libc.stdlib cimport free
 from libc.stdlib cimport malloc
@@ -263,9 +267,11 @@ cdef process_tickers(ticker_list, char timestamps[][12]):
 
     # make this block c compliant.
     cdef int i = 0
+    # not c 
     cdef int len_ticker_list = len(ticker_list)
     for i in range(len_ticker_list):
         symbol = ticker_list[i]
+        # not c
         ticker = symbol.strip().upper().encode('UTF-8')
         strcpy(ticker_c, ticker)
         process_ticker(ticker_c, timestamps)
@@ -278,9 +284,20 @@ def main():
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
 
+    cdef char ticker_string[128]
+    memset(ticker_string, 0, 128)
+    cdef char ticker_string_strip[128]
+    memset(ticker_string_strip, 0, 128)
+
     if len(sys.argv) < 2:
         while True:
-            raw_ticker_string = input('Enter ticker list: ')
+            # raw_ticker_string = input('Enter ticker list: ')
+            raw_ticker_string = ''
+            printf("%s", "Enter ticker list: ")
+            fflush(cstdout)
+            fgets(ticker_string, 128, cstdin)
+            strncpy(ticker_string_strip, ticker_string, strlen(ticker_string) - 1)
+            exit(0)
 
             start = time.time()
             ticker_list = raw_ticker_string.strip().split(' ')
