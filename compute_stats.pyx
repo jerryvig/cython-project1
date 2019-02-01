@@ -1,5 +1,4 @@
 import sys
-import time
 import requests
 
 from libc.stdio cimport fflush
