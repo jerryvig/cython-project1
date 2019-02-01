@@ -33,6 +33,11 @@ from posix.unistd cimport usleep
 cdef extern from "ctype.h":
     int toupper(int c)
 
+cdef extern from "curl/curl.h":
+    ctypedef void CURL
+    CURL *curl_easy_init()
+    char *curl_easy_escape( CURL * curl , const char * string , int length )
+
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
@@ -70,10 +75,14 @@ ctypedef struct sign_diff_pct:
 
 # Looks like there is an issue here for some cases with unicode characters.
 cdef void get_crumb(const char *response_text, char *crumb):
+    cdef CURL *curl = curl_easy_init()
+
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
+    printf("%s\n", crumbstore)
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
     cdef const char *end_quote = strstr(&colon_quote[2], "\"")
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote))
+    print('CRUMB = %s\n', crumb.decode('UTF-8'))
     return
 
 cdef void get_timestamps(char timestamps[][12]):
@@ -229,8 +238,6 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
 
     resp_encode = response.text.encode('UTF-8')
 
-    # print(response.text)
-
     cdef const char* response_text_char = resp_encode
     
     cdef sign_diff_pct sign_diff_values
@@ -243,6 +250,7 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
 
     printf("TRYING TO GET THE CRUMB\n")
     get_crumb(response_text_char, crumb)
+    printf("GOT THE CRUMB\n")
 
     cdef char download_url[256]
     memset(download_url, 0, 256)
