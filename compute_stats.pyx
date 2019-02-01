@@ -210,6 +210,9 @@ cdef void get_sigma_data(const double *changes_daily, const int changes_length, 
 
 cdef void process_ticker(char *ticker, char timestamps[][12]):
     """Makes requests to get crumb and data and call stats computation."""
+    cdef timespec start
+    cdef timespec end   
+
     cdef char url[128]
     memset(url, 0, 128)
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker)
@@ -243,10 +246,10 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
     dl_resp_char = download_response.text.encode('UTF-8')
     cdef char *download_response_char = dl_resp_char
 
-    # start = time.time_ns()
+    clock_gettime(CLOCK_MONOTONIC, &start)
     cdef int changes_length = get_adj_close_and_changes(download_response_char, changes_daily)
-    # end = time.time_ns()
-    # print('ran get_adj_close_and_changes() in %d ns' % (end - start))
+    clock_gettime(CLOCK_MONOTONIC, &end)
+    printf("ran get adj_close_and_changes in %ld ns.\n", end.tv_nsec - start.tv_nsec)
 
     if not changes_length:
         return
