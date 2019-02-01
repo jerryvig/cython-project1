@@ -25,6 +25,9 @@ from libc.time cimport mktime
 from libc.time cimport time as ctime
 from libc.time cimport time_t
 from libc.time cimport tm
+from posix.time cimport CLOCK_MONOTONIC
+from posix.time cimport clock_gettime
+from posix.time cimport timespec
 from posix.unistd cimport usleep
 
 
@@ -269,7 +272,7 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
 cdef process_tickers(char *ticker_string, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
     cdef char *ticker = strsep(&ticker_string, " ")
-    while ticker: 
+    while ticker != NULL: 
         process_ticker(ticker, timestamps)
         ticker = strsep(&ticker_string, " ")
         if ticker != NULL:
@@ -279,6 +282,8 @@ def main():
     """The main routine and application entry point of this module."""
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
+    cdef timespec start
+    cdef timespec end
 
     cdef int ticker_strlen
     cdef char ticker_string[128]
@@ -296,14 +301,15 @@ def main():
             for i in range(ticker_strlen):
                 ticker_string_strip[i] = toupper(ticker_string_strip[i])
             
-            start = time.time()
+            clock_gettime(CLOCK_MONOTONIC, &start)
             process_tickers(ticker_string_strip, timestamps)
-            end = time.time()
-            print('processed in %.6f' % (end - start))
+            clock_gettime(CLOCK_MONOTONIC, &end)
+            printf("processed in %.5f s\n", (<double>end.tv_sec + 1.0e-9*end.tv_nsec) - (<double>start.tv_sec + 1.0e-9*start.tv_nsec))
         return
 
-    ticker_list = [s.strip().upper() for s in sys.argv[1:]]
-    process_tickers(ticker_list, timestamps)
+    # need to fix this to C
+    #ticker_list = [s.strip().upper() for s in sys.argv[1:]]
+    #process_tickers(ticker_list, timestamps)
 
 if __name__ == '__main__':
     main()
