@@ -21,7 +21,7 @@ from libc.string cimport strtok
 from libc.string cimport strsep
 from libc.time cimport localtime
 from libc.time cimport mktime
-from libc.time cimport time as ctime
+from libc.time cimport time
 from libc.time cimport time_t
 from libc.time cimport tm
 from posix.time cimport CLOCK_MONOTONIC
@@ -68,7 +68,7 @@ ctypedef struct sign_diff_pct:
     char sign_diff_pct_20_down[16]
     char title[128]
 
-# Looks like there is an issue here for some cases.
+# Looks like there is an issue here for some cases with unicode characters.
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
@@ -79,7 +79,7 @@ cdef void get_crumb(const char *response_text, char *crumb):
 cdef void get_timestamps(char timestamps[][12]):
     memset(timestamps[0], 0, 12)
     memset(timestamps[1], 0, 12)    
-    cdef time_t now = ctime(NULL)
+    cdef time_t now = time(NULL)
     cdef tm *now_tm = localtime(&now)
     now_tm.tm_sec = 0
     now_tm.tm_min = 0
@@ -92,6 +92,7 @@ cdef void get_timestamps(char timestamps[][12]):
     return
 
 cdef void get_title(const char *response_text, char *title):
+    """Extracts the company title string from the response text."""
     cdef const char* title_start = strstr(response_text, "<title>")
     cdef const char* pipe_start = strstr(title_start, "|")
     cdef const char* hyphen_end = strstr(&pipe_start[2], "-")
