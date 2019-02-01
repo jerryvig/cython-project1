@@ -19,11 +19,13 @@ from libc.string cimport strstr
 from libc.string cimport strcpy
 from libc.string cimport strncpy
 from libc.string cimport strtok
+from libc.string cimport strsep
 from libc.time cimport localtime
 from libc.time cimport mktime
 from libc.time cimport time as ctime
 from libc.time cimport time_t
 from libc.time cimport tm
+from posix.unistd cimport usleep
 
 
 cdef extern from "ctype.h":
@@ -266,32 +268,12 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
 
 cdef process_tickers(char *ticker_string, char timestamps[][12]):
     """Processes all of the input tickers by looping over the list."""
-    cdef char ticker_c[8]
-    memset(ticker_c, 0, 8)
-
-    printf("\"%s\"\n", ticker_string)
-    cdef char *token = strtok(ticker_string, " ")
-    while token:
-        printf("token = \"%s\"\n", token)
-        token = strtok(NULL, " ")
-
-    return
-
-    ticker_list = []
-
-    # make this block c compliant.
-    cdef int i = 0
-    # not c - we will make this use strtok()
-    cdef int len_ticker_list = len(ticker_list)
-    for i in range(len_ticker_list):
-        symbol = ticker_list[i]
-        # not c
-        ticker = symbol.strip().upper().encode('UTF-8')
-        strcpy(ticker_c, ticker)
-        process_ticker(ticker_c, timestamps)
-
-        if (i + 1) < len_ticker_list:
-            time.sleep(1.5)
+    cdef char *ticker = strsep(&ticker_string, " ")
+    while ticker: 
+        process_ticker(ticker, timestamps)
+        ticker = strsep(&ticker_string, " ")
+        if ticker != NULL:
+            usleep(1500000)
 
 def main():
     """The main routine and application entry point of this module."""
