@@ -311,8 +311,8 @@ def main():
         return
 
     # need to fix this to C
-    #ticker_list = [s.strip().upper() for s in sys.argv[1:]]
-    #process_tickers(ticker_list, timestamps)
+    # ticker_list = [s.strip().upper() for s in sys.argv[1:]]
+    # process_tickers(ticker_string, timestamps)
 
 if __name__ == '__main__':
     main()
