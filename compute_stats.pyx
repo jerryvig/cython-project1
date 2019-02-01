@@ -91,14 +91,18 @@ cdef void get_timestamps(char timestamps[][12]):
     sprintf(timestamps[1], "%ld", ago_366_days)
     return
 
-cdef void get_title(const char *response_text, char *title):
+cdef int get_title(const char *response_text, char *title):
     """Extracts the company title string from the response text."""
     cdef const char* title_start = strstr(response_text, "<title>")
     cdef const char* pipe_start = strstr(title_start, "|")
     cdef const char* hyphen_end = strstr(&pipe_start[2], "-")
     cdef size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end)
-    strncpy(title, &pipe_start[2], diff)
-    return
+    if diff <= 128:
+        strncpy(title, &pipe_start[2], diff)
+        return 0
+    else:
+        printf("Failed to parse the title from the response.\n")
+        return 1
 
 cdef int get_adj_close_and_changes(char *response_text, double *changes):
     """Extracts prices from text and computes daily changes."""
@@ -224,13 +228,20 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
     memset(crumb, 0, 128)
 
     resp_encode = response.text.encode('UTF-8')
+
+    # print(response.text)
+
     cdef const char* response_text_char = resp_encode
     
     cdef sign_diff_pct sign_diff_values
 
     memset(sign_diff_values.title, 0, 128)
-    get_title(response_text_char, sign_diff_values.title)
 
+    cdef int title_failure = get_title(response_text_char, sign_diff_values.title)
+    if title_failure:
+        return
+
+    printf("TRYING TO GET THE CRUMB\n")
     get_crumb(response_text_char, crumb)
 
     cdef char download_url[256]
