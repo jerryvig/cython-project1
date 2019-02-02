@@ -36,7 +36,12 @@ cdef extern from "ctype.h":
 cdef extern from "curl/curl.h":
     ctypedef void CURL
     CURL *curl_easy_init()
-    char *curl_easy_escape( CURL * curl , const char * string , int length )
+
+cdef extern from "ujson4c/ujdecode.h":
+    ctypedef void *UJObject
+    ctypedef void UJHeapFuncs
+    cdef UJObject UJDecode(const char *input, size_t cbInput, UJHeapFuncs *hf, void **outState)
+    cdef void UJFree(void *state)
 
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
@@ -76,14 +81,24 @@ ctypedef struct sign_diff_pct:
 # Looks like there is an issue here for some cases with unicode characters.
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef CURL *curl = curl_easy_init()
+    cdef char json_snippet[256]
+    memset(json_snippet, 0, 256)
+    cdef UJObject ujobj
+    cdef void *state
 
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
     printf("%s\n", crumbstore)
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
     cdef const char *end_quote = strstr(&colon_quote[2], "\"")
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote))
-    print('CRUMB = %s\n', crumb.decode('UTF-8'))
-    return
+    sprintf(json_snippet, "{\"crumb\": \"%s\"}", crumb)
+    printf("json_snippet = %s\n", json_snippet)
+    ujobj = UJDecode(json_snippet, strlen(json_snippet), NULL, &state)
+
+    # cdef char* escaped_crumb = curl_easy_escape( curl, crumb, 0 )
+    # printf("escaped crumb = %s\n", escaped_crumb)
+    # memset(crumb, 0, 128)
+    # strcpy(crumb, escaped_crumb)
 
 cdef void get_timestamps(char timestamps[][12]):
     memset(timestamps[0], 0, 12)
