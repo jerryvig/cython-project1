@@ -1,6 +1,7 @@
 import sys
 import requests
 
+from libc.stddef cimport wchar_t
 from libc.stdio cimport fflush
 from libc.stdio cimport fgets
 from libc.stdio cimport printf
@@ -41,6 +42,8 @@ cdef extern from "ujson4c/ujdecode.h":
     ctypedef void *UJObject
     ctypedef void UJHeapFuncs
     cdef UJObject UJDecode(const char *input, size_t cbInput, UJHeapFuncs *hf, void **outState)
+    cdef int UJObjectUnpack(UJObject objObj, int keys, const char *format, const wchar_t **keyNames, ...)
+    cdef const wchar_t *UJReadString(UJObject obj, size_t *cchOutBuffer)
     cdef void UJFree(void *state)
 
 cdef extern from "gsl/gsl_statistics_double.h":
@@ -94,7 +97,13 @@ cdef void get_crumb(const char *response_text, char *crumb):
     sprintf(json_snippet, "{\"crumb\": \"%s\"}", crumb)
     printf("json_snippet = %s\n", json_snippet)
     ujobj = UJDecode(json_snippet, strlen(json_snippet), NULL, &state)
+    # crumb_py_str = u"crumb"
+    cdef UJObject crumb_obj
+    cdef Py_UNICODE *keys = u"crumb"
+    UJObjectUnpack(json_snippet, 1, "S", <wchar_t**>&keys, &crumb_obj)
+    cdef const wchar_t *crumb_wchar_t = UJReadString(crumb_obj, NULL)
 
+    UJFree(state)
     # cdef char* escaped_crumb = curl_easy_escape( curl, crumb, 0 )
     # printf("escaped crumb = %s\n", escaped_crumb)
     # memset(crumb, 0, 128)
