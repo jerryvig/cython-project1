@@ -241,10 +241,10 @@ cdef void get_sigma_data(const double *changes_daily, const int changes_length, 
     sprintf(sign_diff_values.sigma_change, "%.3f", sigma_change)
     sprintf(sign_diff_values.record_count, "%d", changes_length)
 
-cdef void process_ticker(char *ticker, char timestamps[][12]):
+cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     """Makes requests to get crumb and data and call stats computation."""
     cdef timespec start
-    cdef timespec end   
+    cdef timespec end
 
     cdef char url[128]
     memset(url, 0, 128)
@@ -309,11 +309,11 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
     printf("  \"stdev_10_down\": %s\n", sign_diff_values.stdev_10_down)
     printf("  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_up)
 
-cdef process_tickers(char *ticker_string, char timestamps[][12]):
+cdef process_tickers(char *ticker_string, char timestamps[][12], CURL *curl):
     """Processes all of the input tickers by looping over the list."""
     cdef char *ticker = strsep(&ticker_string, " ")
     while ticker != NULL: 
-        process_ticker(ticker, timestamps)
+        process_ticker(ticker, timestamps, curl)
         ticker = strsep(&ticker_string, " ")
         if ticker != NULL:
             usleep(1500000)
@@ -335,22 +335,22 @@ cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp
 def main():
     """The main routine and application entry point of this module."""
     cdef CURL *curl = curl_easy_init()
-    cdef CURLcode res
-    cdef Memory chunk
-    chunk.memory = <char*>malloc(1)
-    chunk.size = 0
+    #cdef CURLcode res
+    #cdef Memory chunk
+    #chunk.memory = <char*>malloc(1)
+    #chunk.size = 0
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/")
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, <void*>&chunk)
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
+    #curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/")
+    #curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
+    #curl_easy_setopt(curl, CURLOPT_WRITEDATA, <void*>&chunk)
+    #curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
 
-    res = curl_easy_perform(curl)
+    #res = curl_easy_perform(curl)
 
-    if res != CURLE_OK:
-        printf("curl_easy_perform() failed.....\n")
+    #if res != CURLE_OK:
+    #    printf("curl_easy_perform() failed.....\n")
 
-    printf("chunk = %s\n", chunk.memory)
+    #printf("chunk = %s\n", chunk.memory)
 
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
@@ -374,12 +374,12 @@ def main():
                 ticker_string_strip[i] = toupper(ticker_string_strip[i])
             
             clock_gettime(CLOCK_MONOTONIC, &start)
-            process_tickers(ticker_string_strip, timestamps)
+            process_tickers(ticker_string_strip, timestamps, curl)
             clock_gettime(CLOCK_MONOTONIC, &end)
             printf("processed in %.5f s\n", (<double>end.tv_sec + 1.0e-9*end.tv_nsec) - (<double>start.tv_sec + 1.0e-9*start.tv_nsec))
         return
 
-    free(chunk.memory)
+    # free(chunk.memory)
     curl_easy_cleanup(curl)
 
     # need to fix this to C
