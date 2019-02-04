@@ -33,10 +33,21 @@ from posix.unistd cimport usleep
 cdef extern from "ctype.h":
     int toupper(int c)
 
+ctypedef struct Memory:
+    char *memory
+    size_t size
+
 cdef extern from "curl/curl.h":
     ctypedef void CURL
+    ctypedef int CURLcode
+    ctypedef int CURLoption
     CURL *curl_easy_init()
     void curl_easy_cleanup(CURL *handle)
+    CURLcode curl_easy_setopt(CURL *handle, CURLoption option, void *parameter)
+    CURLcode curl_easy_perform(CURL * easy_handle )
+    enum: CURLOPT_URL
+    enum: CURLOPT_WRITEFUNCTION
+    enum: CURLOPT_USERAGENT
 
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
@@ -74,7 +85,6 @@ ctypedef struct sign_diff_pct:
     char title[128]
 
 cdef void get_crumb(const char *response_text, char *crumb):
-    cdef CURL *curl = curl_easy_init()
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
     cdef const char *end_quote = strstr(&colon_quote[2], "\"")
@@ -303,10 +313,20 @@ cdef process_tickers(char *ticker_string, char timestamps[][12]):
         if ticker != NULL:
             usleep(1500000)
 
+cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp):
+    cdef size_t rs = size * nmemb
+    printf("%s", contents)
+    return rs
+
 def main():
     """The main routine and application entry point of this module."""
-    cdef CURL *curl
-    curl_easy_init()
+    cdef CURL *curl = curl_easy_init()
+    cdef CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/")
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+    res = curl_easy_perform(curl)
 
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
