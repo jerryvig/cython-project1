@@ -13,6 +13,7 @@ from libc.stdlib cimport free
 from libc.stdlib cimport malloc
 from libc.stdlib cimport qsort
 from libc.string cimport memset
+from libc.string cimport strcat
 from libc.string cimport strcmp
 from libc.string cimport strlen
 from libc.string cimport strstr
@@ -37,14 +38,6 @@ cdef extern from "ctype.h":
 cdef extern from "curl/curl.h":
     ctypedef void CURL
     CURL *curl_easy_init()
-
-cdef extern from "ujson4c/ujdecode.h":
-    ctypedef void *UJObject
-    ctypedef void UJHeapFuncs
-    cdef UJObject UJDecode(const char *input, size_t cbInput, UJHeapFuncs *hf, void **outState)
-    cdef int UJObjectUnpack(UJObject objObj, int keys, const char *format, const wchar_t **keyNames, ...)
-    cdef const wchar_t *UJReadString(UJObject obj, size_t *cchOutBuffer)
-    cdef void UJFree(void *state)
 
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
@@ -81,33 +74,22 @@ ctypedef struct sign_diff_pct:
     char sign_diff_pct_20_down[16]
     char title[128]
 
-# Looks like there is an issue here for some cases with unicode characters.
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef CURL *curl = curl_easy_init()
-    cdef char json_snippet[256]
-    memset(json_snippet, 0, 256)
-    cdef UJObject ujobj
-    cdef void *state
-
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
-    printf("%s\n", crumbstore)
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
     cdef const char *end_quote = strstr(&colon_quote[2], "\"")
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote))
-    sprintf(json_snippet, "{\"crumb\": \"%s\"}", crumb)
-    printf("json_snippet = %s\n", json_snippet)
-    ujobj = UJDecode(json_snippet, strlen(json_snippet), NULL, &state)
-    # crumb_py_str = u"crumb"
-    cdef UJObject crumb_obj
-    cdef Py_UNICODE *keys = u"crumb"
-    UJObjectUnpack(json_snippet, 1, "S", <wchar_t**>&keys, &crumb_obj)
-    cdef const wchar_t *crumb_wchar_t = UJReadString(crumb_obj, NULL)
+    cdef char crumbclean[128]
+    memset(crumbclean, 0, 128)
+    cdef char *twofpos = strstr(crumb, "\u002F")
 
-    UJFree(state)
-    # cdef char* escaped_crumb = curl_easy_escape( curl, crumb, 0 )
-    # printf("escaped crumb = %s\n", escaped_crumb)
-    # memset(crumb, 0, 128)
-    # strcpy(crumb, escaped_crumb)
+    if twofpos:
+        strncpy(crumbclean, crumb, twofpos - crumb)
+        strcat(crumbclean, "%2F")
+        strcat(crumbclean, &twofpos[6])
+        memset(crumb, 0, 128)
+        strcpy(crumb, crumbclean)
 
 cdef void get_timestamps(char timestamps[][12]):
     memset(timestamps[0], 0, 12)
@@ -272,9 +254,7 @@ cdef void process_ticker(char *ticker, char timestamps[][12]):
     if title_failure:
         return
 
-    printf("TRYING TO GET THE CRUMB\n")
     get_crumb(response_text_char, crumb)
-    printf("GOT THE CRUMB\n")
 
     cdef char download_url[256]
     memset(download_url, 0, 256)
