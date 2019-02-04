@@ -9,7 +9,10 @@ from libc.stdio cimport stdin as cstdin
 from libc.stdio cimport stdout as cstdout
 from libc.stdlib cimport atof
 from libc.stdlib cimport free
+from libc.stdlib cimport malloc
 from libc.stdlib cimport qsort
+from libc.stdlib cimport realloc
+from libc.string cimport memcpy
 from libc.string cimport memset
 from libc.string cimport strcat
 from libc.string cimport strcmp
@@ -45,7 +48,9 @@ cdef extern from "curl/curl.h":
     void curl_easy_cleanup(CURL *handle)
     CURLcode curl_easy_setopt(CURL *handle, CURLoption option, void *parameter)
     CURLcode curl_easy_perform(CURL * easy_handle )
+    enum: CURLE_OK
     enum: CURLOPT_URL
+    enum: CURLOPT_WRITEDATA
     enum: CURLOPT_WRITEFUNCTION
     enum: CURLOPT_USERAGENT
 
@@ -315,18 +320,37 @@ cdef process_tickers(char *ticker_string, char timestamps[][12]):
 
 cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp):
     cdef size_t rs = size * nmemb
-    printf("%s", contents)
+    cdef Memory *mem = <Memory*>userp
+    cdef char *ptr = <char*>realloc(mem.memory, mem.size + rs + 1)
+    if ptr == NULL:
+        printf("Insufficient memory: realloc() returned NULL\n")
+        return 0
+
+    mem.memory = ptr
+    memcpy(&(mem.memory[mem.size]), contents, rs)
+    mem.size += rs
+    mem.memory[mem.size] = 0
     return rs
 
 def main():
     """The main routine and application entry point of this module."""
     cdef CURL *curl = curl_easy_init()
-    cdef CURLcode res;
+    cdef CURLcode res
+    cdef Memory chunk
+    chunk.memory = <char*>malloc(1)
+    chunk.size = 0
+
     curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/")
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, <void*>&chunk)
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
 
     res = curl_easy_perform(curl)
+
+    if res != CURLE_OK:
+        printf("curl_easy_perform() failed.....\n")
+
+    printf("chunk = %s\n", chunk.memory)
 
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
@@ -355,6 +379,7 @@ def main():
             printf("processed in %.5f s\n", (<double>end.tv_sec + 1.0e-9*end.tv_nsec) - (<double>start.tv_sec + 1.0e-9*start.tv_nsec))
         return
 
+    free(chunk.memory)
     curl_easy_cleanup(curl)
 
     # need to fix this to C
