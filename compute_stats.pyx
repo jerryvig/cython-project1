@@ -1,7 +1,6 @@
 import sys
 import requests
 
-from libc.stddef cimport wchar_t
 from libc.stdio cimport fflush
 from libc.stdio cimport fgets
 from libc.stdio cimport printf
@@ -9,8 +8,6 @@ from libc.stdio cimport sprintf
 from libc.stdio cimport stdin as cstdin
 from libc.stdio cimport stdout as cstdout
 from libc.stdlib cimport atof
-from libc.stdlib cimport free
-from libc.stdlib cimport malloc
 from libc.stdlib cimport qsort
 from libc.string cimport memset
 from libc.string cimport strcat
