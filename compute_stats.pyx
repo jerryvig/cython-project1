@@ -8,6 +8,7 @@ from libc.stdio cimport sprintf
 from libc.stdio cimport stdin as cstdin
 from libc.stdio cimport stdout as cstdout
 from libc.stdlib cimport atof
+from libc.stdlib cimport free
 from libc.stdlib cimport qsort
 from libc.string cimport memset
 from libc.string cimport strcat
@@ -35,6 +36,7 @@ cdef extern from "ctype.h":
 cdef extern from "curl/curl.h":
     ctypedef void CURL
     CURL *curl_easy_init()
+    void curl_easy_cleanup(CURL *handle)
 
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
@@ -303,6 +305,9 @@ cdef process_tickers(char *ticker_string, char timestamps[][12]):
 
 def main():
     """The main routine and application entry point of this module."""
+    cdef CURL *curl
+    curl_easy_init()
+
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
     cdef timespec start
@@ -329,6 +334,8 @@ def main():
             clock_gettime(CLOCK_MONOTONIC, &end)
             printf("processed in %.5f s\n", (<double>end.tv_sec + 1.0e-9*end.tv_nsec) - (<double>start.tv_sec + 1.0e-9*start.tv_nsec))
         return
+
+    curl_easy_cleanup(curl)
 
     # need to fix this to C
     # ticker_list = [s.strip().upper() for s in sys.argv[1:]]
