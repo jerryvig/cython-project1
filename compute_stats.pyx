@@ -248,22 +248,19 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     cdef char url[128]
     memset(url, 0, 128)
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker)
-    printf("url = %s\n", url)
+    # printf("url = %s\n", url)
 
-    cdef CURLcode res
+    cdef CURLcode response
     cdef Memory memoria
     memoria.memory = <char*>malloc(1)
     memoria.size = 0
 
     curl_easy_setopt(curl, CURLOPT_URL, url)
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, <void*>&memoria)
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "")
 
-    res = curl_easy_perform(curl)
+    response = curl_easy_perform(curl)
 
-    if res != CURLE_OK:
+    if response != CURLE_OK:
         printf("curl_easy_perform() failed.....\n")
 
     cdef char crumb[128]
@@ -289,8 +286,8 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     memoria.size = 0
 
     curl_easy_setopt(curl, CURLOPT_URL, download_url)
-    res = curl_easy_perform(curl)
-    if res != CURLE_OK:
+    response = curl_easy_perform(curl)
+    if response != CURLE_OK:
         printf("curl_easy_perform() failed.....\n")
 
     cdef double changes_daily[512]
@@ -307,13 +304,11 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     free(memoria.memory)
 
     printf("===============================\n  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down)
-    printf("  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_up)
-    printf("  \"title\": \"%s\"\n", sign_diff_values.title)
+    printf("  \"avg_move_10_up\": %s\n  \"title\": \"%s\"\n", sign_diff_values.avg_move_10_up, sign_diff_values.title)
     printf("  \"change\": %s\n", sign_diff_values.change)
     printf("  \"record_count\": %s\n", sign_diff_values.record_count)
     printf("  \"self_correlation\": %s\n", sign_diff_values.self_correlation)
-    printf("  \"sigma\": %s\n", sign_diff_values.sigma)
-    printf("  \"sigma_change\": %s\n", sign_diff_values.sigma_change)
+    printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values.sigma, sign_diff_values.sigma_change)
     printf("  \"sign_diff_pct_10_down\": %s\n", sign_diff_values.sign_diff_pct_10_down)
     printf("  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_up)
     printf("  \"sign_diff_pct_20_down\": %s\n", sign_diff_values.sign_diff_pct_20_down)
@@ -347,6 +342,9 @@ cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp
 def main():
     """The main routine and application entry point of this module."""
     cdef CURL *curl = curl_easy_init()
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "")
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
 
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
