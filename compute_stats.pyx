@@ -1,5 +1,3 @@
-import sys
-
 from libc.stdio cimport fflush
 from libc.stdio cimport fgets
 from libc.stdio cimport printf
@@ -355,23 +353,22 @@ def main():
     cdef char ticker_string[128]
     cdef char ticker_string_strip[128]
 
-    if len(sys.argv) < 2:
-        while True:
-            memset(ticker_string, 0, 128)
-            memset(ticker_string_strip, 0, 128)
-            printf("%s", "Enter ticker list: ")
-            fflush(cstdout)
-            fgets(ticker_string, 128, cstdin)
-            ticker_strlen = strlen(ticker_string) - 1
-            strncpy(ticker_string_strip, ticker_string, ticker_strlen)
-            for i in range(ticker_strlen):
-                ticker_string_strip[i] = toupper(ticker_string_strip[i])
+    #if len(sys.argv) < 2:
+    while True:
+        memset(ticker_string, 0, 128)
+        memset(ticker_string_strip, 0, 128)
+        printf("%s", "Enter ticker list: ")
+        fflush(cstdout)
+        fgets(ticker_string, 128, cstdin)
+        ticker_strlen = strlen(ticker_string) - 1
+        strncpy(ticker_string_strip, ticker_string, ticker_strlen)
+        for i in range(ticker_strlen):
+            ticker_string_strip[i] = toupper(ticker_string_strip[i])
             
-            clock_gettime(CLOCK_MONOTONIC, &start)
-            process_tickers(ticker_string_strip, timestamps, curl)
-            clock_gettime(CLOCK_MONOTONIC, &end)
-            printf("processed in %.5f s\n", (<double>end.tv_sec + 1.0e-9*end.tv_nsec) - (<double>start.tv_sec + 1.0e-9*start.tv_nsec))
-        return
+        clock_gettime(CLOCK_MONOTONIC, &start)
+        process_tickers(ticker_string_strip, timestamps, curl)
+        clock_gettime(CLOCK_MONOTONIC, &end)
+        printf("processed in %.5f s\n", (<double>end.tv_sec + 1.0e-9*end.tv_nsec) - (<double>start.tv_sec + 1.0e-9*start.tv_nsec))
 
     curl_easy_cleanup(curl)
 
