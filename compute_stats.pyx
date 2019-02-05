@@ -1,5 +1,4 @@
 import sys
-import requests
 
 from libc.stdio cimport fflush
 from libc.stdio cimport fgets
@@ -48,11 +47,12 @@ cdef extern from "curl/curl.h":
     void curl_easy_cleanup(CURL *handle)
     CURLcode curl_easy_setopt(CURL *handle, CURLoption option, void *parameter)
     CURLcode curl_easy_perform(CURL * easy_handle )
+    enum: CURLOPT_COOKIEFILE
     enum: CURLE_OK
     enum: CURLOPT_URL
+    enum: CURLOPT_USERAGENT
     enum: CURLOPT_WRITEDATA
     enum: CURLOPT_WRITEFUNCTION
-    enum: CURLOPT_USERAGENT
 
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
@@ -251,40 +251,52 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker)
     printf("url = %s\n", url)
 
-    response = requests.get(url.decode('UTF-8'))
+    cdef CURLcode res
+    cdef Memory memoria
+    memoria.memory = <char*>malloc(1)
+    memoria.size = 0
+
+    curl_easy_setopt(curl, CURLOPT_URL, url)
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, <void*>&memoria)
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "")
+
+    res = curl_easy_perform(curl)
+
+    if res != CURLE_OK:
+        printf("curl_easy_perform() failed.....\n")
 
     cdef char crumb[128]
     memset(crumb, 0, 128)
-
-    resp_encode = response.text.encode('UTF-8')
-
-    cdef const char* response_text_char = resp_encode
     
     cdef sign_diff_pct sign_diff_values
 
     memset(sign_diff_values.title, 0, 128)
 
-    cdef int title_failure = get_title(response_text_char, sign_diff_values.title)
+    cdef int title_failure = get_title(memoria.memory, sign_diff_values.title)
     if title_failure:
         return
 
-    get_crumb(response_text_char, crumb)
+    get_crumb(memoria.memory, crumb)
 
     cdef char download_url[256]
     memset(download_url, 0, 256)
-
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb)
     printf("download_url = %s\n", download_url)
 
-    download_response = requests.get(download_url.decode('UTF-8'), cookies=response.cookies)
+    free(memoria.memory)
+    memoria.memory = <char*>malloc(1)
+    memoria.size = 0
+
+    curl_easy_setopt(curl, CURLOPT_URL, download_url)
+    res = curl_easy_perform(curl)
+    if res != CURLE_OK:
+        printf("curl_easy_perform() failed.....\n")
 
     cdef double changes_daily[512]
-
-    dl_resp_char = download_response.text.encode('UTF-8')
-    cdef char *download_response_char = dl_resp_char
-
     clock_gettime(CLOCK_MONOTONIC, &start)
-    cdef int changes_length = get_adj_close_and_changes(download_response_char, changes_daily)
+    cdef int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily)
     clock_gettime(CLOCK_MONOTONIC, &end)
     printf("ran get adj_close_and_changes in %ld ns.\n", end.tv_nsec - start.tv_nsec)
 
@@ -293,8 +305,9 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
 
     get_sigma_data(changes_daily, changes_length, &sign_diff_values)
 
-    printf("===============================\n")
-    printf("  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down)
+    free(memoria.memory)
+
+    printf("===============================\n  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down)
     printf("  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_up)
     printf("  \"title\": \"%s\"\n", sign_diff_values.title)
     printf("  \"change\": %s\n", sign_diff_values.change)
@@ -323,7 +336,7 @@ cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp
     cdef Memory *mem = <Memory*>userp
     cdef char *ptr = <char*>realloc(mem.memory, mem.size + rs + 1)
     if ptr == NULL:
-        printf("Insufficient memory: realloc() returned NULL\n")
+        printf("Insufficient memory: realloc() returned NULL.\n")
         return 0
 
     mem.memory = ptr
@@ -335,22 +348,6 @@ cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp
 def main():
     """The main routine and application entry point of this module."""
     cdef CURL *curl = curl_easy_init()
-    #cdef CURLcode res
-    #cdef Memory chunk
-    #chunk.memory = <char*>malloc(1)
-    #chunk.size = 0
-
-    #curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com/")
-    #curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
-    #curl_easy_setopt(curl, CURLOPT_WRITEDATA, <void*>&chunk)
-    #curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
-
-    #res = curl_easy_perform(curl)
-
-    #if res != CURLE_OK:
-    #    printf("curl_easy_perform() failed.....\n")
-
-    #printf("chunk = %s\n", chunk.memory)
 
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
