@@ -322,7 +322,7 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     printf("  \"stdev_10_down\": %s\n", sign_diff_values.stdev_10_down)
     printf("  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_up)
 
-cdef process_tickers(char *ticker_string, char timestamps[][12], CURL *curl):
+cdef void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl):
     """Processes all of the input tickers by looping over the list."""
     cdef char *ticker = strsep(&ticker_string, " ")
     while ticker != NULL: 
