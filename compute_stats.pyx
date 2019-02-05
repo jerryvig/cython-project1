@@ -323,7 +323,7 @@ cdef void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl
         if ticker != NULL:
             usleep(1500000)
 
-cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp):
+cdef size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp):
     cdef size_t rs = size * nmemb
     cdef Memory *mem = <Memory*>userp
     cdef char *ptr = <char*>realloc(mem.memory, mem.size + rs + 1)
@@ -337,12 +337,16 @@ cdef size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp
     mem.memory[mem.size] = 0
     return rs
 
+
+cdef perform_work(int thread_number):
+    pass
+
 def main():
     """The main routine and application entry point of this module."""
     cdef CURL *curl = curl_easy_init()
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "")
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback)
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback)
 
     cdef char timestamps[2][12]
     get_timestamps(timestamps)
