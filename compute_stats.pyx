@@ -363,7 +363,7 @@ def main():
         strncpy(ticker_string_strip, ticker_string, ticker_strlen)
         for i in range(ticker_strlen):
             ticker_string_strip[i] = toupper(ticker_string_strip[i])
-            
+
         clock_gettime(CLOCK_MONOTONIC, &start)
         process_tickers(ticker_string_strip, timestamps, curl)
         clock_gettime(CLOCK_MONOTONIC, &end)
