@@ -353,7 +353,6 @@ def main():
     cdef char ticker_string[128]
     cdef char ticker_string_strip[128]
 
-    #if len(sys.argv) < 2:
     while True:
         memset(ticker_string, 0, 128)
         memset(ticker_string_strip, 0, 128)
