@@ -55,21 +55,11 @@ cdef extern from "curl/curl.h":
 cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
-    double gsl_stats_correlation(const double data1[], const size_t stride1,const double data2[], const size_t stride2, const size_t n);
+    double gsl_stats_correlation(const double data1[], const size_t stride1,const double data2[], const size_t stride2, const size_t n)
 
 ctypedef struct changes_tuple:
     double change_0
     double change_plus_one
-
-cdef int compare_changes_tuples(const void *a, const void *b) nogil:
-    cdef changes_tuple a_val = (<const changes_tuple*>a)[0]
-    cdef changes_tuple b_val = (<const changes_tuple*>b)[0]
-
-    if a_val.change_0 < b_val.change_0:
-        return 1
-    if a_val.change_0 > b_val.change_0:
-        return -1
-    return 0
 
 ctypedef struct sign_diff_pct:
     char avg_move_10_up[16]
@@ -85,7 +75,17 @@ ctypedef struct sign_diff_pct:
     char sign_diff_pct_20_up[16]
     char sign_diff_pct_10_down[16]
     char sign_diff_pct_20_down[16]
-    char title[128]
+    char title[128]    
+
+cdef int compare_changes_tuples(const void *a, const void *b) nogil:
+    cdef changes_tuple a_val = (<const changes_tuple*>a)[0]
+    cdef changes_tuple b_val = (<const changes_tuple*>b)[0]
+
+    if a_val.change_0 < b_val.change_0:
+        return 1
+    if a_val.change_0 > b_val.change_0:
+        return -1
+    return 0
 
 cdef void get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
