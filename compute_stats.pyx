@@ -118,7 +118,6 @@ cdef void get_timestamps(char timestamps[][12]):
     cdef time_t ago_366_days = today_time - 31622400
     sprintf(timestamps[0], "%ld", manana)
     sprintf(timestamps[1], "%ld", ago_366_days)
-    return
 
 cdef int get_title(const char *response_text, char *title):
     """Extracts the company title string from the response text."""
