@@ -13,19 +13,19 @@ from libc.string cimport memcpy
 from libc.string cimport memset
 from libc.string cimport strcat
 from libc.string cimport strcmp
-from libc.string cimport strlen
-from libc.string cimport strstr
 from libc.string cimport strcpy
+from libc.string cimport strlen
 from libc.string cimport strncpy
-from libc.string cimport strtok
 from libc.string cimport strsep
+from libc.string cimport strstr
+from libc.string cimport strtok
 from libc.time cimport localtime
 from libc.time cimport mktime
 from libc.time cimport time
 from libc.time cimport time_t
 from libc.time cimport tm
-from posix.time cimport CLOCK_MONOTONIC
 from posix.time cimport clock_gettime
+from posix.time cimport CLOCK_MONOTONIC
 from posix.time cimport timespec
 from posix.unistd cimport usleep
 
