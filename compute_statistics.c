@@ -90,6 +90,7 @@ int get_adj_close_and_changes(char *response_text, double *changes) {
 	double adj_close;
 	double last_adj_close;
     char line[512];
+    char *cols;
     char adj_close_str[128];
     char *last_column;
 
@@ -100,15 +101,25 @@ int get_adj_close_and_changes(char *response_text, double *changes) {
     		memset(adj_close_str, 0, 128);
     		strcpy(line, token);
 
-    		for (j=0; j<5; ++j) {
-                line = strstr(&line[1], ",");
+    		cols = strstr(&line[1], ",");
+    		for (j=0; j<4; ++j) {
+                cols = strstr(&cols[1], ",");
     		}
-    		last_column = strstr(&line[1], ",");
+    		last_column = strstr(&cols[1], ",");
+            strncpy(adj_close_str, &cols[1], strlen(&cols[1]) - strlen(last_column));
+            if (strcmp(adj_close_str, "null") == 0) {
+            	return 0;
+            }
+
+            adj_close = atof(adj_close_str);
+            if (i > 1) {
+                changes[i-2] = (adj_close - last_adj_close)/last_adj_close;
+            }
+            last_adj_close = adj_close;
     	}
     	token = strtok(NULL, "\n");
     	i++;
     }
-
 	return i - 2;
 }
 
@@ -170,6 +181,10 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 
     double changes_daily[512];
     int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
+
+    if (!changes_length) {
+    	return;
+    }
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
