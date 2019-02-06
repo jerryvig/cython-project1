@@ -108,6 +108,21 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     memset(download_url, 0, 256);
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
     printf("download_url = %s\n", download_url);
+
+    free(memoria.memory);
+    memoria.memory = (char*)malloc(1);
+    memoria.size = 0;
+
+    curl_easy_setopt(curl, CURLOPT_URL, download_url);
+    response = curl_easy_perform(curl);
+
+    if (response != CURLE_OK) {
+    	printf("curl_easy_perform() failed.....\n");
+    }
+
+    printf("response text = %s\n", memoria.memory);
+
+    double changes_daily[512];
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
