@@ -13,6 +13,10 @@ typedef struct {
 	size_t size;
 } Memory;
 
+typedef struct {
+	char title[128];
+} sign_diff_pct;
+
 void get_timestamps(char timestamps[][12]) {
     memset(timestamps[0], 0, 12);
     memset(timestamps[1], 0, 12);
@@ -30,8 +34,34 @@ void get_timestamps(char timestamps[][12]) {
 
 int get_crumb(const char *response_text, char *crumb) {
 	const char *crumbstore = strstr(response_text, "CrumbStore");
-	printf("in get_crumb()");
+    const char *colon_quote = strstr(crumbstore, ":\"");
+    const char *end_quote = strstr(&colon_quote[2], "\"");
+    strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote));
+    char crumbclean[128];
+    memset(crumbclean, 0, 128);
+    const char *twofpos = strstr(crumb, "\\u002F");
+
+    if (twofpos) {
+        strncpy(crumbclean, crumb, twofpos - crumb);
+        strcat(crumbclean, "%2F");
+        strcat(crumbclean, &twofpos[6]);
+        memset(crumb, 0, 128);
+        strcpy(crumb, crumbclean);
+    }
 	return 0;
+}
+
+int get_title(const char *response_text, char *title) {
+	const char* title_start = strstr(response_text, "<title>");
+    const char* pipe_start = strstr(title_start, "|");
+    const char* hyphen_end = strstr(&pipe_start[2], "-");
+    size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end);
+    if (diff < 128) {
+    	strncpy(title, &pipe_start[2], diff);
+    	return 0;
+    }
+    printf("Failed to parse the title from the response.\n");
+	return 1;
 }
 
 void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
@@ -60,10 +90,24 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     char crumb[128];
     memset(crumb, 0, 128);
 
+    sign_diff_pct sign_diff_values;
+    memset(sign_diff_values.title, 0, 128);
+
     int crumb_failure = get_crumb(memoria.memory, crumb);
     if (crumb_failure) {
+    	printf("Failed to get crumb...\n");
     	return;
     }
+
+    int title_failure = get_title(memoria.memory, sign_diff_values.title);
+    if (title_failure) {
+    	return;
+    }
+
+    char download_url[256];
+    memset(download_url, 0, 256);
+    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
+    printf("download_url = %s\n", download_url);
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
