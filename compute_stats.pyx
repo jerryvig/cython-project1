@@ -1,4 +1,3 @@
-from cython.operator cimport dereference
 from libc.stdio cimport fflush
 from libc.stdio cimport fgets
 from libc.stdio cimport printf

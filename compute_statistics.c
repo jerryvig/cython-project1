@@ -1,8 +1,11 @@
+#define _POSIX_C_SOURCE 199309L
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include <curl/curl.h>
 
 void get_timestamps(char timestamps[][12]) {
@@ -32,6 +35,8 @@ int main(void) {
 
     char timestamps[2][12];
     get_timestamps(timestamps);
+    struct timespec start;
+    struct timespec end;
 
 	int ticker_strlen;
     char ticker_string[128];
@@ -49,7 +54,10 @@ int main(void) {
         	ticker_string_strip[i] = toupper(ticker_string_strip[i]);
         }
         
+        clock_gettime(CLOCK_MONOTONIC, &start);
         process_tickers(ticker_string_strip, timestamps, curl);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
     curl_easy_cleanup(curl);
 	return EXIT_SUCCESS;
