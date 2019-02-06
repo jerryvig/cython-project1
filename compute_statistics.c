@@ -28,6 +28,12 @@ void get_timestamps(char timestamps[][12]) {
     sprintf(timestamps[1], "%ld", ago_366_days);
 }
 
+int get_crumb(const char *response_text, char *crumb) {
+	const char *crumbstore = strstr(response_text, "CrumbStore");
+	printf("in get_crumb()");
+	return 0;
+}
+
 void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     struct timespec start;
     struct timespec end;
@@ -53,6 +59,11 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 
     char crumb[128];
     memset(crumb, 0, 128);
+
+    int crumb_failure = get_crumb(memoria.memory, crumb);
+    if (crumb_failure) {
+    	return;
+    }
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
@@ -67,6 +78,19 @@ void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
 }
 
 size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t rs = size * nmemb;
+    Memory *mem = (Memory*)userp;
+    char *ptr = (char*)realloc(mem->memory, mem->size + rs + 1);
+    if (ptr == NULL) {
+        printf("Insufficient memory: realloc() returned NULL.\n");
+        return 0;
+    }
+
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), contents, rs);
+    mem->size += rs;
+    mem->memory[mem->size] = 0;
+    return rs;
 }
 
 int main(void) {
