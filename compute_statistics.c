@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 199309L
+#define _DEFAULT_SOURCE
 
 #include <ctype.h>
 #include <stdio.h>
@@ -7,6 +7,11 @@
 #include <time.h>
 #include <unistd.h>
 #include <curl/curl.h>
+
+typedef struct {
+	char *memory;
+	size_t size;
+} Memory;
 
 void get_timestamps(char timestamps[][12]) {
     memset(timestamps[0], 0, 12);
@@ -23,8 +28,42 @@ void get_timestamps(char timestamps[][12]) {
     sprintf(timestamps[1], "%ld", ago_366_days);
 }
 
+void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
+    struct timespec start;
+    struct timespec end;
+
+    char url[128];
+    memset(url, 0, 128);
+    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
+	// printf("url = %s\n", url);
+
+    CURLcode response;
+    Memory memoria;
+    memoria.memory = (char*)malloc(1);
+    memoria.size = 0;
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
+
+    response = curl_easy_perform(curl);
+
+    if (response != CURLE_OK) {
+    	printf("curl_easy_perform() failed.....\n");
+    }
+
+    char crumb[128];
+    memset(crumb, 0, 128);
+}
+
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
-    printf("ticker_string = %s\n", ticker_string);
+    char *ticker = strsep(&ticker_string, " ");
+    while (ticker != NULL) {
+    	process_ticker(ticker, timestamps, curl);
+    	ticker = strsep(&ticker_string, " ");
+    	if (ticker != NULL) {
+    		usleep(1500000);
+    	}
+    }
 }
 
 size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -63,5 +102,6 @@ int main(void) {
         printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
     curl_easy_cleanup(curl);
+    
     return EXIT_SUCCESS;
 }
