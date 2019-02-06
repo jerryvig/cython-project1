@@ -7,6 +7,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <curl/curl.h>
+#include <gsl/gsl_statistics_double.h>
 
 typedef struct {
     char *memory;
@@ -14,6 +15,24 @@ typedef struct {
 } Memory;
 
 typedef struct {
+    double change_0;
+    double change_plus_one;
+} changes_tuple;
+
+typedef struct {
+    char avg_move_10_up[16];
+    char avg_move_10_down[16];
+    char change[16];
+    char record_count[8];
+    char self_correlation[16];
+    char sigma[16];
+    char sigma_change[16];
+    char stdev_10_up[16];
+    char stdev_10_down[16];
+    char sign_diff_pct_10_up[16];
+    char sign_diff_pct_20_up[16];
+    char sign_diff_pct_10_down[16];
+    char sign_diff_pct_20_down[16];
     char title[128];
 } sign_diff_pct;
 
