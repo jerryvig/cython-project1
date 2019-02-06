@@ -28,11 +28,11 @@ void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
 }
 
 size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-	
+
 }
 
 int main(void) {
-	CURL *curl = curl_easy_init();
+    CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
@@ -64,5 +64,5 @@ int main(void) {
         printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
     curl_easy_cleanup(curl);
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
