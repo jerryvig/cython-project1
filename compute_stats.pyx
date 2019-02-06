@@ -58,14 +58,6 @@ cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
     double gsl_stats_correlation(const double data1[], const size_t stride1,const double data2[], const size_t stride2, const size_t n)
 
-cdef extern from "pthread.h" nogil:
-    ctypedef int pthread_t
-    ctypedef struct pthread_attr_t:
-        pass
-    cdef int pthread_create(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)
-    cdef int pthread_join(pthread_t thread, void **retval)
-    cdef void pthread_exit(void *retval)
-
 ctypedef struct changes_tuple:
     double change_0
     double change_plus_one
@@ -348,17 +340,6 @@ cdef size_t write_callback(void *contents, size_t size, size_t nmemb, void *user
     mem.size += rs
     mem.memory[mem.size] = 0
     return rs
-
-
-cdef void *perform_work(void *args) nogil:
-    cdef int thread_index = dereference(<int*>args)
-    if thread_index == 2:
-        usleep(1000000)
-    else:
-        usleep(3000000)
-    printf("printing from thread # %d\n", thread_index)
-    cdef int retval = thread_index + 1
-    return <void*>retval
 
 def main():
     """The main routine and application entry point of this module."""
