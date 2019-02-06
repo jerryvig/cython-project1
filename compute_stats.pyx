@@ -64,6 +64,7 @@ cdef extern from "pthread.h" nogil:
         pass
     cdef int pthread_create(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)
     cdef int pthread_join(pthread_t thread, void **retval)
+    cdef void pthread_exit(void *retval)
 
 ctypedef struct changes_tuple:
     double change_0
@@ -353,6 +354,9 @@ cdef void *perform_work(void *args) nogil:
     else:
         usleep(3000000)
     printf("printing from thread # %d\n", thread_index)
+    cdef char *retval
+    retval = "6"
+    pthread_exit(retval)
 
 def main():
     """The main routine and application entry point of this module."""
@@ -360,16 +364,21 @@ def main():
     cdef pthread_t thread2
     cdef int arg1 = 1
     cdef int arg2 = 2
+    cdef void *retval1
+    cdef void *retval2
 
     pthread_create(&thread1, NULL, perform_work, &arg1)
     pthread_create(&thread2, NULL, perform_work, &arg2)
 
     printf("IN main all threads created.\n")
 
-    pthread_join(thread1, NULL)
-    pthread_join(thread2, NULL)
+    pthread_join(thread1, &retval1)
+    pthread_join(thread2, &retval2)
 
     printf("DONE JOINING ALL OF THE THREADS\n")
+
+    printf("thread 1 returned value = %s\n", retval1)
+    printf("thread 2 returned value = %s\n", retval2)
 
     exit(0)
 
