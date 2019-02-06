@@ -27,18 +27,22 @@ void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
 	printf("ticker_string = %s\n", ticker_string);
 }
 
+size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
+	
+}
+
 int main(void) {
 	CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-    // curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
 
     char timestamps[2][12];
     get_timestamps(timestamps);
     struct timespec start;
     struct timespec end;
 
-	int ticker_strlen;
+    int ticker_strlen;
     char ticker_string[128];
     char ticker_string_strip[128];
 
