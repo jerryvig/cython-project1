@@ -122,9 +122,30 @@ int get_adj_close_and_changes(char *response_text, double *changes) {
 	return i - 2;
 }
 
+void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
+	printf("IN compute_sign_diff_pct() \n");
+
+    double changes_minus_one[changes_length - 2];
+    double changes_0[changes_length - 2];
+    changes_tuple changes_tuples[changes_length - 2];
+    double np_avg_10_up[10];
+    double np_avg_10_down[10];
+
+    for (int i=0; i<changes_length - 2; ++i) {
+        changes_minus_one[i] = changes_daily[i];
+        changes_0[i] = changes_daily[i+1];
+        changes_tuples[i].change_0 = changes_daily[i];
+        changes_tuples[i].change_plus_one = changes_daily[i+1];
+    }
+
+    double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
+}
+
 void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
     double stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1));
     double sigma_change = changes_daily[changes_length - 1]/stdev;
+
+    compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values);
 
     sprintf(sign_diff_values->change, "%.3f%%", changes_daily[changes_length - 1] * 100);
     sprintf(sign_diff_values->sigma, "%.3f%%", stdev * 100);
