@@ -84,7 +84,6 @@ int get_title(const char *response_text, char *title) {
 }
 
 int get_adj_close_and_changes(char *response_text, double *changes) {
-	printf("in get_adj_close_and_changes()\n");
 	int j;
 	int i = 0;
 	double adj_close;
@@ -121,6 +120,16 @@ int get_adj_close_and_changes(char *response_text, double *changes) {
     	i++;
     }
 	return i - 2;
+}
+
+void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
+    double stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1));
+    double sigma_change = changes_daily[changes_length - 1]/stdev;
+
+    sprintf(sign_diff_values->change, "%.3f%%", changes_daily[changes_length - 1] * 100);
+    sprintf(sign_diff_values->sigma, "%.3f%%", stdev * 100);
+    sprintf(sign_diff_values->sigma_change, "%.3f", sigma_change);
+    sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
 void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
@@ -185,6 +194,8 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     if (!changes_length) {
     	return;
     }
+
+    get_sigma_data(changes_daily, changes_length, &sign_diff_values);
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
