@@ -96,7 +96,7 @@ cdef int compare_changes_tuples(const void *a, const void *b) nogil:
         return -1
     return 0
 
-cdef void get_crumb(const char *response_text, char *crumb):
+cdef int get_crumb(const char *response_text, char *crumb):
     cdef const char *crumbstore = strstr(response_text, "CrumbStore")
     cdef const char *colon_quote = strstr(crumbstore, ":\"")
     cdef const char *end_quote = strstr(&colon_quote[2], "\"")
@@ -111,6 +111,7 @@ cdef void get_crumb(const char *response_text, char *crumb):
         strcat(crumbclean, &twofpos[6])
         memset(crumb, 0, 128)
         strcpy(crumb, crumbclean)
+    return 0
 
 cdef void get_timestamps(char timestamps[][12]):
     memset(timestamps[0], 0, 12)
@@ -281,7 +282,9 @@ cdef void process_ticker(char *ticker, char timestamps[][12], CURL *curl):
     if title_failure:
         return
 
-    get_crumb(memoria.memory, crumb)
+    cdef int crumb_failure = get_crumb(memoria.memory, crumb)
+    if crumb_failure:
+        return
 
     cdef char download_url[256]
     memset(download_url, 0, 256)
@@ -354,9 +357,8 @@ cdef void *perform_work(void *args) nogil:
     else:
         usleep(3000000)
     printf("printing from thread # %d\n", thread_index)
-    cdef char *retval
-    retval = "6"
-    pthread_exit(retval)
+    cdef int retval = thread_index + 1
+    return <void*>retval
 
 def main():
     """The main routine and application entry point of this module."""
@@ -377,8 +379,8 @@ def main():
 
     printf("DONE JOINING ALL OF THE THREADS\n")
 
-    printf("thread 1 returned value = %s\n", retval1)
-    printf("thread 2 returned value = %s\n", retval2)
+    printf("thread 1 returned value = %d\n", <int>retval1)
+    printf("thread 2 returned value = %d\n", <int>retval2)
 
     exit(0)
 
