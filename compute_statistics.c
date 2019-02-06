@@ -9,12 +9,12 @@
 #include <curl/curl.h>
 
 typedef struct {
-	char *memory;
-	size_t size;
+    char *memory;
+    size_t size;
 } Memory;
 
 typedef struct {
-	char title[128];
+    char title[128];
 } sign_diff_pct;
 
 void get_timestamps(char timestamps[][12]) {
@@ -33,7 +33,7 @@ void get_timestamps(char timestamps[][12]) {
 }
 
 int get_crumb(const char *response_text, char *crumb) {
-	const char *crumbstore = strstr(response_text, "CrumbStore");
+    const char *crumbstore = strstr(response_text, "CrumbStore");
     const char *colon_quote = strstr(crumbstore, ":\"");
     const char *end_quote = strstr(&colon_quote[2], "\"");
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote));
@@ -52,7 +52,7 @@ int get_crumb(const char *response_text, char *crumb) {
 }
 
 int get_title(const char *response_text, char *title) {
-	const char* title_start = strstr(response_text, "<title>");
+    const char* title_start = strstr(response_text, "<title>");
     const char* pipe_start = strstr(title_start, "|");
     const char* hyphen_end = strstr(&pipe_start[2], "-");
     size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end);
