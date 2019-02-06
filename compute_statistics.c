@@ -9,7 +9,7 @@
 #include <curl/curl.h>
 
 void get_timestamps(char timestamps[][12]) {
-	memset(timestamps[0], 0, 12);
+    memset(timestamps[0], 0, 12);
     memset(timestamps[1], 0, 12);
     time_t now = time(NULL);
     struct tm *now_tm = localtime(&now);
@@ -24,11 +24,10 @@ void get_timestamps(char timestamps[][12]) {
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
-	printf("ticker_string = %s\n", ticker_string);
+    printf("ticker_string = %s\n", ticker_string);
 }
 
 size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-
 }
 
 int main(void) {
@@ -55,9 +54,9 @@ int main(void) {
         ticker_strlen = strlen(ticker_string) - 1;
         strncpy(ticker_string_strip, ticker_string, ticker_strlen);
         for (int i=0; i<ticker_strlen; ++i) {
-        	ticker_string_strip[i] = toupper(ticker_string_strip[i]);
+            ticker_string_strip[i] = toupper(ticker_string_strip[i]);
         }
-        
+
         clock_gettime(CLOCK_MONOTONIC, &start);
         process_tickers(ticker_string_strip, timestamps, curl);
         clock_gettime(CLOCK_MONOTONIC, &end);
