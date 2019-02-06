@@ -1,3 +1,4 @@
+from cython.operator cimport dereference
 from libc.stdio cimport fflush
 from libc.stdio cimport fgets
 from libc.stdio cimport printf
@@ -56,6 +57,13 @@ cdef extern from "gsl/gsl_statistics_double.h":
     double gsl_stats_mean(const double data[], const size_t stride, const size_t n)
     double gsl_stats_sd(const double data[], const size_t stride, const size_t n)
     double gsl_stats_correlation(const double data1[], const size_t stride1,const double data2[], const size_t stride2, const size_t n)
+
+cdef extern from "pthread.h" nogil:
+    ctypedef int pthread_t
+    ctypedef struct pthread_attr_t:
+        pass
+    cdef int pthread_create(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)
+    cdef int pthread_join(pthread_t thread, void **retval)
 
 ctypedef struct changes_tuple:
     double change_0
@@ -338,11 +346,33 @@ cdef size_t write_callback(void *contents, size_t size, size_t nmemb, void *user
     return rs
 
 
-cdef perform_work(int thread_number):
-    pass
+cdef void *perform_work(void *args) nogil:
+    cdef int thread_index = dereference(<int*>args)
+    if thread_index == 2:
+        usleep(1000000)
+    else:
+        usleep(3000000)
+    printf("printing from thread # %d\n", thread_index)
 
 def main():
     """The main routine and application entry point of this module."""
+    cdef pthread_t thread1
+    cdef pthread_t thread2
+    cdef int arg1 = 1
+    cdef int arg2 = 2
+
+    pthread_create(&thread1, NULL, perform_work, &arg1)
+    pthread_create(&thread2, NULL, perform_work, &arg2)
+
+    printf("IN main all threads created.\n")
+
+    pthread_join(thread1, NULL)
+    pthread_join(thread2, NULL)
+
+    printf("DONE JOINING ALL OF THE THREADS\n")
+
+    exit(0)
+
     cdef CURL *curl = curl_easy_init()
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0")
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "")
