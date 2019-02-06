@@ -83,6 +83,35 @@ int get_title(const char *response_text, char *title) {
 	return 1;
 }
 
+int get_adj_close_and_changes(char *response_text, double *changes) {
+	printf("in get_adj_close_and_changes()\n");
+	int j;
+	int i = 0;
+	double adj_close;
+	double last_adj_close;
+    char line[512];
+    char adj_close_str[128];
+    char *last_column;
+
+    char *token = strtok(response_text, "\n");
+    while (token) {
+    	if (i) {
+    		memset(line, 0, 512);
+    		memset(adj_close_str, 0, 128);
+    		strcpy(line, token);
+
+    		for (j=0; j<5; ++j) {
+                line = strstr(&line[1], ",");
+    		}
+    		last_column = strstr(&line[1], ",");
+    	}
+    	token = strtok(NULL, "\n");
+    	i++;
+    }
+
+	return i - 2;
+}
+
 void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     struct timespec start;
     struct timespec end;
@@ -139,9 +168,8 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     	printf("curl_easy_perform() failed.....\n");
     }
 
-    printf("response text = %s\n", memoria.memory);
-
     double changes_daily[512];
+    int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
 }
 
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
