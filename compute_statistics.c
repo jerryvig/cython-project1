@@ -97,10 +97,10 @@ int get_title(const char *response_text, char *title) {
 }
 
 int get_adj_close_and_changes(char *response_text, double *changes) {
-	int j;
-	int i = 0;
-	double adj_close;
-	double last_adj_close;
+    int j;
+    int i = 0;
+    double adj_close;
+    double last_adj_close;
     char line[512];
     char *cols;
     char adj_close_str[128];
