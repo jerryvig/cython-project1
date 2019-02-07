@@ -216,13 +216,15 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
 }
 
 void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
+    printf("in process ticker\n");
+
     struct timespec start;
     struct timespec end;
 
     char url[128];
     memset(url, 0, 128);
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
-    // printf("url = %s\n", url);
+    printf("url = %s\n", url);
 
     CURLcode response;
     Memory memoria;
@@ -232,7 +234,11 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
+    printf("about to do curl_easy_perform\n");
+
     response = curl_easy_perform(curl);
+
+    printf("completed curl_easy_perf\n");
 
     if (response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
@@ -287,14 +293,16 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     printf("  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values.title, sign_diff_values.change);
     printf("  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values.record_count, sign_diff_values.self_correlation);
     printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values.sigma, sign_diff_values.sigma_change);
-    printf("  \"sign_diff_pct_10_down\": %s\n", sign_diff_values.sign_diff_pct_10_down);
-    printf("  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_up);
+    printf("  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_down, sign_diff_values.sign_diff_pct_10_up);
     printf("  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values.sign_diff_pct_20_down, sign_diff_values.sign_diff_pct_20_up);
     printf("  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_down, sign_diff_values.stdev_10_up);
 }
 
 static void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
     char *ticker = strsep(&ticker_string, " ");
+
+    printf("completed strsep\n");
+
     while (ticker != NULL) {
         process_ticker(ticker, timestamps, curl);
         ticker = strsep(&ticker_string, " ");
@@ -341,12 +349,18 @@ int main(void) {
         printf("%s", "Enter ticker list: ");
         fflush(stdout);
         fgets(ticker_string, 128, stdin);
+        
         ticker_strlen = strlen(ticker_string) - 1;
+        if (!ticker_strlen) {
+            printf("Got empty ticker string....\n");
+            continue;
+        }
+        
         strncpy(ticker_string_strip, ticker_string, ticker_strlen);
         for (register int i = 0; i < ticker_strlen; ++i) {
             ticker_string_strip[i] = toupper(ticker_string_strip[i]);
         }
-
+        
         clock_gettime(CLOCK_MONOTONIC, &start);
         process_tickers(ticker_string_strip, timestamps, curl);
         clock_gettime(CLOCK_MONOTONIC, &end);
