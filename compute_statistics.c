@@ -52,7 +52,7 @@ int compare_changes_tuples(const void *a, const void *b) {
 static void get_timestamps(char timestamps[][12]) {
     memset(timestamps[0], 0, 12);
     memset(timestamps[1], 0, 12);
-    time_t now = time(NULL);
+    const time_t now = time(NULL);
     struct tm *now_tm = localtime(&now);
     now_tm->tm_sec = 0;
     now_tm->tm_min = 0;
