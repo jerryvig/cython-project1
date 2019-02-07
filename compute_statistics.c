@@ -57,9 +57,9 @@ static void get_timestamps(char timestamps[][12]) {
     now_tm->tm_sec = 0;
     now_tm->tm_min = 0;
     now_tm->tm_hour = 0;
-    time_t today_time = mktime(now_tm);
-    time_t manana = today_time + 86400;
-    time_t ago_366_days = today_time - 31622400;
+    const time_t today_time = mktime(now_tm);
+    const time_t manana = today_time + 86400;
+    const time_t ago_366_days = today_time - 31622400;
     sprintf(timestamps[0], "%ld", manana);
     sprintf(timestamps[1], "%ld", ago_366_days);
 }
@@ -97,7 +97,6 @@ static int get_title(const char *response_text, char *title) {
 }
 
 static int get_adj_close_and_changes(char *response_text, double *changes) {
-    int j;
     int i = 0;
     double adj_close;
     double last_adj_close;
@@ -139,7 +138,7 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
 }
 
 void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
-    int i;
+    register int i;
     double changes_minus_one[changes_length - 2];
     double changes_0[changes_length - 2];
     changes_tuple changes_tuples[changes_length - 2];
@@ -163,7 +162,7 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     double product_up;
     double product_down;
 
-    for (i=0; i<20; ++i) {
+    for (i = 0; i < 20; ++i) {
         product_up = changes_tuples[i].change_0 * changes_tuples[i].change_plus_one;
         product_down = changes_tuples[changes_length - 22 + i].change_0 * changes_tuples[changes_length - 22 + i].change_plus_one;
 
@@ -349,7 +348,7 @@ int main(void) {
         fgets(ticker_string, 128, stdin);
         ticker_strlen = strlen(ticker_string) - 1;
         strncpy(ticker_string_strip, ticker_string, ticker_strlen);
-        for (int i = 0; i < ticker_strlen; ++i) {
+        for (register int i = 0; i < ticker_strlen; ++i) {
             ticker_string_strip[i] = toupper(ticker_string_strip[i]);
         }
 
