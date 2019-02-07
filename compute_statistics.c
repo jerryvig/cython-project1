@@ -64,7 +64,7 @@ static void get_timestamps(char timestamps[][12]) {
     sprintf(timestamps[1], "%ld", ago_366_days);
 }
 
-int get_crumb(const char *response_text, char *crumb) {
+static int get_crumb(const char *response_text, char *crumb) {
     const char *crumbstore = strstr(response_text, "CrumbStore");
     const char *colon_quote = strstr(crumbstore, ":\"");
     const char *end_quote = strstr(&colon_quote[2], "\"");
@@ -83,7 +83,7 @@ int get_crumb(const char *response_text, char *crumb) {
     return 0;
 }
 
-int get_title(const char *response_text, char *title) {
+static int get_title(const char *response_text, char *title) {
     const char* title_start = strstr(response_text, "<title>");
     const char* pipe_start = strstr(title_start, "|");
     const char* hyphen_end = strstr(&pipe_start[2], "-");
