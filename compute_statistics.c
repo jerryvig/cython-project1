@@ -152,7 +152,7 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
         changes_tuples[i].change_plus_one = changes_daily[i+1];
     }
 
-    double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
+    const double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
     qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples);
 
     int pct_sum_10_up = 0;
