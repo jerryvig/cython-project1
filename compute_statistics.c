@@ -89,11 +89,11 @@ static int get_title(const char *response_text, char *title) {
     const char* hyphen_end = strstr(&pipe_start[2], "-");
     size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end);
     if (diff < 128) {
-    	strncpy(title, &pipe_start[2], diff);
-    	return 0;
+        strncpy(title, &pipe_start[2], diff);
+        return 0;
     }
     printf("Failed to parse the title from the response.\n");
-	return 1;
+    return 1;
 }
 
 static int get_adj_close_and_changes(char *response_text, double *changes) {
@@ -108,19 +108,19 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
 
     char *token = strtok(response_text, "\n");
     while (token) {
-    	if (i) {
-    		memset(line, 0, 512);
-    		memset(adj_close_str, 0, 128);
-    		strcpy(line, token);
+        if (i) {
+            memset(line, 0, 512);
+            memset(adj_close_str, 0, 128);
+            strcpy(line, token);
 
-    		cols = strstr(&line[1], ",");
-    		for (j = 0; j < 4; ++j) {
+            cols = strstr(&line[1], ",");
+            for (j = 0; j < 4; ++j) {
                 cols = strstr(&cols[1], ",");
-    		}
-    		last_column = strstr(&cols[1], ",");
+            }
+            last_column = strstr(&cols[1], ",");
             strncpy(adj_close_str, &cols[1], strlen(&cols[1]) - strlen(last_column));
             if (strcmp(adj_close_str, "null") == 0) {
-            	return 0;
+                return 0;
             }
 
             adj_close = atof(adj_close_str);
@@ -128,11 +128,11 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
                 changes[i-2] = (adj_close - last_adj_close)/last_adj_close;
             }
             last_adj_close = adj_close;
-    	}
-    	token = strtok(NULL, "\n");
-    	i++;
+        }
+        token = strtok(NULL, "\n");
+        i++;
     }
-	return i - 2;
+    return i - 2;
 }
 
 void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
