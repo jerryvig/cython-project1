@@ -285,10 +285,8 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     printf("===============================\n");
     printf("  \"avg_move_10_down\": %s\n", sign_diff_values.avg_move_10_down);
     printf("  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_up);
-    printf("  \"title\": \"%s\"\n", sign_diff_values.title);
-    printf("  \"change\": %s\n", sign_diff_values.change);
-    printf("  \"record_count\": %s\n", sign_diff_values.record_count);
-    printf("  \"self_correlation\": %s\n", sign_diff_values.self_correlation);
+    printf("  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values.title, sign_diff_values.change);
+    printf("  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values.record_count, sign_diff_values.self_correlation);
     printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values.sigma, sign_diff_values.sigma_change);
     printf("  \"sign_diff_pct_10_down\": %s\n", sign_diff_values.sign_diff_pct_10_down);
     printf("  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_up);
