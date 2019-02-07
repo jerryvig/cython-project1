@@ -136,15 +136,14 @@ int get_adj_close_and_changes(char *response_text, double *changes) {
 }
 
 void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
-	printf("IN compute_sign_diff_pct() \n");
-
+    int i;
     double changes_minus_one[changes_length - 2];
     double changes_0[changes_length - 2];
     changes_tuple changes_tuples[changes_length - 2];
     double np_avg_10_up[10];
     double np_avg_10_down[10];
 
-    for (int i=0; i<changes_length - 2; ++i) {
+    for (i=0; i<changes_length - 2; ++i) {
         changes_minus_one[i] = changes_daily[i];
         changes_0[i] = changes_daily[i+1];
         changes_tuples[i].change_0 = changes_daily[i];
@@ -160,6 +159,30 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     int pct_sum_20_down = 0;
     double product_up;
     double product_down;
+
+    for (i=0; i<20; ++i) {
+        product_up = changes_tuples[i].change_0 * changes_tuples[i].change_plus_one;
+        product_down = changes_tuples[changes_length - 22 + i].change_0 * changes_tuples[changes_length - 22 + i].change_plus_one;
+
+        if (i < 10) {
+            np_avg_10_up[i] = changes_tuples[i].change_plus_one;
+            np_avg_10_down[i] = changes_tuples[changes_length - 12 + i].change_plus_one;
+        }
+
+        if (product_up < 0) {
+            pct_sum_20_up++;
+            if (i < 10) {
+                pct_sum_10_up++;
+            }
+        }
+
+        if (product_down < 0) {
+            pct_sum_20_down++;
+            if (i > 9) {
+                pct_sum_10_down++;
+            }
+        }
+    }
 }
 
 void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
