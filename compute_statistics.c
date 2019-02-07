@@ -114,9 +114,12 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
             strcpy(line, token);
 
             cols = strstr(&line[1], ",");
-            for (j = 0; j < 4; ++j) {
-                cols = strstr(&cols[1], ",");
-            }
+
+            cols = strstr(&cols[1], ",");
+            cols = strstr(&cols[1], ",");
+            cols = strstr(&cols[1], ",");
+            cols = strstr(&cols[1], ",");
+            
             last_column = strstr(&cols[1], ",");
             strncpy(adj_close_str, &cols[1], strlen(&cols[1]) - strlen(last_column));
             if (strcmp(adj_close_str, "null") == 0) {
