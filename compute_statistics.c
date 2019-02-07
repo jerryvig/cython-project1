@@ -49,7 +49,7 @@ int compare_changes_tuples(const void *a, const void *b) {
     return 0;
 }
 
-void get_timestamps(char timestamps[][12]) {
+static void get_timestamps(char timestamps[][12]) {
     memset(timestamps[0], 0, 12);
     memset(timestamps[1], 0, 12);
     time_t now = time(NULL);
@@ -68,9 +68,9 @@ int get_crumb(const char *response_text, char *crumb) {
     const char *crumbstore = strstr(response_text, "CrumbStore");
     const char *colon_quote = strstr(crumbstore, ":\"");
     const char *end_quote = strstr(&colon_quote[2], "\"");
-    strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote));
     char crumbclean[128];
     memset(crumbclean, 0, 128);
+    strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote));
     const char *twofpos = strstr(crumb, "\\u002F");
 
     if (twofpos) {
@@ -80,7 +80,7 @@ int get_crumb(const char *response_text, char *crumb) {
         memset(crumb, 0, 128);
         strcpy(crumb, crumbclean);
     }
-	return 0;
+    return 0;
 }
 
 int get_title(const char *response_text, char *title) {
@@ -114,7 +114,7 @@ int get_adj_close_and_changes(char *response_text, double *changes) {
     		strcpy(line, token);
 
     		cols = strstr(&line[1], ",");
-    		for (j=0; j<4; ++j) {
+    		for (j = 0; j < 4; ++j) {
                 cols = strstr(&cols[1], ",");
     		}
     		last_column = strstr(&cols[1], ",");
@@ -143,7 +143,7 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     double np_avg_10_up[10];
     double np_avg_10_down[10];
 
-    for (i=0; i<changes_length - 2; ++i) {
+    for (i = 0; i < changes_length - 2; ++i) {
         changes_minus_one[i] = changes_daily[i];
         changes_0[i] = changes_daily[i+1];
         changes_tuples[i].change_0 = changes_daily[i];
@@ -346,7 +346,7 @@ int main(void) {
         fgets(ticker_string, 128, stdin);
         ticker_strlen = strlen(ticker_string) - 1;
         strncpy(ticker_string_strip, ticker_string, ticker_strlen);
-        for (int i=0; i<ticker_strlen; ++i) {
+        for (int i = 0; i < ticker_strlen; ++i) {
             ticker_string_strip[i] = toupper(ticker_string_strip[i]);
         }
 
