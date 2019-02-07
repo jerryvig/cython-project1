@@ -66,6 +66,10 @@ static void get_timestamps(char timestamps[][12]) {
 
 static int get_crumb(const char *response_text, char *crumb) {
     const char *crumbstore = strstr(response_text, "CrumbStore");
+    if (crumbstore == NULL) {
+        puts("Failed to find crumbstore....");
+        return 1;
+    }
     const char *colon_quote = strstr(crumbstore, ":\"");
     const char *end_quote = strstr(&colon_quote[2], "\"");
     char crumbclean[128];
@@ -216,15 +220,13 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
 }
 
 void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
-    printf("in process ticker\n");
-
     struct timespec start;
     struct timespec end;
 
     char url[128];
     memset(url, 0, 128);
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
-    printf("url = %s\n", url);
+    // printf("url = %s\n", url);
 
     CURLcode response;
     Memory memoria;
@@ -234,11 +236,7 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
-    printf("about to do curl_easy_perform\n");
-
     response = curl_easy_perform(curl);
-
-    printf("completed curl_easy_perf\n");
 
     if (response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
@@ -300,9 +298,6 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 
 static void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
     char *ticker = strsep(&ticker_string, " ");
-
-    printf("completed strsep\n");
-
     while (ticker != NULL) {
         process_ticker(ticker, timestamps, curl);
         ticker = strsep(&ticker_string, " ");
