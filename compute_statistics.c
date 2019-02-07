@@ -36,6 +36,19 @@ typedef struct {
     char title[128];
 } sign_diff_pct;
 
+int compare_changes_tuples(const void *a, const void *b) {
+    changes_tuple a_val = ((const changes_tuple*)a)[0];
+    changes_tuple b_val = ((const changes_tuple*)b)[0];
+
+    if (a_val.change_0 < b_val.change_0) {
+        return 1;
+    }
+    if (a_val.change_0 > b_val.change_0) {
+        return -1;
+    }
+    return 0;
+}
+
 void get_timestamps(char timestamps[][12]) {
     memset(timestamps[0], 0, 12);
     memset(timestamps[1], 0, 12);
@@ -139,6 +152,14 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     }
 
     double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
+    qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples);
+
+    int pct_sum_10_up = 0;
+    int pct_sum_10_down = 0;
+    int pct_sum_20_up = 0;
+    int pct_sum_20_down = 0;
+    double product_up;
+    double product_down;
 }
 
 void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
