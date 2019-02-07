@@ -220,7 +220,7 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     char url[128];
     memset(url, 0, 128);
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
-	// printf("url = %s\n", url);
+    // printf("url = %s\n", url);
 
     CURLcode response;
     Memory memoria;
@@ -233,7 +233,7 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     response = curl_easy_perform(curl);
 
     if (response != CURLE_OK) {
-    	printf("curl_easy_perform() failed.....\n");
+        printf("curl_easy_perform() failed.....\n");
     }
 
     char crumb[128];
@@ -244,13 +244,13 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 
     int crumb_failure = get_crumb(memoria.memory, crumb);
     if (crumb_failure) {
-    	printf("Failed to get crumb...\n");
-    	return;
+        printf("Failed to get crumb...\n");
+        return;
     }
 
     int title_failure = get_title(memoria.memory, sign_diff_values.title);
     if (title_failure) {
-    	return;
+        return;
     }
 
     char download_url[256];
@@ -299,11 +299,11 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
     char *ticker = strsep(&ticker_string, " ");
     while (ticker != NULL) {
-    	process_ticker(ticker, timestamps, curl);
-    	ticker = strsep(&ticker_string, " ");
-    	if (ticker != NULL) {
-    		usleep(1500000);
-    	}
+        process_ticker(ticker, timestamps, curl);
+        ticker = strsep(&ticker_string, " ");
+        if (ticker != NULL) {
+            usleep(1500000);
+        }
     }
 }
 
@@ -339,10 +339,10 @@ int main(void) {
     char ticker_string_strip[128];
 
     while (1) {
-    	memset(ticker_string, 0, 128);
-    	memset(ticker_string_strip, 0, 128);
-    	printf("%s", "Enter ticker list: ");
-    	fflush(stdout);
+        memset(ticker_string, 0, 128);
+        memset(ticker_string_strip, 0, 128);
+        printf("%s", "Enter ticker list: ");
+        fflush(stdout);
         fgets(ticker_string, 128, stdin);
         ticker_strlen = strlen(ticker_string) - 1;
         strncpy(ticker_string_strip, ticker_string, ticker_strlen);
