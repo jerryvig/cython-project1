@@ -96,7 +96,7 @@ static int get_title(const char *response_text, char *title) {
 	return 1;
 }
 
-int get_adj_close_and_changes(char *response_text, double *changes) {
+static int get_adj_close_and_changes(char *response_text, double *changes) {
     int j;
     int i = 0;
     double adj_close;
@@ -296,7 +296,7 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     printf("  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_up);
 }
 
-void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
+static void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
     char *ticker = strsep(&ticker_string, " ");
     while (ticker != NULL) {
         process_ticker(ticker, timestamps, curl);
