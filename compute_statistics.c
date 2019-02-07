@@ -87,7 +87,7 @@ static int get_title(const char *response_text, char *title) {
     const char* title_start = strstr(response_text, "<title>");
     const char* pipe_start = strstr(title_start, "|");
     const char* hyphen_end = strstr(&pipe_start[2], "-");
-    size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end);
+    const size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end);
     if (diff < 128) {
         strncpy(title, &pipe_start[2], diff);
         return 0;
@@ -186,11 +186,11 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
         }
     }
 
-    double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10);
-    double stdev_10_up = gsl_stats_sd(np_avg_10_up, 1, 10);
+    const double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10);
+    const double stdev_10_up = gsl_stats_sd(np_avg_10_up, 1, 10);
 
-    double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10);
-    double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10);
+    const double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10);
+    const double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10);
 
     sprintf(sign_diff_values->avg_move_10_up, "%.4f%%", avg_10_up * 100);
     sprintf(sign_diff_values->avg_move_10_down, "%.4f%%", avg_10_down * 100);
@@ -204,8 +204,8 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
 }
 
 static void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
-    double stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1));
-    double sigma_change = changes_daily[changes_length - 1]/stdev;
+    const double stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1));
+    const double sigma_change = changes_daily[changes_length - 1]/stdev;
 
     compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values);
 
@@ -272,7 +272,7 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     }
 
     double changes_daily[512];
-    int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
+    const int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
 
     free(memoria.memory);
 
