@@ -1,3 +1,4 @@
+//Build with: gcc compute_statistics.c -o compute_statistics -O3 -pedantic -lcurl -lgsl -lgslcblas -Wall -Wextra -std=c11
 #define _DEFAULT_SOURCE
 
 #include <ctype.h>
@@ -146,8 +147,7 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     double changes_minus_one[changes_length - 2];
     double changes_0[changes_length - 2];
     changes_tuple changes_tuples[changes_length - 2];
-    double np_avg_10_up[10];
-    double np_avg_10_down[10];
+    
 
     for (i = 0; i < changes_length - 2; ++i) {
         changes_minus_one[i] = changes_daily[i];
@@ -159,6 +159,8 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     const double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
     qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples);
 
+    double np_avg_10_up[10];
+    double np_avg_10_down[10];
     int pct_sum_10_up = 0;
     int pct_sum_10_down = 0;
     int pct_sum_20_up = 0;
