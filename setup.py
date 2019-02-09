@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 EXT_MODULES = [
     Extension("compute_stats",
               sources=["compute_stats.pyx"],
-              libraries=["gsl", "gslcblas", "curl", "pthread"]
+              libraries=["gsl", "gslcblas", "curl"]
               )
 ]
 
