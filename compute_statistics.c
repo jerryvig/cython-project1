@@ -147,7 +147,6 @@ void compute_sign_diff_pct(const double *changes_daily, const int changes_length
     double changes_minus_one[changes_length - 2];
     double changes_0[changes_length - 2];
     changes_tuple changes_tuples[changes_length - 2];
-    
 
     for (i = 0; i < changes_length - 2; ++i) {
         changes_minus_one[i] = changes_daily[i];
@@ -275,6 +274,7 @@ void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 
     if (response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
+        return;
     }
 
     double changes_daily[512];
@@ -310,7 +310,7 @@ static void process_tickers(char *ticker_string, char timestamps[][12], CURL *cu
 }
 
 size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-    size_t rs = size * nmemb;
+    const size_t rs = size * nmemb;
     Memory *mem = (Memory*)userp;
     char *ptr = (char*)realloc(mem->memory, mem->size + rs + 1);
     if (ptr == NULL) {
