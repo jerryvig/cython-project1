@@ -338,11 +338,9 @@ int main(void) {
 
     int ticker_strlen;
     char ticker_string[128];
-    char ticker_string_strip[128];
 
     while (1) {
         memset(ticker_string, 0, 128);
-        memset(ticker_string_strip, 0, 128);
         printf("%s", "Enter ticker list: ");
         fflush(stdout);
         fgets(ticker_string, 128, stdin);
@@ -352,14 +350,14 @@ int main(void) {
             printf("Got empty ticker string....\n");
             continue;
         }
-        
-        strncpy(ticker_string_strip, ticker_string, ticker_strlen);
+
+        ticker_string[ticker_strlen] = NULL;
         for (register int i = 0; i < ticker_strlen; ++i) {
-            ticker_string_strip[i] = toupper(ticker_string_strip[i]);
+            ticker_string[i] = toupper(ticker_string[i]);
         }
         
         clock_gettime(CLOCK_MONOTONIC, &start);
-        process_tickers(ticker_string_strip, timestamps, curl);
+        process_tickers(ticker_string, timestamps, curl);
         clock_gettime(CLOCK_MONOTONIC, &end);
         printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
