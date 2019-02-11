@@ -336,6 +336,7 @@ int main(void) {
     struct timespec start;
     struct timespec end;
 
+    register int i;
     int ticker_strlen;
     char ticker_string[128];
 
@@ -352,7 +353,7 @@ int main(void) {
         }
 
         ticker_string[ticker_strlen] = NULL;
-        for (register int i = 0; i < ticker_strlen; ++i) {
+        for (i = 0; i < ticker_strlen; ++i) {
             ticker_string[i] = toupper(ticker_string[i]);
         }
         
