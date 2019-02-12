@@ -325,6 +325,31 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
+void run(char *ticker_string) {
+    const CURL *curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+
+    char ticker_str[128];
+    memset(ticker_str, 0, 128);
+    int ticker_strlen = strlen(ticker_string);
+    strncpy(ticker_str, ticker_string, ticker_strlen);
+
+    char timestamps[2][12];
+    get_timestamps(timestamps);
+
+    for (register int i = 0; i < ticker_strlen; ++i) {
+        if (ticker_string[i] != '\n') {
+            ticker_str[i] = toupper(ticker_str[i]);
+        } else {
+            ticker_str[i] = NULL;
+        }
+    }
+
+    curl_easy_cleanup(curl);
+}
+
 int main(void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
