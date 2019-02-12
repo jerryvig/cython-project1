@@ -19,7 +19,10 @@ int main (void) {
             printf("query_string = &quot;%s&quot;\n", query_string);
         }
 
-        run_stats("GOOGL");
+        char *ts_string = get_ts();
+
+        printf("ts_string = %s\n", ts_string);
+
         printf("</pre></body></html>\n");
     }
 

@@ -352,6 +352,11 @@ void run_stats(const char *ticker_string) {
     curl_easy_cleanup(curl);
 }
 
+
+char *get_ts(void) {
+    return "timestamp_string_here";
+}
+
 /* int main(void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
