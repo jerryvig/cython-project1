@@ -142,7 +142,7 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
     return i - 2;
 }
 
-void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
+static void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
     register int i;
     double changes_minus_one[changes_length - 2];
     double changes_0[changes_length - 2];
