@@ -251,7 +251,6 @@ static void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
 
     int crumb_failure = get_crumb(memoria.memory, crumb);
     if (crumb_failure) {
-        printf("Failed to get crumb...\n");
         return;
     }
 
@@ -283,6 +282,7 @@ static void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     free(memoria.memory);
 
     if (!changes_length) {
+        printf("Failed to parse adj_close and changes data from response");
         return;
     }
 
@@ -357,12 +357,77 @@ void run_stats(const char *ticker_string) {
     memoria.memory = (char*)malloc(1);
     memoria.size = 0;
 
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
+
+    response = curl_easy_perform(curl);
+
+    if (response != CURLE_OK) {
+        printf("curl_easy_perform() failed.....\n");
+    }
+
+    char crumb[128];
+    memset(crumb, 0, 128);
+
+    sign_diff_pct sign_diff_values;
+    memset(sign_diff_values.title, 0, 128);
+
+    int crumb_failure = get_crumb(memoria.memory, crumb);
+    if (crumb_failure) {
+        return;
+    }
+
+    int title_failure = get_title(memoria.memory, sign_diff_values.title);
+    if (title_failure) {
+        return;
+    }
+
+    char download_url[256];
+    memset(download_url, 0, 256);
+    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
+    printf("download_url = %s\n", download_url);
+
+    free(memoria.memory);
+    memoria.memory = (char*)malloc(1);
+    memoria.size = 0;
+
+    curl_easy_setopt(curl, CURLOPT_URL, download_url);
+    response = curl_easy_perform(curl);
+
+    if (response != CURLE_OK) {
+        printf("curl_easy_perform() failed.....\n");
+        return;
+    }
+
+    double changes_daily[512];
+    const int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
+
+    free(memoria.memory);
+
+    if (!changes_length) {
+        printf("Failed to parse adj_close and changes data from response");
+        return;
+    }
+
+    get_sigma_data(changes_daily, changes_length, &sign_diff_values);
+
+    printf("===============================\n");
+    printf("  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_down, sign_diff_values.avg_move_10_up);
+    printf("  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values.title, sign_diff_values.change);
+    printf("  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values.record_count, sign_diff_values.self_correlation);
+    printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values.sigma, sign_diff_values.sigma_change);
+    printf("  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_down, sign_diff_values.sign_diff_pct_10_up);
+    printf("  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values.sign_diff_pct_20_down, sign_diff_values.sign_diff_pct_20_up);
+    printf("  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_down, sign_diff_values.stdev_10_up);
 
     // END PROCESS TICKERS CODE REFACTOR.
     curl_easy_cleanup(curl);
 }
 
 int main(void) {
+    run_stats("AABA");
+    exit(0);
+
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
