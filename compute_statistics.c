@@ -325,7 +325,7 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
-void run_stats(const char *ticker_string) {
+void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
@@ -369,15 +369,15 @@ void run_stats(const char *ticker_string) {
     char crumb[128];
     memset(crumb, 0, 128);
 
-    sign_diff_pct sign_diff_values;
-    memset(sign_diff_values.title, 0, 128);
+    //sign_diff_pct sign_diff_values;
+    memset(sign_diff_values->title, 0, 128);
 
     int crumb_failure = get_crumb(memoria.memory, crumb);
     if (crumb_failure) {
         return;
     }
 
-    int title_failure = get_title(memoria.memory, sign_diff_values.title);
+    int title_failure = get_title(memoria.memory, sign_diff_values->title);
     if (title_failure) {
         return;
     }
@@ -409,23 +409,26 @@ void run_stats(const char *ticker_string) {
         return;
     }
 
-    get_sigma_data(changes_daily, changes_length, &sign_diff_values);
+    get_sigma_data(changes_daily, changes_length, sign_diff_values);
 
-    printf("===============================\n");
-    printf("  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_down, sign_diff_values.avg_move_10_up);
-    printf("  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values.title, sign_diff_values.change);
-    printf("  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values.record_count, sign_diff_values.self_correlation);
-    printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values.sigma, sign_diff_values.sigma_change);
-    printf("  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_down, sign_diff_values.sign_diff_pct_10_up);
-    printf("  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values.sign_diff_pct_20_down, sign_diff_values.sign_diff_pct_20_up);
-    printf("  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_down, sign_diff_values.stdev_10_up);
+    /* printf("===============================\n");
+    printf("  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values->avg_move_10_down, sign_diff_values->avg_move_10_up);
+    printf("  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values->title, sign_diff_values->change);
+    printf("  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values->record_count, sign_diff_values->self_correlation);
+    printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values->sigma, sign_diff_values->sigma_change);
+    printf("  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values->sign_diff_pct_10_down, sign_diff_values->sign_diff_pct_10_up);
+    printf("  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values->sign_diff_pct_20_down, sign_diff_values->sign_diff_pct_20_up);
+    printf("  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values->stdev_10_down, sign_diff_values->stdev_10_up); */
 
     // END PROCESS TICKERS CODE REFACTOR.
     curl_easy_cleanup(curl);
 }
 
 int main(void) {
-    run_stats("AABA");
+    sign_diff_pct sign_diff_values;
+    run_stats("AABA", &sign_diff_values);
+    printf("===============================\n");
+    printf("  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_down, sign_diff_values.avg_move_10_up);
     exit(0);
 
     const CURL *curl = curl_easy_init();
