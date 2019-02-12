@@ -352,7 +352,7 @@ void run_stats(const char *ticker_string) {
     curl_easy_cleanup(curl);
 }
 
-int main(void) {
+/* int main(void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
@@ -392,4 +392,4 @@ int main(void) {
     curl_easy_cleanup(curl);
     
     return EXIT_SUCCESS;
-}
+} */
