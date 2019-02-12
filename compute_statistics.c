@@ -347,18 +347,19 @@ void run_stats(const char *ticker_string) {
         }
     }
 
-    process_tickers(ticker_str, timestamps, curl);
-
-    curl_easy_cleanup(curl);
-}
-
-
-char *get_ts(char *ticker) {
-    
-    
+    // BEGIN PROCESS TICKERS CODE REFACTOR.
     char url[128];
     memset(url, 0, 128);
-    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
+    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_str, ticker_str);
+
+    CURLcode response;
+    Memory memoria;
+    memoria.memory = (char*)malloc(1);
+    memoria.size = 0;
+
+
+    // END PROCESS TICKERS CODE REFACTOR.
+    curl_easy_cleanup(curl);
 }
 
 int main(void) {
