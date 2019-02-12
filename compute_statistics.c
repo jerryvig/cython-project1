@@ -353,11 +353,15 @@ void run_stats(const char *ticker_string) {
 }
 
 
-char *get_ts(void) {
-    return "timestamp_string_here";
+char *get_ts(char *ticker) {
+    
+    
+    char url[128];
+    memset(url, 0, 128);
+    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
 }
 
-/* int main(void) {
+int main(void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
@@ -397,4 +401,4 @@ char *get_ts(void) {
     curl_easy_cleanup(curl);
     
     return EXIT_SUCCESS;
-} */
+}
