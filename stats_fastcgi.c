@@ -1,6 +1,7 @@
 // Compile with: gcc stats_fastcgi.c -o stats_fastcgi.fcgi -lfcgi -O3 -Wall -Wextra -pedantic -std=c11
 #include <stdlib.h>
 #include <fcgi_stdio.h>
+#include "compute_statistics.h"
 
 int main (void) {
     while (FCGI_Accept() >= 0) {
@@ -10,13 +11,15 @@ int main (void) {
         printf("Status: 200 OK\r\n");
         printf("Content-type: text/html\r\n\r\n");
         printf("<!doctype><html><body><pre>Hola mundo from fastcgi with lighttpd!\n");
-        
+
         if (path_info != NULL) {
             printf("path_info = &quot;%s&quot;\n", path_info);
         }
         if (query_string != NULL) {
             printf("query_string = &quot;%s&quot;\n", query_string);
         }
+
+        run_stats("GOOGL");
         printf("</pre></body></html>\n");
     }
 
