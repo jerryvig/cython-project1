@@ -220,7 +220,7 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
+static void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     struct timespec start;
     struct timespec end;
 
@@ -325,7 +325,7 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
-void run(char *ticker_string) {
+static void run(const char *ticker_string) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
@@ -346,6 +346,8 @@ void run(char *ticker_string) {
             ticker_str[i] = NULL;
         }
     }
+
+    process_tickers(ticker_str, timestamps, curl);
 
     curl_easy_cleanup(curl);
 }
