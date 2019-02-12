@@ -282,7 +282,7 @@ static void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
     free(memoria.memory);
 
     if (!changes_length) {
-        printf("Failed to parse adj_close and changes data from response");
+        printf("Failed to parse adj_close and changes data from response.\n");
         return;
     }
 
@@ -405,7 +405,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
     free(memoria.memory);
 
     if (!changes_length) {
-        printf("Failed to parse adj_close and changes data from response");
+        printf("Failed to parse adj_close and changes data from response.\n");
         return;
     }
 
@@ -425,11 +425,11 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
 }
 
 int main(void) {
-    sign_diff_pct sign_diff_values;
+    /* sign_diff_pct sign_diff_values;
     run_stats("AABA", &sign_diff_values);
     printf("===============================\n");
     printf("  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_down, sign_diff_values.avg_move_10_up);
-    exit(0);
+    exit(0); */
 
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
