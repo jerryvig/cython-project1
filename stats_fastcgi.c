@@ -4,8 +4,6 @@
 #include "compute_statistics.h"
 #include <curl/curl.h>
 
-
-
 int main (void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
