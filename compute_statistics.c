@@ -22,8 +22,8 @@ typedef struct {
 } changes_tuple;
 
 int compare_changes_tuples(const void *a, const void *b) {
-    changes_tuple a_val = ((const changes_tuple*)a)[0];
-    changes_tuple b_val = ((const changes_tuple*)b)[0];
+    const changes_tuple a_val = ((const changes_tuple*)a)[0];
+    const changes_tuple b_val = ((const changes_tuple*)b)[0];
 
     if (a_val.change_0 < b_val.change_0) {
         return 1;
@@ -86,7 +86,7 @@ static int get_title(const char *response_text, char *title) {
 }
 
 static int get_adj_close_and_changes(char *response_text, double *changes) {
-    int i = 0;
+    register int i = 0;
     double adj_close;
     double last_adj_close;
     char line[512];
