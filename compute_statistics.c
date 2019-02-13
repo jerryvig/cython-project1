@@ -412,41 +412,42 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
 }
 
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values) {
-    char temp_str[128];
+    const int temp_strlen = 128;
+    char temp_str[temp_strlen];
     memset(sign_diff_print, 0, 512);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
 
     strcat(sign_diff_print, "===============================\n");
     sprintf(temp_str, "  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values->avg_move_10_down, sign_diff_values->avg_move_10_up);
     strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values->title, sign_diff_values->change);
     strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values->record_count, sign_diff_values->self_correlation);
     strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values->sigma, sign_diff_values->sigma_change);
     strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values->sign_diff_pct_10_down, sign_diff_values->sign_diff_pct_10_up);
     strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values->sign_diff_pct_20_down, sign_diff_values->sign_diff_pct_20_up);
     strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, 128);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values->stdev_10_down, sign_diff_values->stdev_10_up);
     strcat(sign_diff_print, temp_str);
 }
 
-/* int main(void) {
-    sign_diff_pct sign_diff_values;
+int main(void) {
+    /* sign_diff_pct sign_diff_values;
     run_stats("CRM", &sign_diff_values);
 
     char sign_diff_print[512];
     build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
     printf("%s", sign_diff_print);
-    exit(0);
+    exit(0); */
 
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
@@ -487,4 +488,4 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     curl_easy_cleanup(curl);
     
     return EXIT_SUCCESS;
-} */
+}
