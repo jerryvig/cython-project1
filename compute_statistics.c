@@ -220,88 +220,17 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-static void process_ticker(char *ticker, char timestamps[][12], CURL *curl) {
-    struct timespec start;
-    struct timespec end;
-
-    char url[128];
-    memset(url, 0, 128);
-    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker, ticker);
-    // printf("url = %s\n", url);
-
-    CURLcode response;
-    Memory memoria;
-    memoria.memory = (char*)malloc(1);
-    memoria.size = 0;
-
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
-
-    response = curl_easy_perform(curl);
-
-    if (response != CURLE_OK) {
-        printf("curl_easy_perform() failed.....\n");
-    }
-
-    char crumb[128];
-    memset(crumb, 0, 128);
-
-    sign_diff_pct sign_diff_values;
-    memset(sign_diff_values.title, 0, 128);
-
-    int crumb_failure = get_crumb(memoria.memory, crumb);
-    if (crumb_failure) {
-        return;
-    }
-
-    int title_failure = get_title(memoria.memory, sign_diff_values.title);
-    if (title_failure) {
-        return;
-    }
-
-    char download_url[256];
-    memset(download_url, 0, 256);
-    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
-    printf("download_url = %s\n", download_url);
-
-    free(memoria.memory);
-    memoria.memory = (char*)malloc(1);
-    memoria.size = 0;
-
-    curl_easy_setopt(curl, CURLOPT_URL, download_url);
-    response = curl_easy_perform(curl);
-
-    if (response != CURLE_OK) {
-        printf("curl_easy_perform() failed.....\n");
-        return;
-    }
-
-    double changes_daily[512];
-    const int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
-
-    free(memoria.memory);
-
-    if (!changes_length) {
-        printf("Failed to parse adj_close and changes data from response.\n");
-        return;
-    }
-
-    get_sigma_data(changes_daily, changes_length, &sign_diff_values);
-
-    printf("===============================\n");
-    printf("  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values.avg_move_10_down, sign_diff_values.avg_move_10_up);
-    printf("  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values.title, sign_diff_values.change);
-    printf("  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values.record_count, sign_diff_values.self_correlation);
-    printf("  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values.sigma, sign_diff_values.sigma_change);
-    printf("  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values.sign_diff_pct_10_down, sign_diff_values.sign_diff_pct_10_up);
-    printf("  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values.sign_diff_pct_20_down, sign_diff_values.sign_diff_pct_20_up);
-    printf("  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values.stdev_10_down, sign_diff_values.stdev_10_up);
-}
-
-static void process_tickers(char *ticker_string, char timestamps[][12], CURL *curl) {
+static void process_tickers(char *ticker_string, CURL *curl) {
+    char sign_diff_print[512];
     char *ticker = strsep(&ticker_string, " ");
+
     while (ticker != NULL) {
-        process_ticker(ticker, timestamps, curl);
+        sign_diff_pct sign_diff_values;
+        run_stats(ticker, &sign_diff_values, curl);
+        memset(sign_diff_print, 0, 512);
+        build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
+        printf("%s", sign_diff_print);
+
         ticker = strsep(&ticker_string, " ");
         if (ticker != NULL) {
             usleep(1500000);
@@ -330,7 +259,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
 
     char ticker_str[128];
     memset(ticker_str, 0, 128);
-    int ticker_strlen = strlen(ticker_string);
+    register int ticker_strlen = strlen(ticker_string);
     strncpy(ticker_str, ticker_string, ticker_strlen);
 
     char timestamps[2][12];
@@ -436,29 +365,16 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     strcat(sign_diff_print, temp_str);
 }
 
-/* int main(void) {
+int main(void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-    sign_diff_pct sign_diff_values;
-    run_stats("CRM", &sign_diff_values, curl);
 
-    char sign_diff_print[512];
-    build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
-    printf("%s", sign_diff_print);
-    exit(0);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
-
-    char timestamps[2][12];
-    get_timestamps(timestamps);
     struct timespec start;
     struct timespec end;
 
-    register int i;
     int ticker_strlen;
     char ticker_string[128];
-
     while (1) {
         memset(ticker_string, 0, 128);
         printf("%s", "Enter ticker list: ");
@@ -470,18 +386,14 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
             printf("Got empty ticker string....\n");
             continue;
         }
-
         ticker_string[ticker_strlen] = NULL;
-        for (i = 0; i < ticker_strlen; ++i) {
-            ticker_string[i] = toupper(ticker_string[i]);
-        }
-        
+
         clock_gettime(CLOCK_MONOTONIC, &start);
-        process_tickers(ticker_string, timestamps, curl);
+        process_tickers(ticker_string, curl);
         clock_gettime(CLOCK_MONOTONIC, &end);
         printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
+
     curl_easy_cleanup(curl);
-    
     return EXIT_SUCCESS;
-} */
+}
