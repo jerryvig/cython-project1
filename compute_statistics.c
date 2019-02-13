@@ -325,10 +325,7 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
-void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
-    const CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
 
     char ticker_str[128];
@@ -441,17 +438,17 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
 }
 
 int main(void) {
-    /* sign_diff_pct sign_diff_values;
-    run_stats("CRM", &sign_diff_values);
+    const CURL *curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    sign_diff_pct sign_diff_values;
+    run_stats("CRM", &sign_diff_values, curl);
 
     char sign_diff_print[512];
     build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
     printf("%s", sign_diff_print);
-    exit(0); */
+    exit(0);
 
-    const CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
 
     char timestamps[2][12];
