@@ -347,7 +347,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
         }
     }
 
-    // BEGIN PROCESS TICKERS CODE REFACTOR.
     char url[128];
     memset(url, 0, 128);
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_str, ticker_str);
@@ -369,7 +368,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
     char crumb[128];
     memset(crumb, 0, 128);
 
-    //sign_diff_pct sign_diff_values;
     memset(sign_diff_values->title, 0, 128);
 
     int crumb_failure = get_crumb(memoria.memory, crumb);
@@ -410,7 +408,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values) {
     }
 
     get_sigma_data(changes_daily, changes_length, sign_diff_values);
-    // END PROCESS TICKERS CODE REFACTOR.
     curl_easy_cleanup(curl);
 }
 
@@ -442,13 +439,13 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     strcat(sign_diff_print, temp_str);
 }
 
-int main(void) {
+/* int main(void) {
     sign_diff_pct sign_diff_values;
-    run_stats("GOOGL", &sign_diff_values);
+    run_stats("CRM", &sign_diff_values);
 
     char sign_diff_print[512];
     build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
-    printf("sign_diff_print = %s", sign_diff_print);
+    printf("%s", sign_diff_print);
     exit(0);
 
     const CURL *curl = curl_easy_init();
@@ -490,4 +487,4 @@ int main(void) {
     curl_easy_cleanup(curl);
     
     return EXIT_SUCCESS;
-}
+} */

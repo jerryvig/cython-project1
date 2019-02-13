@@ -1,6 +1,6 @@
-// Compile with: gcc stats_fastcgi.c -o stats_fastcgi.fcgi -lfcgi -O3 -Wall -Wextra -pedantic -std=c11
-#include <stdlib.h>
+// Compile with: gcc stats_fastcgi.c compute_statistics.c -o stats_fastcgi.fcgi -lfcgi -lcurl -lgsl -lgslcblas -O3 -Wall -Wextra -pedantic -std=c11
 #include <fcgi_stdio.h>
+#include <stdlib.h>
 #include "compute_statistics.h"
 
 int main (void) {
@@ -19,9 +19,11 @@ int main (void) {
             printf("query_string = &quot;%s&quot;\n", query_string);
         }
 
-        char *ts_string = get_ts();
-
-        printf("ts_string = %s\n", ts_string);
+        sign_diff_pct sign_diff_values;
+        run_stats("FB", &sign_diff_values);
+        char sign_diff_print[512];
+        build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
+        printf("%s", sign_diff_print);
 
         printf("</pre></body></html>\n");
     }
