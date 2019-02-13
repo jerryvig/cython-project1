@@ -405,7 +405,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     }
 
     get_sigma_data(changes_daily, changes_length, sign_diff_values);
-    curl_easy_cleanup(curl);
 }
 
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values) {
@@ -437,7 +436,7 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     strcat(sign_diff_print, temp_str);
 }
 
-int main(void) {
+/* int main(void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
@@ -485,4 +484,4 @@ int main(void) {
     curl_easy_cleanup(curl);
     
     return EXIT_SUCCESS;
-}
+} */

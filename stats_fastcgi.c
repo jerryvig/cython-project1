@@ -2,8 +2,15 @@
 #include <fcgi_stdio.h>
 #include <stdlib.h>
 #include "compute_statistics.h"
+#include <curl/curl.h>
+
+
 
 int main (void) {
+    const CURL *curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+
     while (FCGI_Accept() >= 0) {
         char *query_string = getenv("QUERY_STRING");
         char *path_info = getenv("PATH_INFO");
@@ -11,7 +18,7 @@ int main (void) {
         sign_diff_pct sign_diff_values;
         if (path_info != NULL) {
             if (strlen(path_info) > 1) {
-                run_stats(&path_info[1], &sign_diff_values);
+                run_stats(&path_info[1], &sign_diff_values, curl);
             }
         }
         char sign_diff_print[512];
@@ -19,7 +26,7 @@ int main (void) {
 
         printf("Status: 200 OK\r\n");
         printf("Content-type: text/html\r\n\r\n");
-        printf("<!doctype><html><head></head><body style=\"width: 100%%;\"><div style=\"width: 40%%;margin: 0 auto;\"><pre>Hola mundo from fastcgi with lighttpd!\n");
+        printf("<!doctype html><html><head></head><body style=\"width:100%%;\"><div style=\"width:40%%;margin:0 auto;\"><pre>COMPUTE STATISTICS FastCGI\n");
 
         if (query_string != NULL && strlen(query_string) > 0) {
             printf("query_string = &quot;%s&quot;\n", query_string);
@@ -29,8 +36,9 @@ int main (void) {
             printf("%s", sign_diff_print);
         }
 
-        printf("</pre></div></body></html>\n");
+        printf("</pre></div></body></html>");
     }
 
+    curl_easy_cleanup(curl);
     return EXIT_SUCCESS;
 }

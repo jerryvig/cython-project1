@@ -1,6 +1,8 @@
 #ifndef COMPUTE_STATISTICS_H
 #define COMPUTE_STATISTICS_H
 
+#include <curl/curl.h>
+
 typedef struct {
     char avg_move_10_up[16];
     char avg_move_10_down[16];
@@ -19,6 +21,6 @@ typedef struct {
 } sign_diff_pct;
 
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values);
-void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values);
+void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl);
 
 #endif
