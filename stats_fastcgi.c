@@ -10,7 +10,7 @@ void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_
     memset(sign_diff_json, 0, 512);
     memset(temp_str, 0, temp_strlen);
 
-    sprintf(temp_str, "{\"avg_move_10_down\":\"%s\",", sign_diff_values->avg_move_10_down);
+    sprintf(temp_str, "{\"avg_move_10_down\":\"%s\",", sign_diff_values->avg_move_10_down );
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "\"avg_move_10_up\":\"%s\",", sign_diff_values->avg_move_10_up);
