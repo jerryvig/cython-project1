@@ -348,36 +348,3 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     sprintf(temp_str, "  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values->stdev_10_down, sign_diff_values->stdev_10_up);
     strcat(sign_diff_print, temp_str);
 }
-
-/* int main(void) {
-    const CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-
-    struct timespec start;
-    struct timespec end;
-
-    int ticker_strlen;
-    char ticker_string[128];
-    while (1) {
-        memset(ticker_string, 0, 128);
-        printf("%s", "Enter ticker list: ");
-        fflush(stdout);
-        fgets(ticker_string, 128, stdin);
-        
-        ticker_strlen = strlen(ticker_string) - 1;
-        if (!ticker_strlen) {
-            printf("Got empty ticker string....\n");
-            continue;
-        }
-        ticker_string[ticker_strlen] = NULL;
-
-        clock_gettime(CLOCK_MONOTONIC, &start);
-        process_tickers(ticker_string, curl);
-        clock_gettime(CLOCK_MONOTONIC, &end);
-        printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
-    }
-
-    curl_easy_cleanup(curl);
-    return EXIT_SUCCESS;
-} */
