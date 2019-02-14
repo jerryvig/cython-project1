@@ -1,8 +1,8 @@
 // Compile with: gcc stats_fastcgi.c compute_statistics.c -o stats_fastcgi.fcgi -lfcgi -lcurl -lgsl -lgslcblas -O3 -Wall -Wextra -pedantic -std=c11
 #include <fcgi_stdio.h>
 #include <stdlib.h>
-#include "compute_statistics.h"
 #include <curl/curl.h>
+#include "compute_statistics.h"
 
 int main (void) {
     const CURL *curl = curl_easy_init();
@@ -10,8 +10,8 @@ int main (void) {
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
     while (FCGI_Accept() >= 0) {
-        char *query_string = getenv("QUERY_STRING");
-        char *path_info = getenv("PATH_INFO");
+        const char *query_string = getenv("QUERY_STRING");
+        const char *path_info = getenv("PATH_INFO");
 
         sign_diff_pct sign_diff_values;
         if (path_info != NULL) {
