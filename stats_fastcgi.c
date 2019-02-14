@@ -9,6 +9,9 @@ int main (void) {
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
+    char timestamps[2][12];
+    get_timestamps(timestamps);
+
     while (FCGI_Accept() >= 0) {
         const char *query_string = getenv("QUERY_STRING");
         const char *path_info = getenv("PATH_INFO");
@@ -16,7 +19,7 @@ int main (void) {
         sign_diff_pct sign_diff_values;
         if (path_info != NULL) {
             if (strlen(path_info) > 1) {
-                run_stats(&path_info[1], &sign_diff_values, curl);
+                run_stats(&path_info[1], &sign_diff_values, curl, timestamps);
             }
         }
         char sign_diff_print[512];
