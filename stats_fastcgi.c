@@ -51,25 +51,6 @@ void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_
     memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "\"stdev_10_up\":\"%s\"}", sign_diff_values->stdev_10_up );
     strcat(sign_diff_json, temp_str);
-
-    /*
-    sprintf(temp_str, "  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values->title, sign_diff_values->change);
-    strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values->record_count, sign_diff_values->self_correlation);
-    strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"sigma\": %s\n  \"sigma_change\": %s\n", sign_diff_values->sigma, sign_diff_values->sigma_change);
-    strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"sign_diff_pct_10_down\": %s\n  \"sign_diff_pct_10_up\": %s\n", sign_diff_values->sign_diff_pct_10_down, sign_diff_values->sign_diff_pct_10_up);
-    strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"sign_diff_pct_20_down\": %s\n  \"sign_diff_pct_20_up\": %s\n", sign_diff_values->sign_diff_pct_20_down, sign_diff_values->sign_diff_pct_20_up);
-    strcat(sign_diff_print, temp_str);
-    memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values->stdev_10_down, sign_diff_values->stdev_10_up);
-    strcat(sign_diff_print, temp_str); */
 }
 
 int main (void) {
