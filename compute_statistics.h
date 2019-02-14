@@ -21,6 +21,7 @@ typedef struct {
 } sign_diff_pct;
 
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values);
+void process_tickers(char *ticker_string, CURL *curl);
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl);
 
 #endif
