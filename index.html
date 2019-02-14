@@ -4,41 +4,83 @@
 	<title>FastCGI testing mofo</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<style type="text/css">
-		#jsondiv {
-			width:30%;
+		body {
+			width: 100%;
+		}
+
+		#data-table {
+			display: block;
+			width: 60%;
 			margin:0 auto;
-			word-wrap:break-word;
+		}
+
+		th, td {
+			padding: 6px;
+		}
+
+		.text-cell {
+			text-align: left;
+		}
+
+		.numeric-cell {
+			text-align: right;
 		}
 	</style>
 </head>
-<body style="width:100%;">
-	<table style="width:30%;margin:0 auto;display:block;">
+<body>
+	<table id="data-table">
 		<thead>
 			<tr>
 				<th>Ticker</th>
 				<th>Title</th>
+				<th>Change</th>
+				<th>Record Count</th>
 				<th>Self Correlation</th>
 				<th>Sigma</th>
+				<th>Sigma Change</th>
+				<th>Top 10 Down</th>
+				<th>Top 10 Up</th>
+				<th>Avg Move Top 10 Down</th>
+				<th>Avg Move Top 10 Up</th>
 			</tr>
 		</thead>
 		<tbody>
-			<td id="ticker-cell"></td>
-			<td id="title-cell"></td>
-			<td id="self-correlation-cell"></td>
-			<td id="sigma-cell"></td>
+			<tr>
+				<td id="ticker-cell" class="text-cell"></td>
+				<td id="title-cell" class="text-cell"></td>
+				<td id="change-cell" class="numeric-cell"></td>
+				<td id="record-count-cell" class="numeric-cell"></td>
+				<td id="self-correlation-cell" class="numeric-cell"></td>
+				<td id="sigma-cell" class="numeric-cell"></td>
+				<td id="sigma-change-cell" class="numeric-cell"></td>
+				<td id="ten-down-cell" class="numeric-cell"></td>
+				<td id="ten-up-cell" class="numeric-cell"></td>
+				<td id="avg-mv-ten-down-cell" class="numeric-cell"></td>
+				<td id="avg-mv-ten-up-cell" class="numeric-cell"></td>
+			</tr>
+			<tr>
+				<td colspan="11" style="text-align:center;">
+					Ticker input could go here
+				</td>
 		</tbody>
 	</table>
-	<div id="jsondiv" style="width:30%;margin:0 auto;word-wrap:break-word;"></div>
 </body>
 <script type="text/javascript">
 	const ticker = 'googl';
 	const url = `/compute_statistics/${ticker}`;
 
-	$.get(url, function(data) {
+	$.get(url, function( data ) {
 		$('#title-cell').append( data.title );
 		$('#ticker-cell').append( ticker.toUpperCase() );
+		$('#change-cell').append( data.change );
+		$('#record-count-cell').append( data.record_count );
 		$('#self-correlation-cell').append( data.self_correlation );
 		$('#sigma-cell').append( data.sigma );
+		$('#sigma-change-cell').append( data.sigma_change );
+		$('#ten-down-cell').append( data.sign_diff_pct_10_down );
+		$('#ten-up-cell').append( data.sign_diff_pct_10_up );
+		$('#avg-mv-ten-down-cell').append( data.avg_move_10_down );
+		$('#avg-mv-ten-up-cell').append( data.avg_move_10_up );
 	});
 </script>
 </html>
