@@ -238,8 +238,13 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
+static int curl_write_set = 0;
+
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl) {
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+    if (!curl_write_set) {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+        curl_write_set = 1;
+    }
 
     char ticker_str[128];
     memset(ticker_str, 0, 128);
