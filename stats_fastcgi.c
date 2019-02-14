@@ -22,8 +22,7 @@ int main (void) {
         char sign_diff_print[512];
         build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
 
-        printf("Status: 200 OK\r\n");
-        printf("Content-type: text/html\r\n\r\n");
+        printf("Status: 200 OK\r\nContent-type: text/html\r\n\r\n");
         printf("<!doctype html><html><head></head><body style=\"width:100%%;\"><div style=\"width:40%%;margin:0 auto;\"><pre>COMPUTE STATISTICS FastCGI\n");
 
         if (query_string != NULL && strlen(query_string) > 0) {
