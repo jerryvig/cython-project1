@@ -71,8 +71,7 @@ int main (void) {
                 run_stats(&path_info[1], &sign_diff_values, curl, timestamps);
             }
         }
-        
-        //Do the JSON construction here.
+
         char sign_diff_json[512];
         build_sign_diff_print_json(sign_diff_json, &sign_diff_values);
 
