@@ -186,10 +186,10 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     sprintf(sign_diff_values->stdev_10_up, "%.4f%%", stdev_10_up * 100);
     sprintf(sign_diff_values->stdev_10_down, "%.4f%%", stdev_10_down * 100);
     sprintf(sign_diff_values->self_correlation, "%.3f%%", self_correlation * 100);
-    sprintf(sign_diff_values->sign_diff_pct_10_up, "%.1f%%", pct_sum_10_up * 10.0);
-    sprintf(sign_diff_values->sign_diff_pct_10_down, "%.1f%%", pct_sum_10_down * 10.0);
-    sprintf(sign_diff_values->sign_diff_pct_20_up, "%.1f%%", pct_sum_20_up * 5.0);
-    sprintf(sign_diff_values->sign_diff_pct_20_down, "%.1f%%", pct_sum_20_down * 5.0);
+    sprintf(sign_diff_values->sign_diff_pct_10_up, "%.0f%%", pct_sum_10_up * 10.0);
+    sprintf(sign_diff_values->sign_diff_pct_10_down, "%.0f%%", pct_sum_10_down * 10.0);
+    sprintf(sign_diff_values->sign_diff_pct_20_up, "%.0f%%", pct_sum_20_up * 5.0);
+    sprintf(sign_diff_values->sign_diff_pct_20_down, "%.0f%%", pct_sum_20_down * 5.0);
 }
 
 static void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
