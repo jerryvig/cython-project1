@@ -1,0 +1,23 @@
+<!doctype html>
+<head>
+	<title>FastCGI testing mofo</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body style="width:100%;">
+	<table style="width:30%;margin:0 auto;display:block;">
+		<thead>
+			<th>A</th>
+			<th>B</th>
+			<th>D</th>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<div id="jsondiv" style="width:30%;margin:0 auto;word-wrap:break-word;"></div>
+</body>
+<script type="text/javascript">
+	$.get('/compute_statistics/googl', function(data) {
+		$('#jsondiv').append(JSON.stringify(data));
+	});
+</script>
+</html>
