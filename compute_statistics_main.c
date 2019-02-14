@@ -11,6 +11,8 @@ int main(void) {
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
+    char timestamps[2][12];
+    get_timestamps(timestamps);
     struct timespec start;
     struct timespec end;
 
@@ -30,7 +32,7 @@ int main(void) {
         ticker_string[ticker_strlen] = NULL;
 
         clock_gettime(CLOCK_MONOTONIC, &start);
-        process_tickers(ticker_string, curl);
+        process_tickers(ticker_string, curl, timestamps);
         clock_gettime(CLOCK_MONOTONIC, &end);
         printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }

@@ -34,7 +34,7 @@ int compare_changes_tuples(const void *a, const void *b) {
     return 0;
 }
 
-static void get_timestamps(char timestamps[][12]) {
+void get_timestamps(char timestamps[][12]) {
     memset(timestamps[0], 0, 12);
     memset(timestamps[1], 0, 12);
     const time_t now = time(NULL);
@@ -204,13 +204,13 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-void process_tickers(char *ticker_string, CURL *curl) {
+void process_tickers(char *ticker_string, CURL *curl, char timestamps[][12]) {
     char sign_diff_print[512];
     char *ticker = strsep(&ticker_string, " ");
 
     while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
-        run_stats(ticker, &sign_diff_values, curl);
+        run_stats(ticker, &sign_diff_values, curl, timestamps);
         memset(sign_diff_print, 0, 512);
         build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
         printf("%s", sign_diff_print);
@@ -240,7 +240,7 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
 
 static int curl_write_set = 0;
 
-void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl) {
+void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl, char timestamps[][12]) {
     if (!curl_write_set) {
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
         curl_write_set = 1;
@@ -250,9 +250,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     memset(ticker_str, 0, 128);
     register int ticker_strlen = strlen(ticker_string);
     strncpy(ticker_str, ticker_string, ticker_strlen);
-
-    char timestamps[2][12];
-    get_timestamps(timestamps);
 
     for (register int i = 0; i < ticker_strlen; ++i) {
         if (ticker_string[i] != '\n') {
