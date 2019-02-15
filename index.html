@@ -76,18 +76,39 @@
 		var url = `/compute_statistics/${ticker}`;
 
 		$.get(url, function( data ) {
-			//You need to clear the contents of each cell.
-			$('#title-cell').append( data.title );
-			$('#ticker-cell').append( ticker.toUpperCase() );
-			$('#change-cell').append( data.change );
-			$('#record-count-cell').append( data.record_count );
-			$('#self-correlation-cell').append( data.self_correlation );
-			$('#sigma-cell').append( data.sigma );
-			$('#sigma-change-cell').append( data.sigma_change );
-			$('#ten-down-cell').append( data.sign_diff_pct_10_down );
-			$('#ten-up-cell').append( data.sign_diff_pct_10_up );
-			$('#avg-mv-ten-down-cell').append( data.avg_move_10_down );
-			$('#avg-mv-ten-up-cell').append( data.avg_move_10_up );
+			$('#ticker-cell')
+				.empty()
+				.append( ticker.toUpperCase() );
+			$('#title-cell')
+				.empty()
+				.append( data.title );
+			$('#change-cell')
+				.empty()
+				.append( data.change );
+			$('#record-count-cell')
+				.empty()
+				.append( data.record_count );
+			$('#self-correlation-cell')
+				.empty()
+				.append( data.self_correlation );
+			$('#sigma-cell')
+				.empty()
+				.append( data.sigma );
+			$('#sigma-change-cell')
+				.empty()
+				.append( data.sigma_change );
+			$('#ten-down-cell')
+				.empty()
+				.append( data.sign_diff_pct_10_down );
+			$('#ten-up-cell')
+				.empty()
+				.append( data.sign_diff_pct_10_up );
+			$('#avg-mv-ten-down-cell')
+				.empty()
+				.append( data.avg_move_10_down );
+			$('#avg-mv-ten-up-cell')
+				.empty()
+				.append( data.avg_move_10_up );
 		});
 	});
 </script>
