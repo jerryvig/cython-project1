@@ -49,7 +49,7 @@
 				<th>Avg Move Top 10 Up</th>
 			</tr>
 		</thead>
-		<tbody>
+		<tbody id="data-table-body">
 			<tr>
 				<td id="ticker-cell" class="text-cell"></td>
 				<td id="title-cell" class="text-cell"></td>
@@ -63,20 +63,43 @@
 				<td id="avg-mv-ten-down-cell" class="numeric-cell"></td>
 				<td id="avg-mv-ten-up-cell" class="numeric-cell"></td>
 			</tr>
+		</tbody>
+		<tfoot>
 			<tr>
 				<td colspan="11">
 					<input id="ticker-input" type="text" placeholder="Enter ticker symbol here"></input>
 				</td>
-		</tbody>
+			</tr>
+		</tfoot>
 	</table>
 </body>
 <script type="text/javascript">
+	function addDataRow(ticker, data) {
+		var template = `<tr> \
+				<td id="ticker-cell" class="text-cell">${ticker.toUpperCase()}</td>\
+				<td id="title-cell" class="text-cell">B</td>\
+				<td id="change-cell" class="numeric-cell">C</td>\
+				<td id="record-count-cell" class="numeric-cell">D</td>\
+				<td id="self-correlation-cell" class="numeric-cell">E</td>\
+				<td id="sigma-cell" class="numeric-cell">F</td>\
+				<td id="sigma-change-cell" class="numeric-cell">G</td>\
+				<td id="ten-down-cell" class="numeric-cell">H</td>\
+				<td id="ten-up-cell" class="numeric-cell">I</td>\
+				<td id="avg-mv-ten-down-cell" class="numeric-cell">J</td>\
+				<td id="avg-mv-ten-up-cell" class="numeric-cell">K</td>\
+			</tr>`;
+		alert('about to append the template');
+		$('#data-table-body').append( template );
+	}
+
 	$('#ticker-input').change(function(evt) {
 		var ticker = $('#ticker-input').val();
 		var url = `/compute_statistics/${ticker}`;
 
 		$.get(url, function( data ) {
-			$('#ticker-cell')
+			addDataRow(ticker, data);
+
+		/*	$('#ticker-cell')
 				.empty()
 				.append( ticker.toUpperCase() );
 			$('#title-cell')
@@ -109,7 +132,8 @@
 			$('#avg-mv-ten-up-cell')
 				.empty()
 				.append( data.avg_move_10_up );
-			$('#ticker-input').val('');
+			*/
+			$('#ticker-input').val(''); 
 		});
 	});
 </script>
