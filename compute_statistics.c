@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <curl/curl.h>
 #include <gsl/gsl_statistics_double.h>
 #include "compute_statistics.h"
@@ -238,6 +239,14 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
+void *curl_thread_proc( void *curl_ptr ) {
+    CURL *curl = (CURL*)curl_ptr;
+    CURLcode response = curl_easy_perform(curl);
+    CURLcode *response_ptr = (CURLcode*)malloc(sizeof(CURLcode));
+    *response_ptr = response;
+    return (void*)response_ptr;
+}
+
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl, char timestamps[][12]) {
     char ticker_str[128];
     memset(ticker_str, 0, 128);
@@ -276,6 +285,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
 
     memset(sign_diff_values->title, 0, 128);
 
+    //We can expedite this by reusing the same crumb if it is set.
     int crumb_failure = get_crumb(memoria.memory, crumb);
     if (crumb_failure) {
         return;
@@ -290,18 +300,24 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     memset(download_url, 0, 256);
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
     printf("download_url = %s\n", download_url);
+    curl_easy_setopt(curl, CURLOPT_URL, download_url);
 
     free(memoria.memory);
     memoria.memory = (char*)malloc(1);
     memoria.size = 0;
 
-    curl_easy_setopt(curl, CURLOPT_URL, download_url);
-    response = curl_easy_perform(curl);
+    pthread_t curl_thread;
+    void *curl_return_value;
 
-    if (response != CURLE_OK) {
+    pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
+    //Asynchronous code here.
+    pthread_join( curl_thread, &curl_return_value );
+
+    CURLcode *curl_response = (CURLcode*)curl_return_value;
+    if (*curl_response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
-        return;
     }
+    free(curl_response);
 
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(memoria.memory, changes_daily);
