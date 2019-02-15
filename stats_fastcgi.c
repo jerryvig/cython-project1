@@ -57,6 +57,7 @@ int main (void) {
     const CURL *curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "br, gzip");
 
     char timestamps[2][12];
     get_timestamps(timestamps);
