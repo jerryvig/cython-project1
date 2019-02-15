@@ -238,14 +238,7 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
-static int curl_write_set = 0;
-
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl, char timestamps[][12]) {
-    if (!curl_write_set) {
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
-        curl_write_set = 1;
-    }
-
     char ticker_str[128];
     memset(ticker_str, 0, 128);
     register int ticker_strlen = strlen(ticker_string);
@@ -327,6 +320,7 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "br, gzip");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
     return curl;
 }
 
