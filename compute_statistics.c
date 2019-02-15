@@ -264,6 +264,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
+    //This should be refactored to a non-blocking call using curl_multi
     response = curl_easy_perform(curl);
 
     if (response != CURLE_OK) {
