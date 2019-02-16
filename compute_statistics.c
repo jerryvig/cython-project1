@@ -269,13 +269,14 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     memoria.size = 0;
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
-    //We don't need to do this first request if the crumb is already set.
+    //We don't need to do this first request if the crumb is already set,
+    //but we need the result to extract the title.
     // if (crumb == NULL) {
     char url[128];
     memset(url, 0, 128);
     sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_str, ticker_str);
     curl_easy_setopt(curl, CURLOPT_URL, url);
-        
+
     //This should be refactored to a non-blocking call using curl_multi
     CURLcode response = curl_easy_perform(curl);
     if (response != CURLE_OK) {
@@ -288,14 +289,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     if (crumb_failure) {
         return;
     }
-
-    /* int title_failure = get_title(memoria.memory, sign_diff_values->title);
-    if (title_failure) {
-        return;
-    } */
-    /* } else {
-        memset(sign_diff_values->title, 0, 128);
-    } */
+    //} END if (crumb == NULL)
 
     char download_url[256];
     memset(download_url, 0, 256);
@@ -303,7 +297,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     printf("download_url = %s\n", download_url);
     curl_easy_setopt(curl, CURLOPT_URL, download_url);
 
-    //free(memoria.memory);
     Memory dl_memoria;
     dl_memoria.memory = (char*)malloc(1);
     dl_memoria.size = 0;
@@ -313,12 +306,13 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     void *curl_return_value;
 
     pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
-    // do title here.
+    
     int title_failure = get_title(memoria.memory, sign_diff_values->title);
     if (title_failure) {
         return;
     }
     free(memoria.memory);
+
     pthread_join( curl_thread, &curl_return_value );
 
     CURLcode *curl_response = (CURLcode*)curl_return_value;
