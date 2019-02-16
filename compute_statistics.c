@@ -128,6 +128,22 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
     return i - 2;
 }
 
+typedef struct {
+    double *data1;
+    size_t stride1;
+    double *data2;
+    size_t stride2;
+    size_t n;
+} gsl_correlation_args;
+
+void *gsl_correlation_thread_proc( void *gsl_args ) {
+    gsl_correlation_args *gsl_corr_args = (gsl_correlation_args*)gsl_args;
+    const double sc = gsl_stats_correlation(gsl_corr_args->data1, gsl_corr_args->stride1, gsl_corr_args->data2, gsl_corr_args->stride2, gsl_corr_args->n);
+    double *self_correlation = (double*)malloc(sizeof(double));
+    *self_correlation = sc;
+    return (void*)self_correlation;
+}
+
 static void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
     register int i;
     double changes_minus_one[changes_length - 2];
@@ -141,8 +157,32 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
         changes_tuples[i].change_plus_one = changes_daily[i+1];
     }
 
-    const double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
+    struct timespec start;
+    struct timespec end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    pthread_t gsl_thread;
+
+    gsl_correlation_args gsl_corr_args;
+    gsl_corr_args.data1 = changes_minus_one;
+    gsl_corr_args.stride1 = 1;
+    gsl_corr_args.data2 = changes_0;
+    gsl_corr_args.stride2 = 1;
+    gsl_corr_args.n = changes_length - 2;
+    void *sc;
+
+    pthread_create( &gsl_thread, NULL, gsl_correlation_thread_proc, (void*)&gsl_corr_args );
+    //printf("self_corr returned by thread proc = %.5f\n", *self_corr);
+
+    //const double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
+    // maybe consider running this on a separate thread as well to see how performance is impacted.
     qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples);
+
+    pthread_join( gsl_thread, &sc );
+    const double *self_corr = (double*)sc;
+    const double self_correlation = *self_corr;
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    printf("self_correlation and qsort proc'ed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
 
     double np_avg_10_up[10];
     double np_avg_10_down[10];
@@ -177,6 +217,7 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
         }
     }
 
+    //This could be threadable, but must determine if that makes any speed improvement.
     const double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10);
     const double stdev_10_up = gsl_stats_sd(np_avg_10_up, 1, 10);
 
@@ -270,7 +311,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
     //We don't need to do this first request if the crumb is already set,
-    //but we need the result to extract the title.
+    //but we need the http response html to extract the title.
     // if (crumb == NULL) {
     char url[128];
     memset(url, 0, 128);
