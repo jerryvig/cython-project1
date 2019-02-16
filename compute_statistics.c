@@ -74,6 +74,7 @@ static int get_crumb(const char *response_text, char *crumb) {
 }
 
 static int get_title(const char *response_text, char *title) {
+    memset(title, 0, 128);
     const char* title_start = strstr(response_text, "<title>");
     const char* pipe_start = strstr(title_start, "|");
     const char* hyphen_end = strstr(&pipe_start[2], "-");
@@ -247,6 +248,8 @@ void *curl_thread_proc( void *curl_ptr ) {
     return (void*)response_ptr;
 }
 
+static char *crumb;
+
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl, char timestamps[][12]) {
     char ticker_str[128];
     memset(ticker_str, 0, 128);
@@ -261,39 +264,37 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
         }
     }
 
-    char url[128];
-    memset(url, 0, 128);
-    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_str, ticker_str);
-
-    CURLcode response;
     Memory memoria;
     memoria.memory = (char*)malloc(1);
     memoria.size = 0;
-
-    curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
-    //This should be refactored to a non-blocking call using curl_multi
-    response = curl_easy_perform(curl);
+    //We don't need to do this first request if the crumb is already set.
+    if (crumb == NULL) {
+        char url[128];
+        memset(url, 0, 128);
+        sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_str, ticker_str);
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        
+        //This should be refactored to a non-blocking call using curl_multi
+        CURLcode response = curl_easy_perform(curl);
+        if (response != CURLE_OK) {
+            printf("curl_easy_perform() failed.....\n");
+        }
+    
+        crumb = (char*)malloc(128 * sizeof(char));
+        memset(crumb, 0, 128);
+        int crumb_failure = get_crumb(memoria.memory, crumb);
+        if (crumb_failure) {
+            return;
+        }
 
-    if (response != CURLE_OK) {
-        printf("curl_easy_perform() failed.....\n");
-    }
-
-    char crumb[128];
-    memset(crumb, 0, 128);
-
-    memset(sign_diff_values->title, 0, 128);
-
-    //We can expedite this by reusing the same crumb if it is set.
-    int crumb_failure = get_crumb(memoria.memory, crumb);
-    if (crumb_failure) {
-        return;
-    }
-
-    int title_failure = get_title(memoria.memory, sign_diff_values->title);
-    if (title_failure) {
-        return;
+        int title_failure = get_title(memoria.memory, sign_diff_values->title);
+        if (title_failure) {
+            return;
+        }
+    } else {
+        memset(sign_diff_values->title, 0, 128);
     }
 
     char download_url[256];
