@@ -327,7 +327,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     // if (crumb == NULL) {
     char url[128];
     memset(url, 0, 128);
-    sprintf(url, "https://finance.yahoo.com/quote/%s/history?p=%s", ticker_str, ticker_str);
+    sprintf(url, "https://finance.yahoo.com/quote/%s/history", ticker_str);
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     //This should be refactored to a non-blocking call using curl_multi
@@ -335,7 +335,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     if (response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
     }
-    
+
     crumb = (char*)malloc(128 * sizeof(char));
     memset(crumb, 0, 128);
     int crumb_failure = get_crumb(memoria.memory, crumb);
