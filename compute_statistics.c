@@ -192,8 +192,8 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     pthread_join( gsl_thread, &sc );
     pthread_join( qsort_thread, NULL );
 
-    const double *self_corr = (double*)sc;
-    const double self_correlation = *self_corr;
+    //const double *self_corr = ;
+    const double self_correlation = *((double*)sc);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
     printf("self_correlation and qsort proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
