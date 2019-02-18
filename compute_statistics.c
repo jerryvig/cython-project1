@@ -89,14 +89,14 @@ static int get_title(const char *response_text, char *title) {
 
 static int get_adj_close_and_changes(char *response_text, double *changes) {
     register int i = 0;
-    double adj_close;
-    double last_adj_close;
+    register double adj_close;
+    register double last_adj_close;
     char line[512];
     char *cols;
     char adj_close_str[128];
-    char *last_column;
+    register char *last_column;
 
-    char *token = strtok(response_text, "\n");
+    register char *token = strtok(response_text, "\n");
     while (token) {
         if (i) {
             memset(line, 0, 512);
@@ -168,9 +168,9 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
         changes_tuples[i].change_plus_one = changes_daily[i+1];
     }
 
-    struct timespec start;
-    struct timespec end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    //struct timespec start;
+    //struct timespec end;
+    //clock_gettime(CLOCK_MONOTONIC, &start);
     
     pthread_t gsl_thread;
     gsl_correlation_args gsl_corr_args;
@@ -194,8 +194,8 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
 
     const double self_correlation = *((double*)sc);
 
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    printf("self_correlation and qsort proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
+    //clock_gettime(CLOCK_MONOTONIC, &end);
+    //printf("self_correlation and qsort proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
 
     double np_avg_10_up[10];
     double np_avg_10_down[10];
@@ -230,7 +230,6 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
         }
     }
 
-    //This could be threadable, but must determine if that makes any speed improvement.
     const double avg_10_up = gsl_stats_mean(np_avg_10_up, 1, 10);
     const double stdev_10_up = gsl_stats_sd(np_avg_10_up, 1, 10);
 
