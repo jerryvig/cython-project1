@@ -144,6 +144,17 @@ void *gsl_correlation_thread_proc( void *gsl_args ) {
     return (void*)self_correlation;
 }
 
+typedef struct {
+    changes_tuple *changes_tuples;
+    size_t count;
+} qsort_proc_args;
+
+void *qsort_thread_proc( void *args ) {
+    qsort_proc_args *qsort_args = (qsort_proc_args*)args;
+    changes_tuple *changes_tuples = qsort_args->changes_tuples;
+    qsort(changes_tuples, qsort_args->count, sizeof(changes_tuple), compare_changes_tuples);
+}
+
 static void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
     register int i;
     double changes_minus_one[changes_length - 2];
@@ -160,8 +171,8 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     struct timespec start;
     struct timespec end;
     clock_gettime(CLOCK_MONOTONIC, &start);
+    
     pthread_t gsl_thread;
-
     gsl_correlation_args gsl_corr_args;
     gsl_corr_args.data1 = changes_minus_one;
     gsl_corr_args.stride1 = 1;
@@ -170,19 +181,22 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     gsl_corr_args.n = changes_length - 2;
     void *sc;
 
+    pthread_t qsort_thread;
+    qsort_proc_args qsort_args;
+    qsort_args.changes_tuples = changes_tuples;
+    qsort_args.count = changes_length - 2;
+
+    pthread_create( &qsort_thread, NULL, qsort_thread_proc, (void*)&qsort_args );
     pthread_create( &gsl_thread, NULL, gsl_correlation_thread_proc, (void*)&gsl_corr_args );
-    //printf("self_corr returned by thread proc = %.5f\n", *self_corr);
-
-    //const double self_correlation = gsl_stats_correlation(changes_minus_one, 1, changes_0, 1, changes_length - 2);
-    // maybe consider running this on a separate thread as well to see how performance is impacted.
-    qsort(changes_tuples, changes_length - 2, sizeof(changes_tuple), compare_changes_tuples);
-
+   
     pthread_join( gsl_thread, &sc );
+    pthread_join( qsort_thread, NULL );
+
     const double *self_corr = (double*)sc;
     const double self_correlation = *self_corr;
 
     clock_gettime(CLOCK_MONOTONIC, &end);
-    printf("self_correlation and qsort proc'ed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
+    printf("self_correlation and qsort proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
 
     double np_avg_10_up[10];
     double np_avg_10_down[10];
