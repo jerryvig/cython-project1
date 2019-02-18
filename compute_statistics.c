@@ -192,7 +192,6 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     pthread_join( gsl_thread, &sc );
     pthread_join( qsort_thread, NULL );
 
-    //const double *self_corr = ;
     const double self_correlation = *((double*)sc);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
