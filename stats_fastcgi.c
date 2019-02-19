@@ -19,6 +19,9 @@ void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_
     sprintf(temp_str, "\"title\":\"%s\",", sign_diff_values->title );
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
+    sprintf(temp_str, "\"resp_ticker\":\"%s\",", sign_diff_values->response_ticker );
+    strcat(sign_diff_json, temp_str);
+    memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "\"change\":\"%s\",", sign_diff_values->change );
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
