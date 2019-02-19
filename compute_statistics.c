@@ -293,6 +293,18 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     return rs;
 }
 
+static size_t header_callback(char *buffer, size_t size, size_t nitems, void *userdata) {
+    char *prefix = "content-disposition";
+    if (strncmp(prefix, buffer, strlen(prefix)) == 0) {
+        char *filename = strstr(buffer, "filename=");
+        char *period = strstr(&filename[9], ".");
+        char *ticker = (char*)userdata;
+        memset(ticker, 0, 8);
+        strncpy(ticker, &filename[9], strlen(&filename[9]) - strlen(period));
+    }
+    return nitems * size;
+}
+
 void *curl_thread_proc( void *curl_ptr ) {
     CURL *curl = (CURL*)curl_ptr;
     CURLcode response = curl_easy_perform(curl);
@@ -336,13 +348,14 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
         printf("curl_easy_perform() failed.....\n");
     }
 
-    crumb = (char*)malloc(128 * sizeof(char));
-    memset(crumb, 0, 128);
-    int crumb_failure = get_crumb(memoria.memory, crumb);
-    if (crumb_failure) {
-        return;
-    }
-    //} END if (crumb == NULL)
+    if (crumb == NULL) {
+        crumb = (char*)malloc(128 * sizeof(char));
+        memset(crumb, 0, 128);
+        int crumb_failure = get_crumb(memoria.memory, crumb);
+        if (crumb_failure) {
+            return;
+        }
+    } // END if (crumb == NULL)
 
     char download_url[256];
     memset(download_url, 0, 256);
@@ -353,7 +366,10 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     Memory dl_memoria;
     dl_memoria.memory = (char*)malloc(1);
     dl_memoria.size = 0;
+    char response_ticker[8];
+
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&dl_memoria);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, (char*)&response_ticker[0]);
 
     pthread_t curl_thread;
     void *curl_return_value;
@@ -373,6 +389,8 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
         printf("curl_easy_perform() failed.....\n");
     }
     free(curl_response);
+
+    printf("response_ticker = %s\n", response_ticker);
 
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
@@ -396,6 +414,7 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 180L);
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_callback);
     return curl;
 }
 
