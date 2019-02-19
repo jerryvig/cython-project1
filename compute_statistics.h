@@ -18,6 +18,7 @@ typedef struct {
     char sign_diff_pct_10_down[16];
     char sign_diff_pct_20_down[16];
     char title[128];
+    char response_ticker[8];
 } sign_diff_pct;
 
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values);

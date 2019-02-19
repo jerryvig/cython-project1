@@ -393,7 +393,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     }
     free(curl_response);
 
-    printf("response_ticker = %s\n", response_ticker);
+    strcpy(sign_diff_values->response_ticker, response_ticker);
 
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
@@ -432,6 +432,9 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values->title, sign_diff_values->change);
+    strcat(sign_diff_print, temp_str);
+    memset(temp_str, 0, temp_strlen);
+    sprintf(temp_str, "  \"resp_ticker\": \"%s\"\n", sign_diff_values->response_ticker);
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values->record_count, sign_diff_values->self_correlation);
