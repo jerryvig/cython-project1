@@ -54,10 +54,7 @@ void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_
 }
 
 int main (void) {
-    const CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "br, gzip");
+    const CURL *curl = create_and_init_curl();
 
     char timestamps[2][12];
     get_timestamps(timestamps);
