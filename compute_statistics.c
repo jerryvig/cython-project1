@@ -277,7 +277,7 @@ void process_tickers(char *ticker_string, CURL *curl, char timestamps[][12]) {
     }
 }
 
-size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
+static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     const size_t rs = size * nmemb;
     Memory *mem = (Memory*)userp;
     char *ptr = (char*)realloc(mem->memory, mem->size + rs + 1);
