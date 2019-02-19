@@ -329,14 +329,14 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
         }
     }
 
-    Memory memoria;
-    memoria.memory = (char*)malloc(1);
-    memoria.size = 0;
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
-
     //We don't need to do this first request if the crumb is already set,
     //but we need the http response html to extract the title.
     if (crumb == NULL) {
+        Memory memoria;
+        memoria.memory = (char*)malloc(1);
+        memoria.size = 0;
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
+
         char url[128];
         memset(url, 0, 128);
         sprintf(url, "https://finance.yahoo.com/quote/%s/history", ticker_str);
@@ -348,15 +348,21 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
             printf("curl_easy_perform() failed.....\n");
         }
 
-        if (crumb == NULL) {
-            crumb = (char*)malloc(128 * sizeof(char));
-            memset(crumb, 0, 128);
-            int crumb_failure = get_crumb(memoria.memory, crumb);
-            if (crumb_failure) {
-                return;
-            }
-        } // END if (crumb == NULL)
-    }
+        crumb = (char*)malloc(128 * sizeof(char));
+        memset(crumb, 0, 128);
+        int crumb_failure = get_crumb(memoria.memory, crumb);
+        if (crumb_failure) {
+            return;
+        }
+
+        int title_failure = get_title(memoria.memory, sign_diff_values->title);
+        if (title_failure) {
+            return;
+        }
+        free(memoria.memory);
+    } else {
+        strcpy(sign_diff_values->title, "N/A");
+    } //end if (crumb == NULL)
 
     char download_url[256];
     memset(download_url, 0, 256);
@@ -377,12 +383,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
 
     pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
 
-    // We need to skip the title if we skipped the crumb.
-    //int title_failure = get_title(memoria.memory, sign_diff_values->title);
-    //if (title_failure) {
-    //    return;
-    //}
-    free(memoria.memory);
+
 
     pthread_join( curl_thread, &curl_return_value );
 
