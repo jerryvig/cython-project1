@@ -78,23 +78,6 @@ int main (void) {
 
         printf("Status: 200 OK\r\nContent-type: application/json\r\n\r\n");
         printf("%s", sign_diff_json);
-
-        /* 
-        char sign_diff_print[512];
-        build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
-
-        printf("Status: 200 OK\r\nContent-type: text/html\r\n\r\n");
-        printf("<!doctype html><html><head></head><body style=\"width:100%%;\"><div style=\"width:40%%;margin:0 auto;\"><pre>COMPUTE STATISTICS FastCGI\n");
-
-        if (query_string != NULL && strlen(query_string) > 0) {
-            printf("query_string = &quot;%s&quot;\n", query_string);
-        }
-
-        if (path_info != NULL) {
-            printf("%s", sign_diff_print);
-        }
-
-        printf("</pre></div></body></html>"); */
     }
 
     curl_easy_cleanup(curl);
