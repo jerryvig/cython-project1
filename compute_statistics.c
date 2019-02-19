@@ -336,26 +336,27 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
 
     //We don't need to do this first request if the crumb is already set,
     //but we need the http response html to extract the title.
-    // if (crumb == NULL) {
-    char url[128];
-    memset(url, 0, 128);
-    sprintf(url, "https://finance.yahoo.com/quote/%s/history", ticker_str);
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-
-    //This should be refactored to a non-blocking call using curl_multi
-    CURLcode response = curl_easy_perform(curl);
-    if (response != CURLE_OK) {
-        printf("curl_easy_perform() failed.....\n");
-    }
-
     if (crumb == NULL) {
-        crumb = (char*)malloc(128 * sizeof(char));
-        memset(crumb, 0, 128);
-        int crumb_failure = get_crumb(memoria.memory, crumb);
-        if (crumb_failure) {
-            return;
+        char url[128];
+        memset(url, 0, 128);
+        sprintf(url, "https://finance.yahoo.com/quote/%s/history", ticker_str);
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+
+        //This should be refactored to a non-blocking call using curl_multi
+        CURLcode response = curl_easy_perform(curl);
+        if (response != CURLE_OK) {
+            printf("curl_easy_perform() failed.....\n");
         }
-    } // END if (crumb == NULL)
+
+        if (crumb == NULL) {
+            crumb = (char*)malloc(128 * sizeof(char));
+            memset(crumb, 0, 128);
+            int crumb_failure = get_crumb(memoria.memory, crumb);
+            if (crumb_failure) {
+                return;
+            }
+        } // END if (crumb == NULL)
+    }
 
     char download_url[256];
     memset(download_url, 0, 256);
@@ -375,11 +376,12 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     void *curl_return_value;
 
     pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
-    
-    int title_failure = get_title(memoria.memory, sign_diff_values->title);
-    if (title_failure) {
-        return;
-    }
+
+    // We need to skip the title if we skipped the crumb.
+    //int title_failure = get_title(memoria.memory, sign_diff_values->title);
+    //if (title_failure) {
+    //    return;
+    //}
     free(memoria.memory);
 
     pthread_join( curl_thread, &curl_return_value );
