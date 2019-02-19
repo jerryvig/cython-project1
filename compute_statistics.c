@@ -373,10 +373,9 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     Memory dl_memoria;
     dl_memoria.memory = (char*)malloc(1);
     dl_memoria.size = 0;
-    char response_ticker[8];
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&dl_memoria);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)&response_ticker[0]);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)&(sign_diff_values->response_ticker[0]));
 
     pthread_t curl_thread;
     void *curl_return_value;
@@ -392,8 +391,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
         printf("curl_easy_perform() failed.....\n");
     }
     free(curl_response);
-
-    strcpy(sign_diff_values->response_ticker, response_ticker);
 
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
