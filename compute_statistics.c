@@ -431,10 +431,10 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     sprintf(temp_str, "  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values->avg_move_10_down, sign_diff_values->avg_move_10_up);
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"title\": \"%s\"\n  \"change\": %s\n", sign_diff_values->title, sign_diff_values->change);
+    sprintf(temp_str, "  \"title\": \"%s\"\n  \"resp_ticker\": %s\n", sign_diff_values->title, sign_diff_values->response_ticker);
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "  \"resp_ticker\": \"%s\"\n", sign_diff_values->response_ticker);
+    sprintf(temp_str, "  \"change\": \"%s\"\n", sign_diff_values->change);
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, temp_strlen);
     sprintf(temp_str, "  \"record_count\": %s\n  \"self_correlation\": %s\n", sign_diff_values->record_count, sign_diff_values->self_correlation);
