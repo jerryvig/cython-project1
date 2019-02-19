@@ -391,7 +391,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     if (*curl_response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
     }
-    free(curl_response);
+    free(curl_return_value);
 
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
