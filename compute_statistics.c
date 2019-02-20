@@ -134,14 +134,13 @@ typedef struct {
     double *data2;
     size_t stride2;
     size_t n;
+    double *self_correlation;
 } gsl_correlation_args;
 
 void *gsl_correlation_thread_proc( void *gsl_args ) {
     gsl_correlation_args *gsl_corr_args = (gsl_correlation_args*)gsl_args;
     const double sc = gsl_stats_correlation(gsl_corr_args->data1, gsl_corr_args->stride1, gsl_corr_args->data2, gsl_corr_args->stride2, gsl_corr_args->n);
-    double *self_correlation = (double*)malloc(sizeof(double));
-    *self_correlation = sc;
-    return (void*)self_correlation;
+    *(gsl_corr_args->self_correlation) = sc;
 }
 
 typedef struct {
@@ -173,13 +172,14 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     //clock_gettime(CLOCK_MONOTONIC, &start);
     
     pthread_t gsl_thread;
+    double self_correlation;
     gsl_correlation_args gsl_corr_args;
     gsl_corr_args.data1 = changes_minus_one;
     gsl_corr_args.stride1 = 1;
     gsl_corr_args.data2 = changes_0;
     gsl_corr_args.stride2 = 1;
     gsl_corr_args.n = changes_length - 2;
-    void *sc;
+    gsl_corr_args.self_correlation = &self_correlation;
 
     pthread_t qsort_thread;
     qsort_proc_args qsort_args;
@@ -189,11 +189,8 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     pthread_create( &qsort_thread, NULL, qsort_thread_proc, (void*)&qsort_args );
     pthread_create( &gsl_thread, NULL, gsl_correlation_thread_proc, (void*)&gsl_corr_args );
    
-    pthread_join( gsl_thread, &sc );
+    pthread_join( gsl_thread, NULL );
     pthread_join( qsort_thread, NULL );
-
-    const double self_correlation = *((double*)sc);
-    free(sc);
 
     //clock_gettime(CLOCK_MONOTONIC, &end);
     //printf("self_correlation and qsort proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
@@ -368,7 +365,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     char download_url[256];
     memset(download_url, 0, 256);
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
-    printf("download_url = %s\n", download_url);
+    printf("url = %s\n", download_url);
     curl_easy_setopt(curl, CURLOPT_URL, download_url);
 
     // struct timespec start;
