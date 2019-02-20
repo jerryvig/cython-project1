@@ -371,6 +371,10 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     printf("download_url = %s\n", download_url);
     curl_easy_setopt(curl, CURLOPT_URL, download_url);
 
+    // struct timespec start;
+    // struct timespec end;
+    // clock_gettime(CLOCK_MONOTONIC, &start);
+
     Memory dl_memoria;
     dl_memoria.memory = (char*)malloc(1);
     dl_memoria.size = 0;
@@ -378,20 +382,25 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&dl_memoria);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)&(sign_diff_values->response_ticker[0]));
 
-    pthread_t curl_thread;
-    void *curl_return_value;
+    //pthread_t curl_thread;
+    //void *curl_return_value;
 
-    pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
+    //pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
 
     //Any asynchronous tasks would be implemented here.
 
-    pthread_join( curl_thread, &curl_return_value );
+    //pthread_join( curl_thread, &curl_return_value );
 
-    CURLcode *curl_response = (CURLcode*)curl_return_value;
-    if (*curl_response != CURLE_OK) {
+    CURLcode curl_response = curl_easy_perform(curl);
+
+    //CURLcode *curl_response = (CURLcode*)curl_return_value;
+    if (curl_response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
     }
-    free(curl_return_value);
+    //free(curl_return_value);
+
+    // clock_gettime(CLOCK_MONOTONIC, &end);
+    // printf("curl_thread proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
 
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);

@@ -32,7 +32,7 @@ int main(void) {
         clock_gettime(CLOCK_MONOTONIC, &start);
         process_tickers(ticker_string, curl, timestamps);
         clock_gettime(CLOCK_MONOTONIC, &end);
-        printf("processed in %.5f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
+        printf("processed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
 
     curl_easy_cleanup(curl);
