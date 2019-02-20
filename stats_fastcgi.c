@@ -4,7 +4,7 @@
 #include <curl/curl.h>
 #include "compute_statistics.h"
 
-void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_values) {
+static void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_values) {
     const int temp_strlen = 128;
     char temp_str[temp_strlen];
     memset(sign_diff_json, 0, 512);

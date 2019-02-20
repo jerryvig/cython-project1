@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>FastCGI testing mofo</title>
+	<title>FastCGI testing</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<style type="text/css">
 		body {
@@ -76,19 +76,18 @@
 <script type="text/javascript">
 	function addDataRow(ticker, data) {
 		var template = `<tr> \
-				<td id="ticker-cell" class="text-cell">${ticker.toUpperCase()}</td>\
-				<td id="title-cell" class="text-cell">B</td>\
-				<td id="change-cell" class="numeric-cell">C</td>\
-				<td id="record-count-cell" class="numeric-cell">D</td>\
-				<td id="self-correlation-cell" class="numeric-cell">E</td>\
-				<td id="sigma-cell" class="numeric-cell">F</td>\
-				<td id="sigma-change-cell" class="numeric-cell">G</td>\
-				<td id="ten-down-cell" class="numeric-cell">H</td>\
-				<td id="ten-up-cell" class="numeric-cell">I</td>\
-				<td id="avg-mv-ten-down-cell" class="numeric-cell">J</td>\
-				<td id="avg-mv-ten-up-cell" class="numeric-cell">K</td>\
+				<td id="ticker-cell" class="text-cell">${data.resp_ticker}</td>\
+				<td id="title-cell" class="text-cell">${data.title}</td>\
+				<td id="change-cell" class="numeric-cell">${data.change}</td>\
+				<td id="record-count-cell" class="numeric-cell">${data.record_count}</td>\
+				<td id="self-correlation-cell" class="numeric-cell">${data.self_correlation}</td>\
+				<td id="sigma-cell" class="numeric-cell">${data.sigma}</td>\
+				<td id="sigma-change-cell" class="numeric-cell">${data.sigma_change}</td>\
+				<td id="ten-down-cell" class="numeric-cell">${data.sign_diff_pct_10_down}</td>\
+				<td id="ten-up-cell" class="numeric-cell">${data.sign_diff_pct_10_up}</td>\
+				<td id="avg-mv-ten-down-cell" class="numeric-cell">${data.avg_move_10_down}</td>\
+				<td id="avg-mv-ten-up-cell" class="numeric-cell">${data.avg_move_10_up}</td>\
 			</tr>`;
-		// alert('about to append the template');
 		$('#data-table-body').append( template );
 	}
 
@@ -96,7 +95,7 @@
 		var ticker = $('#ticker-input').val();
 		var url = `/compute_statistics/${ticker}`;
 
-		$.get(url, function( data ) {
+		$.get(url, function(data) {
 			addDataRow(ticker, data);
 
 		/*	$('#ticker-cell')
