@@ -28,6 +28,7 @@
 
 		.remove-cell {
 			text-align: center;
+			font-weight: bold;
 		}
 
 		#ticker-input {
@@ -67,7 +68,7 @@
 <script type="text/javascript">
 	var rowIndex = 0;	
 
-	function addDataRow(ticker, data) {
+	const addDataRow = (ticker, data) => {
 		var nextDataRow = `<tr id="row-${rowIndex}">\
 				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
 				<td class="text-cell">${data.resp_ticker}</td>\
@@ -89,13 +90,13 @@
 			$('#' + closeId).parent().remove();
 		});
 		rowIndex++;
-	}
+	};
 
-	$('#ticker-input').change(function(evt) {
+	$('#ticker-input').change((evt) => {
 		var ticker = $('#ticker-input').val();
 		var url = `/compute_statistics/${ticker}`;
 
-		$.get(url, function(data) {
+		$.get(url, (data) => {
 			addDataRow(ticker, data);
 
 			$('#ticker-input').val(''); 
