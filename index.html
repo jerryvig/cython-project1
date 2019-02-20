@@ -26,6 +26,10 @@
 			text-align: right;
 		}
 
+		.remove-cell {
+			text-align: center;
+		}
+
 		#ticker-input {
 			display: block;
 			margin: 0 auto;
@@ -36,6 +40,7 @@
 	<table id="data-table">
 		<thead>
 			<tr>
+				<th>Remove Row</th>
 				<th>Ticker</th>
 				<th>Title</th>
 				<th>Change</th>
@@ -49,24 +54,10 @@
 				<th>Avg Move Top 10 Up</th>
 			</tr>
 		</thead>
-		<tbody id="data-table-body">
-			<tr>
-				<td id="ticker-cell" class="text-cell"></td>
-				<td id="title-cell" class="text-cell"></td>
-				<td id="change-cell" class="numeric-cell"></td>
-				<td id="record-count-cell" class="numeric-cell"></td>
-				<td id="self-correlation-cell" class="numeric-cell"></td>
-				<td id="sigma-cell" class="numeric-cell"></td>
-				<td id="sigma-change-cell" class="numeric-cell"></td>
-				<td id="ten-down-cell" class="numeric-cell"></td>
-				<td id="ten-up-cell" class="numeric-cell"></td>
-				<td id="avg-mv-ten-down-cell" class="numeric-cell"></td>
-				<td id="avg-mv-ten-up-cell" class="numeric-cell"></td>
-			</tr>
-		</tbody>
+		<tbody id="data-table-body"></tbody>
 		<tfoot>
 			<tr>
-				<td colspan="11">
+				<td colspan="12">
 					<input id="ticker-input" type="text" placeholder="Enter ticker symbol here"></input>
 				</td>
 			</tr>
@@ -74,21 +65,29 @@
 	</table>
 </body>
 <script type="text/javascript">
+	var rowIndex = 0;	
+
 	function addDataRow(ticker, data) {
-		var template = `<tr> \
-				<td id="ticker-cell" class="text-cell">${data.resp_ticker}</td>\
-				<td id="title-cell" class="text-cell">${data.title}</td>\
-				<td id="change-cell" class="numeric-cell">${data.change}</td>\
-				<td id="record-count-cell" class="numeric-cell">${data.record_count}</td>\
-				<td id="self-correlation-cell" class="numeric-cell">${data.self_correlation}</td>\
-				<td id="sigma-cell" class="numeric-cell">${data.sigma}</td>\
-				<td id="sigma-change-cell" class="numeric-cell">${data.sigma_change}</td>\
-				<td id="ten-down-cell" class="numeric-cell">${data.sign_diff_pct_10_down}</td>\
-				<td id="ten-up-cell" class="numeric-cell">${data.sign_diff_pct_10_up}</td>\
-				<td id="avg-mv-ten-down-cell" class="numeric-cell">${data.avg_move_10_down}</td>\
-				<td id="avg-mv-ten-up-cell" class="numeric-cell">${data.avg_move_10_up}</td>\
+		var nextDataRow = `<tr id=row-${rowIndex}>\
+				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
+				<td class="text-cell">${data.resp_ticker}</td>\
+				<td class="text-cell">${data.title}</td>\
+				<td class="numeric-cell">${data.change}</td>\
+				<td class="numeric-cell">${data.record_count}</td>\
+				<td class="numeric-cell">${data.self_correlation}</td>\
+				<td class="numeric-cell">${data.sigma}</td>\
+				<td class="numeric-cell">${data.sigma_change}</td>\
+				<td class="numeric-cell">${data.sign_diff_pct_10_down}</td>\
+				<td class="numeric-cell">${data.sign_diff_pct_10_up}</td>\
+				<td class="numeric-cell">${data.avg_move_10_down}</td>\
+				<td class="numeric-cell">${data.avg_move_10_up}</td>\
 			</tr>`;
-		$('#data-table-body').append( template );
+		var closeId = `close-row-${rowIndex}`;
+		$('#' + closeId).click(function() {
+			alert('you clicked the close icon cell');
+		});
+		$('#data-table-body').append( nextDataRow );
+		rowIndex++;
 	}
 
 	$('#ticker-input').change(function(evt) {
@@ -98,40 +97,6 @@
 		$.get(url, function(data) {
 			addDataRow(ticker, data);
 
-		/*	$('#ticker-cell')
-				.empty()
-				.append( ticker.toUpperCase() );
-			$('#title-cell')
-				.empty()
-				.append( data.title );
-			$('#change-cell')
-				.empty()
-				.append( data.change );
-			$('#record-count-cell')
-				.empty()
-				.append( data.record_count );
-			$('#self-correlation-cell')
-				.empty()
-				.append( data.self_correlation );
-			$('#sigma-cell')
-				.empty()
-				.append( data.sigma );
-			$('#sigma-change-cell')
-				.empty()
-				.append( data.sigma_change );
-			$('#ten-down-cell')
-				.empty()
-				.append( data.sign_diff_pct_10_down );
-			$('#ten-up-cell')
-				.empty()
-				.append( data.sign_diff_pct_10_up );
-			$('#avg-mv-ten-down-cell')
-				.empty()
-				.append( data.avg_move_10_down );
-			$('#avg-mv-ten-up-cell')
-				.empty()
-				.append( data.avg_move_10_up );
-			*/
 			$('#ticker-input').val(''); 
 		});
 	});
