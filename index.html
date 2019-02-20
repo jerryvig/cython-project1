@@ -69,7 +69,7 @@
 
 	function addDataRow(ticker, data) {
 		var nextDataRow = `<tr id=row-${rowIndex}>\
-				<td class="remove-cell id="close-row-${rowIndex}">&times;</td>\
+				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
 				<td class="text-cell">${data.resp_ticker}</td>\
 				<td class="text-cell">${data.title}</td>\
 				<td class="numeric-cell">${data.change}</td>\
@@ -88,7 +88,6 @@
 		$('#' + closeId).click(function() {
 			alert('you clicked the close icon cell with id = ' + closeId);
 		});
-		console.log(`the event listener for ${closeId} should be added now`);
 		rowIndex++;
 	}
 
