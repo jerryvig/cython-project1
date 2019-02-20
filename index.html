@@ -69,7 +69,7 @@
 	var rowIndex = 0;	
 
 	const addDataRow = (ticker, data) => {
-		var nextDataRow = `<tr id="row-${rowIndex}">\
+		const nextDataRow = `<tr id="row-${rowIndex}">\
 				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
 				<td class="text-cell">${data.resp_ticker}</td>\
 				<td class="text-cell">${data.title}</td>\
@@ -85,7 +85,7 @@
 			</tr>`;
 		$('#data-table-body').append( nextDataRow );
 
-		var closeId = `close-row-${rowIndex}`;
+		const closeId = `close-row-${rowIndex}`;
 		$('#' + closeId).click(() => {
 			$('#' + closeId).parent().remove();
 		});
@@ -93,8 +93,8 @@
 	};
 
 	$('#ticker-input').change((evt) => {
-		var ticker = $('#ticker-input').val();
-		var url = `/compute_statistics/${ticker}`;
+		const ticker = $('#ticker-input').val();
+		const url = `/compute_statistics/${ticker}`;
 
 		$.get(url, (data) => {
 			addDataRow(ticker, data);
