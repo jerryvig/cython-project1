@@ -18,6 +18,10 @@
 			padding: 6px;
 		}
 
+		th:hover {
+			background-color: #ADDFFF;
+		}
+
 		.text-cell {
 			text-align: left;
 		}
@@ -66,7 +70,7 @@
 	</table>
 </body>
 <script type="text/javascript">
-	var rowIndex = 0;	
+	let rowIndex = 0;	
 
 	const addDataRow = (ticker, data) => {
 		const nextDataRow = `<tr id="row-${rowIndex}">\
@@ -95,11 +99,9 @@
 	$('#ticker-input').change((evt) => {
 		const ticker = $('#ticker-input').val();
 		const url = `/compute_statistics/${ticker}`;
-
-		$.get(url, (data) => {
+		fetch(url).then(response => response.json()).then((data) => {
 			addDataRow(ticker, data);
-
-			$('#ticker-input').val(''); 
+			$('#ticker-input').val('');
 		});
 	});
 </script>
