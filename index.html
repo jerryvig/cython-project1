@@ -48,15 +48,15 @@
 				<th>Remove Row</th>
 				<th id="ticker-col">Ticker</th>
 				<th id="title-col">Title</th>
-				<th>Change</th>
-				<th>Record Count</th>
+				<th id="change-col">Change</th>
+				<th id="record-count-col">Record Count</th>
 				<th id="self-correlation-col">Self Correlation</th>
-				<th>Sigma</th>
-				<th>Sigma Change</th>
-				<th>Top 10 Down</th>
-				<th>Top 10 Up</th>
-				<th>Avg Move Top 10 Down</th>
-				<th>Avg Move Top 10 Up</th>
+				<th id="sigma-col">Sigma</th>
+				<th id="sigma-change-col">Sigma Change</th>
+				<th id="top-10-down-col">Top 10 Down</th>
+				<th id="top-10-up-col">Top 10 Up</th>
+				<th id="avg-10-down-col">Avg Move Top 10 Down</th>
+				<th id="avg-10-up-col">Avg Move Top 10 Up</th>
 			</tr>
 		</thead>
 		<tbody id="data-table-body"></tbody>
@@ -121,6 +121,18 @@
 
 	document.querySelector('#self-correlation-col').addEventListener('click', (evt) => {
 		// do the sort by self correlation here.
+	});
+
+	document.querySelector('#change-col').addEventListener('click', (evt) => {
+		// do the sort by change here.
+	});
+
+	document.querySelector('#record-count-col').addEventListener('click', (evt) => {
+		// do the sort by record count here.
+	});
+
+	document.querySelector('#sigma-col').addEventListener('click', (evt) => {
+		// do the sort by sigma here.
 	});
 </script>
 </html>
