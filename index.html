@@ -70,9 +70,12 @@
 	</table>
 </body>
 <script type="text/javascript">
-	let rowIndex = 0;	
+	let gridData = []; //grid data effectively serves as the model.
+	let rowIndex = 0;
 
 	const addDataRow = (ticker, data) => {
+		gridData.push(data);
+
 		const nextDataRow = `<tr id="row-${rowIndex}">\
 				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
 				<td class="text-cell">${data.resp_ticker}</td>\
@@ -101,7 +104,7 @@
 		const url = `/compute_statistics/${ticker}`;
 		fetch(url).then(response => response.json()).then((data) => {
 			addDataRow(ticker, data);
-			$('#ticker-input').val('');
+			document.getElementById('ticker-input').value = '';
 		});
 	});
 </script>
