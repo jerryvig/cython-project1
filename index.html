@@ -93,7 +93,8 @@
 		$('#data-table-body').append( nextDataRow );
 
 		const closeId = `close-row-${rowIndex}`;
-		$('#' + closeId).click((evt) => {
+		document.querySelector(`#${closeId}`).addEventListener('click', (evt) => {
+			alert('you made it here mother fucker');
 			let targetId = evt.target.id;
 			let rowIdx = targetId.replace('close-row-', '');
 			delete gridData[rowIdx];
@@ -102,7 +103,7 @@
 		rowIndex++;
 	};
 
-	$('#ticker-input').change((evt) => {
+	document.querySelector('#ticker-input').addEventListener('change', (evt) => {
 		const ticker = evt.target.value;
 		const url = `/compute_statistics/${ticker}`;
 		fetch(url).then(response => response.json()).then((data) => {
