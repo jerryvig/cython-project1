@@ -76,25 +76,24 @@
 	const addDataRow = (ticker, data) => {
 		gridData[rowIndex] = data;
 
-		const nextDataRow = `<tr id="row-${rowIndex}">\
-				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
-				<td class="text-cell">${data.resp_ticker}</td>\
-				<td class="text-cell">${data.title}</td>\
-				<td class="numeric-cell">${data.change}</td>\
-				<td class="numeric-cell">${data.record_count}</td>\
-				<td class="numeric-cell">${data.self_correlation}</td>\
-				<td class="numeric-cell">${data.sigma}</td>\
-				<td class="numeric-cell">${data.sigma_change}</td>\
-				<td class="numeric-cell">${data.sign_diff_pct_10_down}</td>\
-				<td class="numeric-cell">${data.sign_diff_pct_10_up}</td>\
-				<td class="numeric-cell">${data.avg_move_10_down}</td>\
-				<td class="numeric-cell">${data.avg_move_10_up}</td>\
-			</tr>`;
-		$('#data-table-body').append( nextDataRow );
+		const nextTableRow = document.createElement('tr');
+		nextTableRow.id = `row-${rowIndex}`
+		nextTableRow.innerHTML = `<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
+			<td class="text-cell">${data.resp_ticker}</td>\
+			<td class="text-cell">${data.title}</td>\
+			<td class="numeric-cell">${data.change}</td>\
+			<td class="numeric-cell">${data.record_count}</td>\
+			<td class="numeric-cell">${data.self_correlation}</td>\
+			<td class="numeric-cell">${data.sigma}</td>\
+			<td class="numeric-cell">${data.sigma_change}</td>\
+			<td class="numeric-cell">${data.sign_diff_pct_10_down}</td>\
+			<td class="numeric-cell">${data.sign_diff_pct_10_up}</td>\
+			<td class="numeric-cell">${data.avg_move_10_down}</td>\
+			<td class="numeric-cell">${data.avg_move_10_up}</td>`;
+		document.getElementById('data-table-body').appendChild(nextTableRow);
 
 		const closeId = `close-row-${rowIndex}`;
 		document.querySelector(`#${closeId}`).addEventListener('click', (evt) => {
-			alert('you made it here mother fucker');
 			let targetId = evt.target.id;
 			let rowIdx = targetId.replace('close-row-', '');
 			delete gridData[rowIdx];
