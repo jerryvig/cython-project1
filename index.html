@@ -46,11 +46,11 @@
 		<thead>
 			<tr>
 				<th>Remove Row</th>
-				<th>Ticker</th>
-				<th>Title</th>
+				<th id="ticker-col">Ticker</th>
+				<th id="title-col">Title</th>
 				<th>Change</th>
 				<th>Record Count</th>
-				<th>Self Correlation</th>
+				<th id="self-correlation-col">Self Correlation</th>
 				<th>Sigma</th>
 				<th>Sigma Change</th>
 				<th>Top 10 Down</th>
@@ -70,11 +70,11 @@
 	</table>
 </body>
 <script type="text/javascript">
-	let gridData = []; //grid data effectively serves as the model.
+	let gridData = {};
 	let rowIndex = 0;
 
 	const addDataRow = (ticker, data) => {
-		gridData.push(data);
+		gridData[rowIndex] = data;
 
 		const nextDataRow = `<tr id="row-${rowIndex}">\
 				<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
@@ -93,14 +93,17 @@
 		$('#data-table-body').append( nextDataRow );
 
 		const closeId = `close-row-${rowIndex}`;
-		$('#' + closeId).click(() => {
+		$('#' + closeId).click((evt) => {
+			let targetId = evt.target.id;
+			let rowIdx = targetId.replace('close-row-', '');
+			delete gridData[rowIdx];
 			$('#' + closeId).parent().remove();
 		});
 		rowIndex++;
 	};
 
 	$('#ticker-input').change((evt) => {
-		const ticker = $('#ticker-input').val();
+		const ticker = document.getElementById('ticker-input').value;
 		const url = `/compute_statistics/${ticker}`;
 		fetch(url).then(response => response.json()).then((data) => {
 			addDataRow(ticker, data);
