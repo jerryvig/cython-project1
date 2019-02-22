@@ -36,6 +36,10 @@ int stats_uwsgi(struct wsgi_request *req) {
 
             uwsgi_response_prepare_headers_int(req, 200);
             uwsgi_response_add_content_type(req, "application/json", 16);
+            uwsgi_response_add_header(req, "Cache-Control", 13, "no-cache, no-store, must-revalidate", 35);
+            uwsgi_response_add_header(req, "Pragma", 6, "no-cache", 8);
+            uwsgi_response_add_header(req, "Expires", 7, "0", 1);
+
             uwsgi_response_write_body_do(req, sign_diff_json, strlen(sign_diff_json));
         } else {
             const char *failure_json = "{\"status\":\"failed\"}";
