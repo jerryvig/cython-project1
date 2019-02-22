@@ -42,7 +42,7 @@ int stats_uwsgi(struct wsgi_request *req) {
 
             uwsgi_response_write_body_do(req, sign_diff_json, strlen(sign_diff_json));
         } else {
-            const char *failure_json = "{\"status\":\"failed\"}";
+            const char *failure_json = "{\"status\":\"failed\", \"message\": \"No ticker given.\"}";
             uwsgi_response_prepare_headers_int(req, 200);
             uwsgi_response_add_content_type(req, "application/json", 16);
             uwsgi_response_write_body_do(req, failure_json, strlen(failure_json));
