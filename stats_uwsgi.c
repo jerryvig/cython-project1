@@ -17,15 +17,15 @@ int stats_uwsgi(struct wsgi_request *req) {
         return -1;
     }
 
-    char *path_info = req->path_info;
-    char *form_feed = strstr(path_info, "\f");
+    const char *path_info = req->path_info;
+    const char *form_feed = strstr(path_info, "\f");
     char path_buf[128];
     memset(path_buf, 0, 128);
     strncpy(path_buf, path_info, strlen(path_info) - strlen(form_feed));
 
-    char *path_prefix = "/compute_statistics/";
+    const char *path_prefix = "/compute_statistics/";
     if (strncmp(path_prefix, path_buf, strlen(path_prefix)) == 0) {
-        char * comp_stats_path = &path_buf[20];
+        const char * comp_stats_path = &path_buf[20];
 
         if (strlen(comp_stats_path) > 0) {
             sign_diff_pct sign_diff_values;
