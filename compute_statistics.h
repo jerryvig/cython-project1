@@ -21,6 +21,7 @@ typedef struct {
     char response_ticker[8];
 } sign_diff_pct;
 
+void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_values);
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values);
 CURL *create_and_init_curl(void);
 void get_timestamps(char timestamps[][12]);
