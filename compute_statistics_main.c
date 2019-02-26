@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <curl/curl.h>
 #include "compute_statistics.h"
@@ -20,14 +21,16 @@ int main(void) {
         memset(ticker_string, 0, 128);
         printf("%s", "Enter ticker list: ");
         fflush(stdout);
-        fgets(ticker_string, 128, stdin);
-        
+        if (fgets(ticker_string, 128, stdin) == NULL) {
+            continue;
+        }
+
         ticker_strlen = strlen(ticker_string) - 1;
         if (!ticker_strlen) {
             printf("Got empty ticker string....\n");
             continue;
         }
-        ticker_string[ticker_strlen] = NULL;
+        ticker_string[ticker_strlen] = 0;
 
         clock_gettime(CLOCK_MONOTONIC, &start);
         process_tickers(ticker_string, curl, timestamps);
