@@ -1,10 +1,12 @@
-// Compile with: gcc stats_fastcgi.c compute_statistics.c -o stats_fastcgi.fcgi -lfcgi -lcurl -lgsl -lgslcblas -O3 -Wall -Wextra -pedantic -std=c11
+// Compile with: gcc stats_fastcgi.c compute_statistics.c -o
+// stats_fastcgi.fcgi -lfcgi -lcurl -lgsl -lgslcblas -O3 -Wall
+// -Wextra -pedantic -std=c11
 #include <fcgi_stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
 #include "compute_statistics.h"
 
-int main (void) {
+int main(void) {
     const CURL *curl = create_and_init_curl();
 
     char timestamps[2][12];
