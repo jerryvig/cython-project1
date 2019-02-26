@@ -422,6 +422,7 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
     curl_easy_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
     curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_callback);
     return curl;
