@@ -333,12 +333,12 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
         Memory memoria;
         memoria.memory = (char*)malloc(1);
         memoria.size = 0;
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&memoria);
+        curl_easy_setopt((CURL*)curl, CURLOPT_WRITEDATA, (void*)&memoria);
 
         char url[128];
         memset(url, 0, 128);
         sprintf(url, "https://finance.yahoo.com/quote/%s/history", ticker_str);
-        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt((CURL*)curl, CURLOPT_URL, url);
 
         //This should be refactored to a non-blocking call using curl_multi
         CURLcode response = curl_easy_perform(curl);
