@@ -38,6 +38,6 @@ int main(void) {
         printf("processed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
     }
 
-    curl_easy_cleanup(curl);
+    curl_easy_cleanup((CURL*)curl);
     return EXIT_SUCCESS;
 }

@@ -257,7 +257,7 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-void process_tickers(char *ticker_string, CURL *curl, char timestamps[][12]) {
+void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12]) {
     char sign_diff_print[512];
     char *ticker = strsep(&ticker_string, " ");
 
@@ -313,7 +313,7 @@ void *curl_thread_proc( void *curl_ptr ) {
 
 static char *crumb;
 
-void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, CURL *curl, char timestamps[][12]) {
+void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {
     char ticker_str[128];
     memset(ticker_str, 0, 128);
     register int ticker_strlen = strlen(ticker_string);
