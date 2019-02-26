@@ -1,5 +1,5 @@
-#ifndef COMPUTE_STATISTICS_H
-#define COMPUTE_STATISTICS_H
+#ifndef COMPUTE_STATISTICS_H_
+#define COMPUTE_STATISTICS_H_
 
 #include <curl/curl.h>
 
@@ -21,11 +21,15 @@ typedef struct {
     char response_ticker[8];
 } sign_diff_pct;
 
-void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_values);
-void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values);
+void build_sign_diff_print_json(char sign_diff_json[],
+    sign_diff_pct *sign_diff_values);
+void build_sign_diff_print_string(char sign_diff_print[],
+    sign_diff_pct *sign_diff_values);
 const CURL *create_and_init_curl(void);
 void get_timestamps(char timestamps[][12]);
-void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12]);
-void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]);
+void process_tickers(char *ticker_string, const CURL *curl,
+    char timestamps[][12]);
+void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values,
+    const CURL *curl, char timestamps[][12]);
 
-#endif
+#endif  // COMPUTE_STATISTICS_H_
