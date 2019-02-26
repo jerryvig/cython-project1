@@ -469,48 +469,57 @@ void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_
     memset(sign_diff_json, 0, 512);
     memset(temp_str, 0, temp_strlen);
 
-    sprintf(temp_str, "{\"avg_move_10_down\":\"%s\",", sign_diff_values->avg_move_10_down );
+    sprintf(temp_str, "{\"avg_move_10_down\":\"%s\",",
+        sign_diff_values->avg_move_10_down);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"avg_move_10_up\":\"%s\",", sign_diff_values->avg_move_10_up);
+    sprintf(temp_str, "\"avg_move_10_up\":\"%s\",",
+        sign_diff_values->avg_move_10_up);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"title\":\"%s\",", sign_diff_values->title );
+    sprintf(temp_str, "\"title\":\"%s\",", sign_diff_values->title);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"resp_ticker\":\"%s\",", sign_diff_values->response_ticker );
+    sprintf(temp_str, "\"resp_ticker\":\"%s\",",
+        sign_diff_values->response_ticker);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"change\":\"%s\",", sign_diff_values->change );
+    sprintf(temp_str, "\"change\":\"%s\",", sign_diff_values->change);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"record_count\":%s,", sign_diff_values->record_count );
+    sprintf(temp_str, "\"record_count\":%s,", sign_diff_values->record_count);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"self_correlation\":\"%s\",", sign_diff_values->self_correlation );
+    sprintf(temp_str, "\"self_correlation\":\"%s\",",
+        sign_diff_values->self_correlation);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"sigma\":\"%s\",", sign_diff_values->sigma );
+    sprintf(temp_str, "\"sigma\":\"%s\",", sign_diff_values->sigma);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"sigma_change\":%s,", sign_diff_values->sigma_change );
+    sprintf(temp_str, "\"sigma_change\":%s,", sign_diff_values->sigma_change);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"sign_diff_pct_10_down\":\"%s\",", sign_diff_values->sign_diff_pct_10_down );
+    sprintf(temp_str, "\"sign_diff_pct_10_down\":\"%s\",",
+        sign_diff_values->sign_diff_pct_10_down);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"sign_diff_pct_10_up\":\"%s\",", sign_diff_values->sign_diff_pct_10_up );
+    sprintf(temp_str, "\"sign_diff_pct_10_up\":\"%s\",",
+        sign_diff_values->sign_diff_pct_10_up);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"sign_diff_pct_20_down\":\"%s\",", sign_diff_values->sign_diff_pct_20_down );
+    sprintf(temp_str, "\"sign_diff_pct_20_down\":\"%s\",",
+        sign_diff_values->sign_diff_pct_20_down);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"sign_diff_pct_20_up\":\"%s\",", sign_diff_values->sign_diff_pct_20_up );
+    sprintf(temp_str, "\"sign_diff_pct_20_up\":\"%s\",",
+        sign_diff_values->sign_diff_pct_20_up);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"stdev_10_down\":\"%s\",", sign_diff_values->stdev_10_down );
+    sprintf(temp_str, "\"stdev_10_down\":\"%s\",",
+        sign_diff_values->stdev_10_down);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, temp_strlen);
-    sprintf(temp_str, "\"stdev_10_up\":\"%s\"}", sign_diff_values->stdev_10_up );
+    sprintf(temp_str, "\"stdev_10_up\":\"%s\"}", sign_diff_values->stdev_10_up);
     strcat(sign_diff_json, temp_str);
 }
