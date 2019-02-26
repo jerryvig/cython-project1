@@ -36,16 +36,20 @@ int stats_uwsgi(struct wsgi_request *req) {
 
             uwsgi_response_prepare_headers_int(req, 200);
             uwsgi_response_add_content_type(req, "application/json", 16);
-            uwsgi_response_add_header(req, "Cache-Control", 13, "private, no-cache, no-store, max-age=0, must-revalidate", 35);
+            uwsgi_response_add_header(req, "Cache-Control", 13,
+                "private, no-cache, no-store, max-age=0, must-revalidate", 35);
             uwsgi_response_add_header(req, "Pragma", 6, "no-cache", 8);
             uwsgi_response_add_header(req, "Expires", 7, "0", 1);
 
-            uwsgi_response_write_body_do(req, sign_diff_json, strlen(sign_diff_json));
+            uwsgi_response_write_body_do(req, sign_diff_json,
+                strlen(sign_diff_json));
         } else {
-            const char *failure_json = "{\"status\":\"failed\", \"message\": \"No ticker given.\"}";
+            const char *failure_json =
+                "{\"status\":\"failed\", \"message\": \"No ticker given.\"}";
             uwsgi_response_prepare_headers_int(req, 200);
             uwsgi_response_add_content_type(req, "application/json", 16);
-            uwsgi_response_write_body_do(req, failure_json, strlen(failure_json));
+            uwsgi_response_write_body_do(req, failure_json,
+                strlen(failure_json));
         }
     } else {
         uwsgi_response_prepare_headers_int(req, 404);
