@@ -1,4 +1,5 @@
-//Build with: gcc compute_statistics.c -o compute_statistics -O3 -pedantic -lcurl -lgsl -lgslcblas -Wall -Wextra -std=c11
+// Build with: gcc compute_statistics.c -o compute_statistics
+// -O3 -pedantic -lcurl -lgsl -lgslcblas -Wall -Wextra -std=c11
 #define _DEFAULT_SOURCE
 
 #include <ctype.h>
@@ -60,7 +61,8 @@ static int get_crumb(const char *response_text, char *crumb) {
     const char *end_quote = strstr(&colon_quote[2], "\"");
     char crumbclean[128];
     memset(crumbclean, 0, 128);
-    strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) - strlen(end_quote));
+    strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) -
+        strlen(end_quote));
     const char *twofpos = strstr(crumb, "\\u002F");
 
     if (twofpos) {
@@ -109,9 +111,10 @@ static int get_adj_close_and_changes(char *response_text, double *changes) {
             cols = strstr(&cols[1], ",");
             cols = strstr(&cols[1], ",");
             cols = strstr(&cols[1], ",");
-            
+
             last_column = strstr(&cols[1], ",");
-            strncpy(adj_close_str, &cols[1], strlen(&cols[1]) - strlen(last_column));
+            strncpy(adj_close_str, &cols[1], strlen(&cols[1])
+                - strlen(last_column));
             if (strcmp(adj_close_str, "null") == 0) {
                 return 0;
             }
