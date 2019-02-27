@@ -164,6 +164,21 @@
 		updateRows(gridDataArray);
 	};
 
+	let recordCountSortDirection = 1;
+	const sortByRecordCount = () => {
+		let gridDataArray = [];
+		for (const idx in gridData) {
+			gridDataArray.push(gridData[idx]);
+		}
+
+		gridDataArray.sort((a, b) => {
+			return (a - b) * recordCountSortDirection;
+		});
+
+		recordCountSortDirection *= -1;
+		updateRows(gridDataArray);
+	};
+
 	document.querySelector('#ticker-col').addEventListener('click', sortByTicker);
 
 	document.querySelector('#title-col').addEventListener('click', sortByTitle);
@@ -176,9 +191,7 @@
 		// do the sort by change here.
 	});
 
-	document.querySelector('#record-count-col').addEventListener('click', (evt) => {
-		// do the sort by record count here.
-	});
+	document.querySelector('#record-count-col').addEventListener('click', sortByRecordCount);
 
 	document.querySelector('#sigma-col').addEventListener('click', (evt) => {
 		// do the sort by sigma here.
