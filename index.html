@@ -172,10 +172,27 @@
 		}
 
 		gridDataArray.sort((a, b) => {
-			return (a - b) * recordCountSortDirection;
+			return (a.record_count - b.record_count) * recordCountSortDirection;
 		});
 
 		recordCountSortDirection *= -1;
+		updateRows(gridDataArray);
+	};
+
+	let sigmaChangeSortDirection = 1;
+	const sortBySigmaChange = () => {
+		alert('in sortBySigmaChange()');
+
+		let gridDataArray = [];
+		for (const idx in gridData) {
+			gridDataArray.push(gridData[idx]);
+		}
+
+		gridDataArray.sort((a, b) => {
+			return (a.sigma_change - b.sigma_change) * sigmaChangeSortDirection;
+		});
+
+		sigmaChangeSortDirection *= -1;
 		updateRows(gridDataArray);
 	};
 
@@ -197,9 +214,6 @@
 		// do the sort by sigma here.
 	});
 
-	document.querySelector('#sigma-change-col').addEventListener('click', (evt) => {
-		// do the sort by sigma here.
-		alert('you clicked the sigma-change-col');
-	});
+	document.querySelector('#sigma-change-col').addEventListener('click', sortBySigmaChange);
 </script>
 </html>
