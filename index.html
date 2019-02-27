@@ -192,22 +192,38 @@
 		updateRows(gridDataArray);
 	};
 
+	const sortByChange = () => {
+		alert('in sortByChange()');
+	};
+
+	const sortBySigma = () => {
+		alert('in sortBySigma()');
+	};
+
+	const sortByTop10Down = () => {
+		let gridDataArray = Object.values(gridData);
+	};
+
+	const sortByTop10Up = () => {
+		let gridDataArray = Object.values(gridData);
+	};
+
 	document.querySelector('#ticker-col').addEventListener('click', sortByTicker);
 
 	document.querySelector('#title-col').addEventListener('click', sortByTitle);
 
 	document.querySelector('#self-correlation-col').addEventListener('click', sortBySelfCorrelation);
 
-	document.querySelector('#change-col').addEventListener('click', (evt) => {
-		// do the sort by change here.
-	});
+	document.querySelector('#change-col').addEventListener('click', sortByChange);
 
 	document.querySelector('#record-count-col').addEventListener('click', sortByRecordCount);
 
-	document.querySelector('#sigma-col').addEventListener('click', (evt) => {
-		// do the sort by sigma here.
-	});
+	document.querySelector('#sigma-col').addEventListener('click', sortBySigma);
 
 	document.querySelector('#sigma-change-col').addEventListener('click', sortBySigmaChange);
+
+	document.querySelector('#top-10-down-col').addEventListener('click', sortByTop10Down);
+
+	document.querySelector('#top-10-up-col').addEventListener('click', sortByTop10Up);
 </script>
 </html>
