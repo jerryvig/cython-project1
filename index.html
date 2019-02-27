@@ -114,7 +114,6 @@
 	let tickerSortDirection = 1;
 	const sortByTicker = () => {
 		let gridDataArray = [];
-
 		for (const idx in gridData) {
 			gridDataArray.push(gridData[idx]);
 		}
@@ -140,6 +139,25 @@
 			addDataRow(row);
 			rowIndex++;
 		}
+	};
+
+	let titleSortDirection = 1;
+	const sortByTitle = () => {
+		let gridDataArray = [];
+		for (const idx in gridData) {
+			gridDataArray.push(gridData[idx]);
+		}
+
+		gridDataArray.sort((a, b) => {
+			if (a.title > b.title) {
+				return 1 * titleSortDirection;
+			} else if (b.title > a.title) {
+				return -1 * titleSortDirection;
+			} else {
+				return 0;
+			}
+		});
+		titleSortDirection *= -1;
 	};
 
 	document.querySelector('#ticker-col').addEventListener('click', sortByTicker);
