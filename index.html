@@ -200,12 +200,36 @@
 		alert('in sortBySigma()');
 	};
 
+	let top10DownSortDirection = 1;
 	const sortByTop10Down = () => {
 		let gridDataArray = Object.values(gridData);
+		gridDataArray.sort((a, b) => {
+			if (a.sign_diff_pct_10_down > b.sign_diff_pct_10_down) {
+				return 1 * top10DownSortDirection;
+			} else if (b.sign_diff_pct_10_down > a.sign_diff_pct_10_down) {
+				return -1 * top10DownSortDirection;
+			} else {
+				return 0;
+			}
+		});
+		top10DownSortDirection *= -1;
+		updateRows(gridDataArray);
 	};
 
+	let top10UpSortDirection = 1;
 	const sortByTop10Up = () => {
 		let gridDataArray = Object.values(gridData);
+		gridDataArray.sort((a, b) => {
+			if (a.sign_diff_pct_10_up > b.sign_diff_pct_10_up) {
+				return 1 * top10UpSortDirection;
+			} else if (b.sign_diff_pct_10_up > a.sign_diff_pct_10_up) {
+				return -1 * top10UpSortDirection;
+			} else {
+				return 0;
+			}
+		});
+		top10UpSortDirection *= -1;
+		updateRows(gridDataArray);
 	};
 
 	document.querySelector('#ticker-col').addEventListener('click', sortByTicker);
