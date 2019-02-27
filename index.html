@@ -123,11 +123,7 @@
 
 	let tickerSortDirection = 1;
 	const sortByTicker = () => {
-		let gridDataArray = [];
-		for (const idx in gridData) {
-			gridDataArray.push(gridData[idx]);
-		}
-
+		let gridDataArray = Object.values(gridData);
 		gridDataArray.sort((a, b) => {
 			var tickerA = a.resp_ticker;
 			var tickerB = b.resp_ticker;
@@ -146,11 +142,7 @@
 
 	let titleSortDirection = 1;
 	const sortByTitle = () => {
-		let gridDataArray = [];
-		for (const idx in gridData) {
-			gridDataArray.push(gridData[idx]);
-		}
-
+		let gridDataArray = Object.values(gridData);
 		gridDataArray.sort((a, b) => {
 			if (a.title > b.title) {
 				return 1 * titleSortDirection;
@@ -166,39 +158,27 @@
 
 	let recordCountSortDirection = 1;
 	const sortByRecordCount = () => {
-		let gridDataArray = [];
-		for (const idx in gridData) {
-			gridDataArray.push(gridData[idx]);
-		}
-
+		let gridDataArray = Object.values(gridData);
 		gridDataArray.sort((a, b) => {
 			return (a.record_count - b.record_count) * recordCountSortDirection;
 		});
-
 		recordCountSortDirection *= -1;
 		updateRows(gridDataArray);
 	};
 
 	let sigmaChangeSortDirection = 1;
 	const sortBySigmaChange = () => {
-		let gridDataArray = [];
-		for (const idx in gridData) {
-			gridDataArray.push(gridData[idx]);
-		}
-
+		let gridDataArray = Object.values(gridData);
 		gridDataArray.sort((a, b) => {
 			return (a.sigma_change - b.sigma_change) * sigmaChangeSortDirection;
 		});
-
 		sigmaChangeSortDirection *= -1;
 		updateRows(gridDataArray);
 	};
 
 	let selfCorrelationSortDirection = 1;
 	const sortBySelfCorrelation = () => {
-		alert('in sortBySelfCorrelation()');
 		let gridDataArray = Object.values(gridData);
-		
 		gridDataArray.sort((a, b) => {
 			if (a.self_correlation > b.self_correlation) {
 				return 1 * selfCorrelationSortDirection;
@@ -208,7 +188,6 @@
 				return 0;
 			}
 		});
-
 		selfCorrelationSortDirection *= -1;
 		updateRows(gridDataArray);
 	};
