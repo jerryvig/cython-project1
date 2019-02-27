@@ -111,6 +111,16 @@
 		});
 	});
 
+	const updateRows = (gridDataArray) => {
+		gridData = {};
+		rowIndex = 0;
+		$('#data-table-body').empty();
+		for (let row of gridDataArray) {
+			addDataRow(row);
+			rowIndex++;
+		}
+	};
+
 	let tickerSortDirection = 1;
 	const sortByTicker = () => {
 		let gridDataArray = [];
@@ -131,14 +141,7 @@
 			}
 		});
 		tickerSortDirection *= -1;
-
-		gridData = {};
-		rowIndex = 0;
-		$('#data-table-body').empty();
-		for (let row of gridDataArray) {
-			addDataRow(row);
-			rowIndex++;
-		}
+		updateRows(gridDataArray);
 	};
 
 	let titleSortDirection = 1;
@@ -158,14 +161,7 @@
 			}
 		});
 		titleSortDirection *= -1;
-
-		gridData = {};
-		rowIndex = 0;
-		$('#data-table-body').empty();
-		for (let row of gridDataArray) {
-			addDataRow(row);
-			rowIndex++;
-		}
+		updateRows(gridDataArray);
 	};
 
 	document.querySelector('#ticker-col').addEventListener('click', sortByTicker);
