@@ -82,6 +82,9 @@
 		gridData[rowIndex] = data;
 
 		const nextTableRow = document.createElement('tr');
+		if (rowIndex % 2) {
+			nextTableRow.style.backgroundColor = '#ADDFFF';
+		}
 		nextTableRow.id = `row-${rowIndex}`
 		nextTableRow.innerHTML = `<td class="remove-cell" id="close-row-${rowIndex}">&times;</td>\
 			<td class="text-cell">${data.resp_ticker}</td>\
