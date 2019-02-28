@@ -217,9 +217,8 @@
 				return 1 * top10DownSortDirection;
 			} else if (b.sign_diff_pct_10_down > a.sign_diff_pct_10_down) {
 				return -1 * top10DownSortDirection;
-			} else {
-				return 0;
 			}
+			return 0;
 		});
 		top10DownSortDirection *= -1;
 		updateRows(gridDataArray);
@@ -233,9 +232,8 @@
 				return 1 * top10UpSortDirection;
 			} else if (b.sign_diff_pct_10_up > a.sign_diff_pct_10_up) {
 				return -1 * top10UpSortDirection;
-			} else {
-				return 0;
 			}
+			return 0;
 		});
 		top10UpSortDirection *= -1;
 		updateRows(gridDataArray);
