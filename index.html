@@ -125,16 +125,13 @@
 	const sortByTicker = () => {
 		let gridDataArray = Object.values(gridData);
 		gridDataArray.sort((a, b) => {
-			var tickerA = a.resp_ticker;
-			var tickerB = b.resp_ticker;
-
-			if (tickerA > tickerB) {
+			if (a.resp_ticker > b.resp_ticker) {
 				return 1 * tickerSortDirection;
-			} else if (tickerB > tickerA) {
-				return -1 * tickerSortDirection;
-			} else {
-				return 0;
 			}
+			if (b.resp_ticker > a.resp_ticker) {
+				return -1 * tickerSortDirection;
+			}
+			return 0;
 		});
 		tickerSortDirection *= -1;
 		updateRows(gridDataArray);
@@ -146,11 +143,11 @@
 		gridDataArray.sort((a, b) => {
 			if (a.title > b.title) {
 				return 1 * titleSortDirection;
-			} else if (b.title > a.title) {
+			} 
+			if (b.title > a.title) {
 				return -1 * titleSortDirection;
-			} else {
-				return 0;
 			}
+			return 0;
 		});
 		titleSortDirection *= -1;
 		updateRows(gridDataArray);
