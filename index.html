@@ -180,13 +180,9 @@
 	const sortBySelfCorrelation = () => {
 		let gridDataArray = Object.values(gridData);
 		gridDataArray.sort((a, b) => {
-			if (a.self_correlation > b.self_correlation) {
-				return 1 * selfCorrelationSortDirection;
-			} else if (b.self_correlation > a.self_correlation) {
-				return -1 * selfCorrelationSortDirection;
-			} else {
-				return 0;
-			}
+			let a_number = parseFloat(a.self_correlation.replace('%', ''));
+			let b_number = parseFloat(b.self_correlation.replace('%', ''));
+			return (a_number - b_number) * selfCorrelationSortDirection;
 		});
 		selfCorrelationSortDirection *= -1;
 		updateRows(gridDataArray);
