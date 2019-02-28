@@ -117,7 +117,6 @@
 		$('#data-table-body').empty();
 		for (let row of gridDataArray) {
 			addDataRow(row);
-			// rowIndex++;
 		}
 	};
 
@@ -239,12 +238,28 @@
 		updateRows(gridDataArray);
 	};
 
+	let avgMove10DownSortDirection = 1;
 	const sortByAvgMove10Down = () => {
-		alert('in sortByAvgMove10Down()');
-	};	
+		let gridDataArray = Object.values(gridData);
+		gridDataArray.sort((a, b) => {
+			let a_number = parseFloat(a.avg_move_10_down.replace('%', ''));
+			let b_number = parseFloat(b.avg_move_10_down.replace('%', ''));
+			return (a_number - b_number) * avgMove10DownSortDirection;
+		});
+		avgMove10DownSortDirection *= -1;
+		updateRows(gridDataArray);
+	};
 
+	let avgMove10UpSortDirection = 1;
 	const sortByAvgMove10Up = () => {
-		alert('in sortByAvgMove10Up()');
+		let gridDataArray = Object.values(gridData);
+		gridDataArray.sort((a, b) => {
+			let a_number = parseFloat(a.avg_move_10_up.replace('%', ''));
+			let b_number = parseFloat(b.avg_move_10_up.replace('%', ''));
+			return (a_number - b_number) * avgMove10UpSortDirection;
+		});
+		avgMove10UpSortDirection *= -1;
+		updateRows(gridDataArray);
 	};
 
 	document.querySelector('#ticker-col').addEventListener('click', sortByTicker);
