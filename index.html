@@ -192,8 +192,16 @@
 		updateRows(gridDataArray);
 	};
 
+	let changeSortDirection = 1;
 	const sortByChange = () => {
-		alert('in sortByChange()');
+		let gridDataArray = Object.values(gridData);
+		gridDataArray.sort((a, b) => {
+			let a_number = parseFloat(a.change.replace('%', ''));
+			let b_number = parseFloat(b.change.replace('%', ''));
+			return (a_number - b_number) * changeSortDirection;
+		});
+		changeSortDirection *= -1;
+		updateRows(gridDataArray);
 	};
 
 	const sortBySigma = () => {
