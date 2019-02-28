@@ -204,8 +204,16 @@
 		updateRows(gridDataArray);
 	};
 
+	let sigmaSortDirection = 1;
 	const sortBySigma = () => {
-		alert('in sortBySigma()');
+		let gridDataArray = Object.values(gridData);
+		gridDataArray.sort((a, b) => {
+			let a_number = parseFloat(a.sigma.replace('%', ''));
+			let b_number = parseFloat(b.sigma.replace('%', ''));
+			return (a_number - b_number) * sigmaSortDirection;
+		});
+		sigmaSortDirection *= -1;
+		updateRows(gridDataArray);
 	};
 
 	let top10DownSortDirection = 1;
