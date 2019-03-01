@@ -6,6 +6,7 @@
 	<style type="text/css">
 		body {
 			width: 100%;
+			background-color: #dcdcdc;
 		}
 
 		#data-table {
@@ -19,6 +20,10 @@
 		}
 
 		#header-row {
+			background-color: #3bb9ff;
+		}
+
+		#footer-row {
 			background-color: #3bb9ff;
 		}
 
@@ -39,7 +44,7 @@
 		}
 
 		.data-row:hover {
-			background-color: black;
+			box-shadow: 0px 5px 5px grey;
 		}
 
 		.text-cell {
@@ -81,7 +86,7 @@
 		</thead>
 		<tbody id="data-table-body"></tbody>
 		<tfoot>
-			<tr>
+			<tr id="footer-row">
 				<td colspan="12">
 					<input id="ticker-input" type="text" placeholder="Enter ticker symbol here"></input>
 				</td>
