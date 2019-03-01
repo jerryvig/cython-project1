@@ -12,11 +12,14 @@
 		#data-table {
 			display: table;
 			table-layout: fixed;
-			width: 80%;
+			width: 86%;
 			margin: 0 auto;
 			border-collapse: collapse;
 			border: 0;
 			box-shadow: 0px 6px 6px grey;
+			font-family: Roboto, RobotoDraft, Arial, Helvetica;
+			font-size: 18px;
+			font-weight: bold;
 		}
 
 		#header-row {
@@ -57,7 +60,8 @@
 
 		.remove-cell {
 			text-align: center;
-			font-weight: bold;
+			font-size: 22px;
+			color: 	#8b0000;
 		}
 
 		#ticker-input {
@@ -309,5 +313,7 @@
 	document.querySelector('#avg-10-down-col').addEventListener('click', sortByAvgMove10Down);
 
 	document.querySelector('#avg-10-up-col').addEventListener('click', sortByAvgMove10Up);
+
+
 </script>
 </html>
