@@ -16,7 +16,7 @@
 typedef struct {
     char *memory;
     size_t size;
-} Memory;
+} memory_t;
 
 typedef struct {
     double change_0;
@@ -280,7 +280,7 @@ void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     const size_t rs = size * nmemb;
-    Memory *mem = (Memory*)userp;
+    memory_t *mem = (memory_t*)userp;
     char *ptr = (char*)realloc(mem->memory, mem->size + rs + 1);
     if (ptr == NULL) {
         printf("Insufficient memory: realloc() returned NULL.\n");
@@ -333,7 +333,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     //We don't need to do this first request if the crumb is already set,
     //but we need the http response html to extract the title.
     if (crumb == NULL) {
-        Memory memoria;
+        memory_t memoria;
         memoria.memory = (char*)malloc(1);
         memoria.size = 0;
         curl_easy_setopt((CURL*)curl, CURLOPT_WRITEDATA, (void*)&memoria);
@@ -375,7 +375,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     // struct timespec end;
     // clock_gettime(CLOCK_MONOTONIC, &start);
 
-    Memory dl_memoria;
+    memory_t dl_memoria;
     dl_memoria.memory = (char*)malloc(1);
     dl_memoria.size = 0;
 
