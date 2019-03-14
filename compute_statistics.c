@@ -416,19 +416,19 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
 }
 
 const CURL *create_and_init_curl(void) {
-    const CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "br, gzip");
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 180L);
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
-    curl_easy_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
-    curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0);
-    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_callback);
-    return curl;
+    const CURL *ez = curl_easy_init();
+    curl_easy_setopt(ez, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    curl_easy_setopt(ez, CURLOPT_COOKIEFILE, "");
+    curl_easy_setopt(ez, CURLOPT_ACCEPT_ENCODING, "br, gzip");
+    curl_easy_setopt(ez, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(ez, CURLOPT_TCP_KEEPIDLE, 180L);
+    curl_easy_setopt(ez, CURLOPT_TCP_KEEPINTVL, 60L);
+    curl_easy_setopt(ez, CURLOPT_TCP_FASTOPEN, 1L);
+    curl_easy_setopt(ez, CURLOPT_TCP_NODELAY, 0);
+    curl_easy_setopt(ez, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    curl_easy_setopt(ez, CURLOPT_WRITEFUNCTION, &write_callback);
+    curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
+    return ez;
 }
 
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values) {
