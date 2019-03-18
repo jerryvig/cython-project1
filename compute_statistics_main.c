@@ -77,7 +77,13 @@ static void on_stdin_read(uv_fs_t *read_req) {
         if (!(stdin_len - 1)) {
             printf("Got empty ticker string...\n");
         } else {
-            //Call into the real processing here.
+            clock_gettime(CLOCK_MONOTONIC, &start);
+            process_tickers(ticker_buffer, curl, timestamps);
+            clock_gettime(CLOCK_MONOTONIC, &end);
+
+            printf("processed in %.6f s\n",
+                   ((double)end.tv_sec + 1.0e-9*end.tv_nsec) -
+                   ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
         }
         init_watchers();
     } else if (stdin_watcher.result < 0) {
