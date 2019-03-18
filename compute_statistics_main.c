@@ -54,11 +54,12 @@ static uv_fs_t stdin_watcher;
 static uv_fs_t stdout_watcher;
 static char ticker_buffer[BUFFER_SIZE];
 static char *prompt = "Enter ticker list: ";
-static void init_watchers();
 static const CURL *curl;
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
+
+static void init_watchers();
 
 static void on_sigint(uv_signal_t *sig, int signum) {
     uv_signal_stop(sig);
