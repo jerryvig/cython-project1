@@ -263,7 +263,7 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
 void process_tickers(char *ticker_string, const CURLM *curl_multi, char timestamps[][12]) {
     char sign_diff_print[512];
     char *ticker_list[16];
-    int ticker_list_length;
+    register int ticker_list_length;
 
     char *ticker = strsep(&ticker_string, " ");
 
@@ -279,6 +279,8 @@ void process_tickers(char *ticker_string, const CURLM *curl_multi, char timestam
 
     for (register int i = 0; i < ticker_list_length; ++i) {
         puts(ticker_list[i]);
+
+        //We kickoff the downloads here.
     }
 
 
