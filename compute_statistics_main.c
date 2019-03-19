@@ -16,6 +16,8 @@ static uv_loop_t *loop;
 static uv_signal_t sigint_watcher;
 static uv_fs_t stdin_watcher;
 static uv_fs_t stdout_watcher;
+static uv_timer_t timeout;
+
 static char ticker_buffer[BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
 static size_t stdin_len;
@@ -67,9 +69,26 @@ static void init_watchers() {
     uv_fs_read(loop, &stdin_watcher, STDIN_FILENO, &stdin_buf, 1, -1, on_stdin_read);
 }
 
+static void on_timeout(uv_timer_t *req) {
+    int running_handles;
+    curl_multi_socket_action(curl_multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
+}
+
+static int start_timeout(CURLM *curl_multi, long timeout_ms, void *userp) {
+    if (timeout_ms < 0) {
+        uv_timer_stop(&timeout);
+    } else {
+        if (timeout_ms == 0) {
+            timeout_ms = 1;
+        }
+        uv_timer_start(&timeout, on_timeout, timeout_ms, 0);
+    }
+}
+
 static CURLM *create_and_init_curl_multi() {
     CURLM *multi_handle = curl_multi_init();
     curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+    curl_multi_setopt(multi_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
     return multi_handle;
 }
 
@@ -86,12 +105,15 @@ int main(void) {
     }
 
     curl_multi = create_and_init_curl_multi();
+
     create_and_init_ez_pool(ez_pool);
     ez = create_and_init_curl();
 
     get_timestamps(timestamps);
 
     loop = uv_default_loop();
+
+    uv_timer_init(loop, &timeout);
 
     uv_signal_t sigint_watcher;
     uv_signal_init(loop, &sigint_watcher);
