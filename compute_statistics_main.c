@@ -17,7 +17,8 @@ static uv_fs_t stdin_watcher;
 static uv_fs_t stdout_watcher;
 static char ticker_buffer[BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
-static const CURL *curl;
+static size_t stdin_len;
+static const CURL *ez;
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
@@ -28,26 +29,26 @@ static void on_sigint(uv_signal_t *sig, int signum) {
     uv_signal_stop(sig);
     uv_close((uv_handle_t*)sig, NULL);
 
-    curl_easy_cleanup((CURL*)curl);
+    curl_easy_cleanup((CURL*)ez);
 
     uv_kill(getpid(), SIGTERM);
 }
 
 static void on_stdin_read(uv_fs_t *read_req) {
     if (stdin_watcher.result > 0) {
-        size_t stdin_len = strlen(ticker_buffer);
+        stdin_len = strlen(ticker_buffer);
         ticker_buffer[stdin_len - 1] = '\0';
 
         if (!(stdin_len - 1)) {
             printf("Got empty ticker string...\n");
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
-            process_tickers(ticker_buffer, curl, timestamps);
+            process_tickers(ticker_buffer, ez, timestamps);
             clock_gettime(CLOCK_MONOTONIC, &end);
 
-            printf("processed in %.6f s\n",
-                   ((double)end.tv_sec + 1.0e-9*end.tv_nsec) -
-                   ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
+            printf("proc'ed in %.6f s\n",
+                   ((double)end.tv_sec + 1.0e-9 * end.tv_nsec) -
+                   ((double)start.tv_sec + 1.0e-9 * start.tv_nsec));
         }
         init_watchers();
     } else if (stdin_watcher.result < 0) {
@@ -64,7 +65,7 @@ static void init_watchers() {
 }
 
 int main(void) {
-    curl = create_and_init_curl();
+    ez = create_and_init_curl();
 
     get_timestamps(timestamps);
 
@@ -78,6 +79,6 @@ int main(void) {
 
     uv_run(loop, UV_RUN_DEFAULT);
 
-    curl_easy_cleanup((CURL*)curl);
+    curl_easy_cleanup((CURL*)ez);
     return EXIT_SUCCESS;
 }
