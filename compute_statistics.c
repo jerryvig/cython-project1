@@ -281,6 +281,7 @@ void process_tickers(char *ticker_string, const CURLM *curl_multi, char timestam
         puts(ticker_list[i]);
 
         //We kickoff the downloads here.
+
     }
 
 
@@ -322,14 +323,6 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
         strncpy(ticker, &filename[9], strlen(&filename[9]) - strlen(period));
     }
     return nitems * size;
-}
-
-void *curl_thread_proc( void *curl_ptr ) {
-    CURL *curl = (CURL*)curl_ptr;
-    CURLcode response = curl_easy_perform(curl);
-    CURLcode *response_ptr = (CURLcode*)malloc(sizeof(CURLcode));
-    *response_ptr = response;
-    return (void*)response_ptr;
 }
 
 static char *crumb;

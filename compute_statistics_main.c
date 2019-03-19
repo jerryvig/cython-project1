@@ -80,6 +80,11 @@ static void create_and_init_ez_pool(CURL *ez_pool[]) {
 }
 
 int main(void) {
+    if (curl_global_init(CURL_GLOBAL_ALL)) {
+        fprintf(stderr, "Failed to initialize cURL.\n");
+        return EXIT_FAILURE;
+    }
+
     curl_multi = create_and_init_curl_multi();
     create_and_init_ez_pool(ez_pool);
     ez = create_and_init_curl();
