@@ -264,6 +264,7 @@ void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12
     char sign_diff_print[512];
     char *ticker = strsep(&ticker_string, " ");
 
+    //instead of using a while loop to process this sequentially, this should be parallelized.
     while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
         run_stats(ticker, &sign_diff_values, curl, timestamps);
@@ -272,9 +273,6 @@ void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12
         printf("%s", sign_diff_print);
 
         ticker = strsep(&ticker_string, " ");
-        if (ticker != NULL) {
-            usleep(1500000);
-        }
     }
 }
 

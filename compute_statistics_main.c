@@ -10,6 +10,7 @@
 #include "compute_statistics.h"
 
 #define BUFFER_SIZE 128
+#define EZ_POOL_SIZE 4
 
 static uv_loop_t *loop;
 static uv_signal_t sigint_watcher;
@@ -18,7 +19,9 @@ static uv_fs_t stdout_watcher;
 static char ticker_buffer[BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
 static size_t stdin_len;
+static const CURLM *curl_multi;
 static const CURL *ez;
+static CURL *ez_pool[EZ_POOL_SIZE];
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
@@ -64,7 +67,21 @@ static void init_watchers() {
     uv_fs_read(loop, &stdin_watcher, STDIN_FILENO, &stdin_buf, 1, -1, on_stdin_read);
 }
 
+static CURLM *create_and_init_curl_multi() {
+    CURLM *multi_handle = curl_multi_init();
+    curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+    return multi_handle;
+}
+
+static void create_and_init_ez_pool(CURL *ez_pool[]) {
+    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
+        ez_pool[i] = create_and_init_curl();
+    }
+}
+
 int main(void) {
+    curl_multi = create_and_init_curl_multi();
+    create_and_init_ez_pool(ez_pool);
     ez = create_and_init_curl();
 
     get_timestamps(timestamps);
@@ -80,5 +97,6 @@ int main(void) {
     uv_run(loop, UV_RUN_DEFAULT);
 
     curl_easy_cleanup((CURL*)ez);
+    curl_multi_cleanup(curl_multi);
     return EXIT_SUCCESS;
 }
