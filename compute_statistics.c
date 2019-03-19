@@ -260,12 +260,30 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12]) {
+void process_tickers(char *ticker_string, const CURLM *curl_multi, char timestamps[][12]) {
     char sign_diff_print[512];
+    char *ticker_list[16];
+    int ticker_list_length;
+
     char *ticker = strsep(&ticker_string, " ");
 
+    while (ticker!= NULL) {
+        ticker_list[ticker_list_length] = ticker;
+
+        ticker = strsep(&ticker_string, " ");
+        ticker_list_length++;
+        if (ticker_list_length > 15) {
+            break;
+        }
+    }
+
+    for (register int i = 0; i < ticker_list_length; ++i) {
+        puts(ticker_list[i]);
+    }
+
+
     //instead of using a while loop to process this sequentially, this should be parallelized.
-    while (ticker != NULL) {
+    /* while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
         run_stats(ticker, &sign_diff_values, curl, timestamps);
         memset(sign_diff_print, 0, 512);
@@ -273,7 +291,7 @@ void process_tickers(char *ticker_string, const CURL *curl, char timestamps[][12
         printf("%s", sign_diff_print);
 
         ticker = strsep(&ticker_string, " ");
-    }
+    } */
 }
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
