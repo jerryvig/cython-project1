@@ -258,12 +258,12 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
 static int ez_pool_index;
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char timestamps[][12]) {
     char sign_diff_print[512];
-    char *ticker_list[16];
-    register int ticker_list_length;
+    // char *ticker_list[16];
+    // register int ticker_list_length;
 
     char *ticker = strsep(&ticker_string, " ");
 
-    while (ticker!= NULL) {
+    /*while (ticker!= NULL) {
         ticker_list[ticker_list_length] = ticker;
 
         ticker = strsep(&ticker_string, " ");
@@ -280,19 +280,19 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
         // you can setoff up to four simultaneously downloads, but you must block after sending four.
         sign_diff_pct sign_diff_values;
         run_stats_async(ticker_list[i], &sign_diff_values, curl_multi_ez, timestamps);
-    }
+    } */
 
 
     //instead of using a while loop to process this sequentially, this should asynchronous.
-    /* while (ticker != NULL) {
+    while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
-        run_stats(ticker, &sign_diff_values, curl, timestamps);
+        run_stats(ticker, &sign_diff_values, curl_multi_ez->ez_pool[0], timestamps);
         memset(sign_diff_print, 0, 512);
         build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
         printf("%s", sign_diff_print);
 
         ticker = strsep(&ticker_string, " ");
-    } */
+    }
 }
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -325,8 +325,8 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
 
 static char *crumb;
 
-void prime_crumb() {
-    CURL *ez = create_and_init_curl();
+void prime_crumb(curl_multi_ez_t *curl_multi_ez) {
+    CURL *ez = curl_multi_ez->ez_pool[0];
     memory_t memoria;
     memoria.memory = (char*)malloc(1);
     memoria.size = 0;
@@ -348,7 +348,7 @@ void prime_crumb() {
     }
 
     free(memoria.memory);
-    curl_easy_cleanup(ez);
+    // curl_easy_cleanup(ez);
 
     fprintf(stderr, "primed crumb = %s\n", crumb);
 }
@@ -375,6 +375,13 @@ void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
 
     CURL *ez = curl_multi_ez->ez_pool[ez_pool_index];
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
+
+    memory_t dl_memoria;
+    dl_memoria.memory = (char*)malloc(1);
+    dl_memoria.size = 0;
+
+    curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)&dl_memoria);
+    curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)&(sign_diff_values->response_ticker[0]));
 }
 
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {

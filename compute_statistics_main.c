@@ -195,7 +195,7 @@ static void create_and_init_multi_ez() {
         buffer->memory = (char*)malloc(1);
         buffer->size = 0;
 
-        curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_WRITEDATA, (void*)buffer);
+        // curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_WRITEDATA, (void*)buffer);
         curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_PRIVATE, buffer);
     }
 }
@@ -218,7 +218,7 @@ int main(void) {
     uv_signal_init(loop, &sigint_watcher);
     uv_signal_start(&sigint_watcher, on_sigint, SIGINT);
 
-    prime_crumb();
+    prime_crumb(&curl_multi_ez);
 
     init_watchers();
 
