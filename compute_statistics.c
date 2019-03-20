@@ -255,7 +255,7 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-static int ez_pool_index = 0;
+static int ez_pool_index;
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char timestamps[][12]) {
     char sign_diff_print[512];
     char *ticker_list[16];
@@ -274,16 +274,16 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
     }
 
     for (register int i = 0; i < ticker_list_length; ++i) {
-        puts(ticker_list[i]);
-
         //We kickoff the downloads here.
         //initialize the next curl easy handle in the ez pool with the next url.
 
         // you can setoff up to four simultaneously downloads, but you must block after sending four.
+        sign_diff_pct sign_diff_values;
+        run_stats_async(ticker_list[i], &sign_diff_values, curl_multi_ez, timestamps);
     }
 
 
-    //instead of using a while loop to process this sequentially, this should be parallelized.
+    //instead of using a while loop to process this sequentially, this should asynchronous.
     /* while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
         run_stats(ticker, &sign_diff_values, curl, timestamps);
@@ -324,6 +324,58 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
 }
 
 static char *crumb;
+
+void prime_crumb() {
+    CURL *ez = create_and_init_curl();
+    memory_t memoria;
+    memoria.memory = (char*)malloc(1);
+    memoria.size = 0;
+
+    curl_easy_setopt((CURL*)ez, CURLOPT_WRITEDATA, (void*)&memoria);
+    const *crumb_url = "https://finance.yahoo.com/quote/AAPL/history";
+    curl_easy_setopt(ez, CURLOPT_URL, crumb_url);
+
+    CURLcode response = curl_easy_perform(ez);
+    if (response != CURLE_OK) {
+        printf("curl_easy_perform() failed.....\n");
+    }
+
+    crumb = (char*)malloc(128 * sizeof(char));
+    memset(crumb, 0, 128);
+    int crumb_failure = get_crumb(memoria.memory, crumb);
+    if (crumb_failure) {
+        return;
+    }
+
+    free(memoria.memory);
+    curl_easy_cleanup(ez);
+
+    fprintf(stderr, "primed crumb = %s\n", crumb);
+}
+
+void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values, curl_multi_ez_t *curl_multi_ez,
+        char timestamps[][12]) {
+    char ticker_str[128];
+    memset(ticker_str, 0, 128);
+    register int ticker_strlen = strlen(ticker_string);
+    strncpy(ticker_str, ticker_string, ticker_strlen);
+
+    for (register int i = 0; i < ticker_strlen; ++i) {
+        if (ticker_string[i] != '\n') {
+            ticker_str[i] = toupper(ticker_str[i]);
+        } else {
+            ticker_str[i] = 0;
+        }
+    }
+
+    char download_url[256];
+    memset(download_url, 0, 256);
+    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
+    fprintf(stderr, "url = %s\n", download_url);
+
+    CURL *ez = curl_multi_ez->ez_pool[ez_pool_index];
+    curl_easy_setopt(ez, CURLOPT_URL, download_url);
+}
 
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {
     char ticker_str[128];

@@ -38,9 +38,12 @@ void build_sign_diff_print_string(char sign_diff_print[],
     sign_diff_pct *sign_diff_values);
 CURL *create_and_init_curl(void);
 void get_timestamps(char timestamps[][12]);
+void prime_crumb();
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez,
     char timestamps[][12]);
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values,
     const CURL *curl, char timestamps[][12]);
+void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
+               curl_multi_ez_t *curl_multi_ez, char timestamps[][12]);
 
 #endif  // COMPUTE_STATISTICS_H_

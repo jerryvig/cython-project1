@@ -218,6 +218,8 @@ int main(void) {
     uv_signal_init(loop, &sigint_watcher);
     uv_signal_start(&sigint_watcher, on_sigint, SIGINT);
 
+    prime_crumb();
+
     init_watchers();
 
     uv_run(loop, UV_RUN_DEFAULT);
