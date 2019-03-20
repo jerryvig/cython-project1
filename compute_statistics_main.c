@@ -197,7 +197,6 @@ static void create_and_init_multi_ez() {
 
         curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_WRITEDATA, (void*)buffer);
         curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_PRIVATE, buffer);
-        curl_multi_add_handle(curl_multi_ez.curl_multi, curl_multi_ez.ez_pool[i]);
     }
 }
 

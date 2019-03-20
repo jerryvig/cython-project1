@@ -255,6 +255,7 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
+static int ez_pool_index = 0;
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char timestamps[][12]) {
     char sign_diff_print[512];
     char *ticker_list[16];
@@ -276,7 +277,9 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
         puts(ticker_list[i]);
 
         //We kickoff the downloads here.
+        //initialize the next curl easy handle in the ez pool with the next url.
 
+        // you can setoff up to four simultaneously downloads, but you must block after sending four.
     }
 
 
