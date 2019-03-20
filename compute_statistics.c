@@ -14,11 +14,6 @@
 #include "compute_statistics.h"
 
 typedef struct {
-    char *memory;
-    size_t size;
-} memory_t;
-
-typedef struct {
     double change_0;
     double change_plus_one;
 } changes_tuple;
@@ -260,7 +255,7 @@ static void get_sigma_data(const double *changes_daily, const int changes_length
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-void process_tickers(char *ticker_string, const CURLM *curl_multi, char timestamps[][12]) {
+void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char timestamps[][12]) {
     char sign_diff_print[512];
     char *ticker_list[16];
     register int ticker_list_length;
@@ -426,8 +421,8 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     get_sigma_data(changes_daily, changes_length, sign_diff_values);
 }
 
-const CURL *create_and_init_curl(void) {
-    const CURL *ez = curl_easy_init();
+CURL *create_and_init_curl(void) {
+    CURL *ez = curl_easy_init();
     curl_easy_setopt(ez, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(ez, CURLOPT_COOKIEFILE, "");
     curl_easy_setopt(ez, CURLOPT_ACCEPT_ENCODING, "br, gzip");
@@ -438,8 +433,6 @@ const CURL *create_and_init_curl(void) {
     curl_easy_setopt(ez, CURLOPT_TCP_NODELAY, 0);
     curl_easy_setopt(ez, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
     curl_easy_setopt(ez, CURLOPT_WRITEFUNCTION, &write_callback);
-
-
     curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
     return ez;
 }

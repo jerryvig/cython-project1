@@ -4,6 +4,11 @@
 #include <curl/curl.h>
 
 typedef struct {
+    char *memory;
+    size_t size;
+} memory_t;
+
+typedef struct {
     char avg_move_10_up[16];
     char avg_move_10_down[16];
     char change[16];
@@ -21,13 +26,19 @@ typedef struct {
     char response_ticker[8];
 } sign_diff_pct;
 
+#define EZ_POOL_SIZE 4
+typedef struct {
+    CURL *ez_pool[EZ_POOL_SIZE];
+    CURLM *curl_multi;
+} curl_multi_ez_t;
+
 void build_sign_diff_print_json(char sign_diff_json[],
     sign_diff_pct *sign_diff_values);
 void build_sign_diff_print_string(char sign_diff_print[],
     sign_diff_pct *sign_diff_values);
-const CURL *create_and_init_curl(void);
+CURL *create_and_init_curl(void);
 void get_timestamps(char timestamps[][12]);
-void process_tickers(char *ticker_string, const CURL *curl,
+void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez,
     char timestamps[][12]);
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values,
     const CURL *curl, char timestamps[][12]);

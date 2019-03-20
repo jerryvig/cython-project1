@@ -10,7 +10,6 @@
 #include "compute_statistics.h"
 
 #define BUFFER_SIZE 128
-#define EZ_POOL_SIZE 4
 
 static uv_loop_t *loop;
 static uv_signal_t sigint_watcher;
@@ -21,31 +20,30 @@ static uv_timer_t timeout;
 static char ticker_buffer[BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
 static size_t stdin_len;
-static const CURLM *curl_multi;
-static const CURL *ez;
-static CURL *ez_pool[EZ_POOL_SIZE];
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
+
+curl_multi_ez_t curl_multi_ez;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
     curl_socket_t sockfd;
 } curl_context_t;
 
-typedef struct {
-    char *memory;
-    size_t size;
-} memory_t;
-
 static void init_watchers();
+
+static void cleanup_curl_multi_ez() {
+    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
+        curl_easy_cleanup(curl_multi_ez.ez_pool[i]);
+    }
+    curl_multi_cleanup(curl_multi_ez.curl_multi);
+}
 
 static void on_sigint(uv_signal_t *sig, int signum) {
     uv_signal_stop(sig);
     uv_close((uv_handle_t*)sig, NULL);
-
-    curl_easy_cleanup((CURL*)ez);
-
+    cleanup_curl_multi_ez();
     uv_kill(getpid(), SIGTERM);
 }
 
@@ -58,7 +56,7 @@ static void on_stdin_read(uv_fs_t *read_req) {
             printf("Got empty ticker string...\n");
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
-            process_tickers(ticker_buffer, ez, timestamps);
+            process_tickers(ticker_buffer, &curl_multi_ez, timestamps);
             clock_gettime(CLOCK_MONOTONIC, &end);
 
             printf("proc'ed in %.6f s\n",
@@ -81,7 +79,7 @@ static void init_watchers() {
 
 static void on_timeout(uv_timer_t *req) {
     int running_handles;
-    curl_multi_socket_action(curl_multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
+    curl_multi_socket_action(curl_multi_ez.curl_multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
 }
 
 static int start_timeout(CURLM *curl_multi, long timeout_ms, void *userp) {
@@ -117,7 +115,7 @@ static void check_multi_info(void) {
     CURL *ez;
     memory_t *buffer;
 
-    while ((message = curl_multi_info_read(curl_multi, &pending))) {
+    while ((message = curl_multi_info_read(curl_multi_ez.curl_multi, &pending))) {
         switch(message->msg) {
             case CURLMSG_DONE:
                 ez = message->easy_handle;
@@ -150,7 +148,7 @@ static void curl_perform(uv_poll_t *poll_handle, int status, int events) {
     }
 
     context = (curl_context_t*)poll_handle->data;
-    curl_multi_socket_action(curl_multi, context->sockfd, flags, &running_handles);
+    curl_multi_socket_action(curl_multi_ez.curl_multi, context->sockfd, flags, &running_handles);
     check_multi_info();
 }
 
@@ -163,7 +161,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
         case CURL_POLL_OUT:
         case CURL_POLL_INOUT:
             curl_context = socketp ? (curl_context_t*)socketp : create_curl_context(sock);
-            curl_multi_assign(curl_multi, sock, (void*)curl_context);
+            curl_multi_assign(curl_multi_ez.curl_multi, sock, (void*)curl_context);
 
             if (action != CURL_POLL_IN) {
                 events |= UV_WRITABLE;
@@ -172,7 +170,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
                 events |= UV_READABLE;
             }
 
-            //uv_poll_start(&curl_context->poll_handle, events, curl_perform);
+            uv_poll_start(&curl_context->poll_handle, events, curl_perform);
             break;
         case CURL_POLL_REMOVE:
             if (socketp) {
@@ -188,9 +186,18 @@ static CURLM *create_and_init_curl_multi() {
     return multi_handle;
 }
 
-static void create_and_init_ez_pool(CURL *ez_pool[]) {
-    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
-        ez_pool[i] = create_and_init_curl();
+static void create_and_init_multi_ez() {
+    curl_multi_ez.curl_multi = create_and_init_curl_multi();
+    for (int i = 0; i < EZ_POOL_SIZE; ++i) {
+        curl_multi_ez.ez_pool[i] = create_and_init_curl();
+
+        memory_t *buffer = (memory_t*)malloc(sizeof(memory_t));
+        buffer->memory = (char*)malloc(1);
+        buffer->size = 0;
+
+        curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_WRITEDATA, (void*)buffer);
+        curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_PRIVATE, buffer);
+        curl_multi_add_handle(curl_multi_ez.curl_multi, curl_multi_ez.ez_pool[i]);
     }
 }
 
@@ -200,16 +207,13 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    curl_multi = create_and_init_curl_multi();
-
-    create_and_init_ez_pool(ez_pool);
-    ez = create_and_init_curl();
-
-    get_timestamps(timestamps);
-
     loop = uv_default_loop();
 
     uv_timer_init(loop, &timeout);
+
+    create_and_init_multi_ez();
+
+    get_timestamps(timestamps);
 
     uv_signal_t sigint_watcher;
     uv_signal_init(loop, &sigint_watcher);
@@ -219,7 +223,6 @@ int main(void) {
 
     uv_run(loop, UV_RUN_DEFAULT);
 
-    curl_easy_cleanup((CURL*)ez);
-    curl_multi_cleanup(curl_multi);
+    cleanup_curl_multi_ez();
     return EXIT_SUCCESS;
 }
