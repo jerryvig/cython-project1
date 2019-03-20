@@ -436,7 +436,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     char download_url[256];
     memset(download_url, 0, 256);
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
-    printf("url = %s\n", download_url);
+    // printf("url = %s\n", download_url);
     curl_easy_setopt(curl, CURLOPT_URL, download_url);
 
     // struct timespec start;
