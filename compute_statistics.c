@@ -438,6 +438,8 @@ const CURL *create_and_init_curl(void) {
     curl_easy_setopt(ez, CURLOPT_TCP_NODELAY, 0);
     curl_easy_setopt(ez, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
     curl_easy_setopt(ez, CURLOPT_WRITEFUNCTION, &write_callback);
+
+
     curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
     return ez;
 }

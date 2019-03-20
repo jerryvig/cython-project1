@@ -28,6 +28,16 @@ static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
 
+typedef struct curl_context_s {
+    uv_poll_t poll_handle;
+    curl_socket_t sockfd;
+} curl_context_t;
+
+typedef struct {
+    char *memory;
+    size_t size;
+} memory_t;
+
 static void init_watchers();
 
 static void on_sigint(uv_signal_t *sig, int signum) {
@@ -85,9 +95,95 @@ static int start_timeout(CURLM *curl_multi, long timeout_ms, void *userp) {
     }
 }
 
+static curl_context_t* create_curl_context(curl_socket_t sockfd) {
+    curl_context_t *context = (curl_context_t*)malloc(sizeof(curl_context_t));
+    context->sockfd = sockfd;
+
+    int r = uv_poll_init_socket(loop, &context->poll_handle, sockfd);
+    context->poll_handle.data = context;
+    return context;
+}
+
+static void destroy_curl_context(curl_context_t *context) {
+    uv_close((uv_handle_t*)&context->poll_handle, NULL);
+    free(context);
+}
+
+static void check_multi_info(void) {
+    char *done_url;
+    CURLMsg *message;
+    int pending;
+
+    CURL *ez;
+    memory_t *buffer;
+
+    while ((message = curl_multi_info_read(curl_multi, &pending))) {
+        switch(message->msg) {
+            case CURLMSG_DONE:
+                ez = message->easy_handle;
+                curl_easy_getinfo(ez, CURLINFO_EFFECTIVE_URL, &done_url);
+                curl_easy_getinfo(ez, CURLINFO_PRIVATE, &buffer);
+                fprintf(stderr, "Finished fetching data for %s\n", done_url);
+
+                break;
+            default:
+                fprintf(stderr, "CURL message default.\n");
+                break;
+        }
+    }
+}
+
+static void curl_perform(uv_poll_t *poll_handle, int status, int events) {
+    int running_handles;
+    int flags = 0;
+    curl_context_t *context;
+
+    if (status < 0) {
+        flags = CURL_CSELECT_ERR;
+    }
+
+    if (events & UV_READABLE) {
+        flags |= CURL_CSELECT_IN;
+    }
+    if (events & UV_WRITABLE) {
+        flags |= CURL_CSELECT_OUT;
+    }
+
+    context = (curl_context_t*)poll_handle->data;
+    curl_multi_socket_action(curl_multi, context->sockfd, flags, &running_handles);
+    check_multi_info();
+}
+
+static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, void *socketp) {
+    curl_context_t *curl_context;
+    int events = 0;
+
+    switch(action) {
+        case CURL_POLL_IN:
+        case CURL_POLL_OUT:
+        case CURL_POLL_INOUT:
+            curl_context = socketp ? (curl_context_t*)socketp : create_curl_context(sock);
+            curl_multi_assign(curl_multi, sock, (void*)curl_context);
+
+            if (action != CURL_POLL_IN) {
+                events |= UV_WRITABLE;
+            }
+            if (action != CURL_POLL_OUT) {
+                events |= UV_READABLE;
+            }
+
+            //uv_poll_start(&curl_context->poll_handle, events, curl_perform);
+            break;
+        case CURL_POLL_REMOVE:
+            if (socketp) {
+            }
+    }
+}
+
 static CURLM *create_and_init_curl_multi() {
     CURLM *multi_handle = curl_multi_init();
     curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+    curl_multi_setopt(multi_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
     curl_multi_setopt(multi_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
     return multi_handle;
 }
