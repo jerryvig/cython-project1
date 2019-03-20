@@ -1,5 +1,3 @@
-// Build with: gcc compute_statistics.c -o compute_statistics
-// -O3 -pedantic -lcurl -lgsl -lgslcblas -Wall -Wextra -std=c11
 #define _DEFAULT_SOURCE
 
 #include <ctype.h>
