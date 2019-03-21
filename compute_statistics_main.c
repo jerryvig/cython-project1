@@ -11,6 +11,10 @@
 
 #define BUFFER_SIZE 128
 
+#define STRINGIFY2(X) #X
+#define STRINGIFY(X) STRINGIFY2(X)
+#define THREAD_POOL_SIZE 4
+
 static uv_loop_t *loop;
 static uv_signal_t sigint_watcher;
 static uv_fs_t stdin_watcher;
@@ -207,6 +211,8 @@ int main(void) {
     }
 
     loop = uv_default_loop();
+
+    putenv("UV_THREADPOOL_SIZE=" STRINGIFY(THREAD_POOL_SIZE));
 
     uv_timer_init(loop, &timeout);
 

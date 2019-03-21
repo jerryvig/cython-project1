@@ -261,7 +261,7 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
 
     char *ticker = strsep(&ticker_string, " ");
 
-    /*while (ticker!= NULL) {
+    /* while (ticker!= NULL) {
         ticker_list[ticker_list_length] = ticker;
 
         ticker = strsep(&ticker_string, " ");
@@ -276,10 +276,10 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
         //initialize the next curl easy handle in the ez pool with the next url.
 
         // you can setoff up to four simultaneously downloads, but you must block after sending four.
+        //we will use uv_queue_work().
         sign_diff_pct sign_diff_values;
         run_stats_async(ticker_list[i], &sign_diff_values, curl_multi_ez, timestamps);
     } */
-
 
     //instead of using a while loop to process this sequentially, this should asynchronous.
     while (ticker != NULL) {
@@ -362,7 +362,7 @@ void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
         if (ticker_string[i] != '\n') {
             ticker_str[i] = toupper(ticker_str[i]);
         } else {
-            ticker_str[i] = 0;
+            ticker_str[i] = '\0';
         }
     }
 
@@ -371,6 +371,9 @@ void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
     fprintf(stderr, "url = %s\n", download_url);
 
+
+    //at this point this would have to be queued otherwise, several of the jobs can reset the URL
+    //on the same ez handle in the pool.
     CURL *ez = curl_multi_ez->ez_pool[ez_pool_index];
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
 
@@ -380,6 +383,7 @@ void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
 
     curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)&dl_memoria);
     curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)&(sign_diff_values->response_ticker[0]));
+    puts("at the end on rs_async()\n");
 }
 
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {
