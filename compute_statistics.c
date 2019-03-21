@@ -71,11 +71,10 @@ static int get_crumb(const char *response_text, char *crumb) {
 static int get_title(const char *response_text, char *title) {
     memset(title, 0, 128);
     const char* title_start = strstr(response_text, "<title>");
-    const char* pipe_start = strstr(title_start, "|");
-    const char* hyphen_end = strstr(&pipe_start[2], "-");
-    const size_t diff = strlen(&pipe_start[2]) - strlen(hyphen_end);
+    const char* parens_start = strstr(title_start, "(");
+    const size_t diff = strlen(&title_start[7]) - strlen(parens_start);
     if (diff < 128) {
-        strncpy(title, &pipe_start[2], diff);
+        strncpy(title, &title_start[7], diff);
         return 0;
     }
     printf("Failed to parse the title from the response.\n");
