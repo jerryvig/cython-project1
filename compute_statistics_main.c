@@ -27,8 +27,7 @@ static size_t stdin_len;
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
-
-curl_multi_ez_t curl_multi_ez;
+static curl_multi_ez_t curl_multi_ez;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
@@ -102,6 +101,9 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     context->sockfd = sockfd;
 
     int r = uv_poll_init_socket(loop, &context->poll_handle, sockfd);
+    if (r) {
+        fprintf(stderr, "Failed to initialize poller on socket.\n");
+    }
     context->poll_handle.data = context;
     return context;
 }

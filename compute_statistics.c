@@ -136,6 +136,7 @@ void *gsl_correlation_thread_proc( void *gsl_args ) {
     gsl_correlation_args *gsl_corr_args = (gsl_correlation_args*)gsl_args;
     const double sc = gsl_stats_correlation(gsl_corr_args->data1, gsl_corr_args->stride1, gsl_corr_args->data2, gsl_corr_args->stride2, gsl_corr_args->n);
     *(gsl_corr_args->self_correlation) = sc;
+    return (void*)&sc;
 }
 
 typedef struct {
@@ -328,11 +329,11 @@ void prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     memoria.memory = (char*)malloc(1);
     memoria.size = 0;
 
-    curl_easy_setopt((CURL*)ez, CURLOPT_WRITEDATA, (void*)&memoria);
-    const *crumb_url = "https://finance.yahoo.com/quote/AAPL/history";
+    curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)&memoria);
+    const char *crumb_url = "https://finance.yahoo.com/quote/AAPL/history";
     curl_easy_setopt(ez, CURLOPT_URL, crumb_url);
 
-    CURLcode response = curl_easy_perform(ez);
+    const CURLcode response = curl_easy_perform(ez);
     if (response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
     }
@@ -340,14 +341,12 @@ void prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     crumb = (char*)malloc(128 * sizeof(char));
     memset(crumb, 0, 128);
     int crumb_failure = get_crumb(memoria.memory, crumb);
+    free(memoria.memory);
+
     if (crumb_failure) {
         return;
     }
-
-    free(memoria.memory);
-    // curl_easy_cleanup(ez);
-
-    fprintf(stderr, "primed crumb = %s\n", crumb);
+    fprintf(stderr, "primed crumb = \"%s\"\n", crumb);
 }
 
 void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values, curl_multi_ez_t *curl_multi_ez,
@@ -388,7 +387,7 @@ void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {
     char ticker_str[128];
     memset(ticker_str, 0, 128);
-    register int ticker_strlen = strlen(ticker_string);
+    const register int ticker_strlen = strlen(ticker_string);
     strncpy(ticker_str, ticker_string, ticker_strlen);
 
     for (register int i = 0; i < ticker_strlen; ++i) {
