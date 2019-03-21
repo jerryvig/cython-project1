@@ -387,7 +387,7 @@ void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values,
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {
     char ticker_str[128];
     memset(ticker_str, 0, 128);
-    register int ticker_strlen = strlen(ticker_string);
+    const register int ticker_strlen = strlen(ticker_string);
     strncpy(ticker_str, ticker_string, ticker_strlen);
 
     for (register int i = 0; i < ticker_strlen; ++i) {
