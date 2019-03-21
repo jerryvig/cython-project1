@@ -484,6 +484,12 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
 }
 
 CURL *create_and_init_curl(void) {
+    memory_t *buffer = (memory_t*)malloc(sizeof(memory_t));
+    buffer->memory = (char*)malloc(1);
+    buffer->size = 0;
+    char *ticker_string = (char*)malloc(16 * sizeof(char));
+    memset(ticker_string, 0, 16);
+
     CURL *ez = curl_easy_init();
     curl_easy_setopt(ez, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(ez, CURLOPT_COOKIEFILE, "");
@@ -495,7 +501,9 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(ez, CURLOPT_TCP_NODELAY, 0);
     curl_easy_setopt(ez, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
     curl_easy_setopt(ez, CURLOPT_WRITEFUNCTION, &write_callback);
+    curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)buffer);
     curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
+    curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)ticker_string);
     return ez;
 }
 

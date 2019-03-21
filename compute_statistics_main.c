@@ -186,6 +186,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
 
 static CURLM *create_and_init_curl_multi() {
     CURLM *multi_handle = curl_multi_init();
+    curl_multi_setopt(multi_handle, CURLMOPT_MAXCONNECTS, (long)EZ_POOL_SIZE);
     curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
     curl_multi_setopt(multi_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
     curl_multi_setopt(multi_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
@@ -194,27 +195,26 @@ static CURLM *create_and_init_curl_multi() {
 
 static void create_and_init_multi_ez() {
     curl_multi_ez.curl_multi = create_and_init_curl_multi();
-    for (int i = 0; i < EZ_POOL_SIZE; ++i) {
+    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
         curl_multi_ez.ez_pool[i] = create_and_init_curl();
 
-        memory_t *buffer = (memory_t*)malloc(sizeof(memory_t));
+        /* memory_t *buffer = (memory_t*)malloc(sizeof(memory_t));
         buffer->memory = (char*)malloc(1);
         buffer->size = 0;
 
         // curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_WRITEDATA, (void*)buffer);
-        curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_PRIVATE, buffer);
+        curl_easy_setopt(curl_multi_ez.ez_pool[i], CURLOPT_PRIVATE, buffer); */
     }
 }
 
 int main(void) {
     if (curl_global_init(CURL_GLOBAL_ALL)) {
-        fprintf(stderr, "Failed to initialize cURL.\n");
+        fprintf(stderr, "Failed to initialize cURL...\n");
         return EXIT_FAILURE;
     }
+    putenv("UV_THREADPOOL_SIZE=" STRINGIFY(THREAD_POOL_SIZE));
 
     loop = uv_default_loop();
-
-    putenv("UV_THREADPOOL_SIZE=" STRINGIFY(THREAD_POOL_SIZE));
 
     uv_timer_init(loop, &timeout);
 
