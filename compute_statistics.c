@@ -504,6 +504,7 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)buffer);
     curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
     curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)ticker_string);
+    curl_easy_setopt(ez, CURLOPT_PRIVATE, buffer);
     return ez;
 }
 
