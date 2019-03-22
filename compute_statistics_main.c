@@ -120,6 +120,10 @@ static void check_multi_info(void) {
             curl_easy_getinfo(ez, CURLINFO_EFFECTIVE_URL, &done_url);
             curl_easy_getinfo(ez, CURLINFO_PRIVATE, &buffer);
             fprintf(stderr, "Finished fetching data for %s\n", done_url);
+
+            if (buffer) {
+                printf("data retrieved = \"%s\"\n", buffer->memory);
+            }
         } else {
             fprintf(stderr, "CURL message default.\n");
         }
