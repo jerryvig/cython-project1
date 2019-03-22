@@ -350,6 +350,18 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     } else {
         fprintf(stderr, "primed crumb = \"%s\"\n", crumb);
     }
+
+    // set/get cookie here.
+    struct curl_slist *cookies_root;
+    CURLcode res = curl_easy_getinfo(ez, CURLINFO_COOKIELIST, &cookies_root);
+    if (res != CURLE_OK) {
+        fprintf(stderr, "Failed to get root of the cookies list...\n");
+    } else {
+        for (register int8_t i = 1; i < EZ_POOL_SIZE; ++i) {
+            curl_easy_setopt(curl_multi_ez->ez_pool[i], CURLOPT_COOKIELIST, cookies_root->data);
+        }
+    }
+
     return crumb;
 }
 
