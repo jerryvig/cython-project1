@@ -346,9 +346,10 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     memoria->size = 0;
 
     if (crumb_failure) {
-        return "";
+        fprintf(stderr, "Failed to prime crumb...\n");
+    } else {
+        fprintf(stderr, "primed crumb = \"%s\"\n", crumb);
     }
-    fprintf(stderr, "primed crumb = \"%s\"\n", crumb);
     return crumb;
 }
 
