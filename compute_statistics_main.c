@@ -28,6 +28,7 @@ static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
 static curl_multi_ez_t curl_multi_ez;
+static int transfers;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
@@ -57,6 +58,24 @@ static void on_sigint(uv_signal_t *sig, int signum) {
     uv_kill(getpid(), SIGTERM);
 }
 
+static void start_transfers(const char *ticker_string) {
+    char sign_diff_print[512];
+    char *ticker_list[16];
+    register int ticker_list_length;
+
+    char *ticker = strsep(&ticker_string, " ");
+
+    while (ticker!= NULL) {
+        ticker_list[ticker_list_length] = ticker;
+
+        ticker = strsep(&ticker_string, " ");
+        ticker_list_length++;
+        if (ticker_list_length > 15) {
+            break;
+        }
+    }
+}
+
 static void on_stdin_read(uv_fs_t *read_req) {
     if (stdin_watcher.result > 0) {
         stdin_len = strlen(ticker_buffer);
@@ -68,6 +87,7 @@ static void on_stdin_read(uv_fs_t *read_req) {
             clock_gettime(CLOCK_MONOTONIC, &start);
 
             //This will need to change here.
+            //start the transfers here.
             process_tickers(ticker_buffer, &curl_multi_ez, timestamps);
             clock_gettime(CLOCK_MONOTONIC, &end);
 
