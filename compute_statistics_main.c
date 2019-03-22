@@ -74,11 +74,13 @@ static void start_transfers(const char *ticker_string) {
     ticker_list.size = 0;
     ticker_list.strings = (char**)malloc(sizeof(char*));
 
-    char *ticker = strsep(&ticker_string, " ");
-    while (ticker!= NULL) {
-        string_list_add(&ticker_list, ticker);
+    char *ticker;
+    do {
         ticker = strsep(&ticker_string, " ");
-    }
+        if (ticker != NULL) {
+            string_list_add(&ticker_list, ticker);
+        }
+    } while (ticker!= NULL);
 
     printf("first ticker = %s\n", ticker_list.strings[0]);
     printf("ticker_list_length = %zu\n", ticker_list.size);
