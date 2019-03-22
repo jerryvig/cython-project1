@@ -35,6 +35,17 @@ typedef struct curl_context_s {
     curl_socket_t sockfd;
 } curl_context_t;
 
+typedef struct {
+    char **strings;
+    size_t size;
+} string_list_t;
+
+static void string_list_add(string_list_t *string_list, char *string) {
+    string_list->size++;
+    string_list->strings = (char**)realloc(string_list->strings, string_list->size * sizeof(char*));
+    string_list->strings[string_list->size - 1] = string;
+}
+
 static void init_watchers();
 
 static void cleanup_curl_multi_ez() {
@@ -59,24 +70,20 @@ static void on_sigint(uv_signal_t *sig, int signum) {
 }
 
 static void start_transfers(const char *ticker_string) {
-    char sign_diff_print[512];
-    char *ticker_list[16];
-    size_t ticker_list_length = 0;
+    string_list_t ticker_list;
+    ticker_list.size = 0;
+    ticker_list.strings = (char**)malloc(sizeof(char*));
 
     char *ticker = strsep(&ticker_string, " ");
-
     while (ticker!= NULL) {
-        ticker_list[ticker_list_length] = ticker;
-
+        string_list_add(&ticker_list, ticker);
         ticker = strsep(&ticker_string, " ");
-        ticker_list_length++;
-        if (ticker_list_length > 15) {
-            break;
-        }
     }
 
-    printf("first ticker = %s\n", ticker_list[0]);
-    printf("ticker_list_length = %zu\n", ticker_list_length);
+    printf("first ticker = %s\n", ticker_list.strings[0]);
+    printf("ticker_list_length = %zu\n", ticker_list.size);
+
+    free(ticker_list.strings);
 }
 
 static void on_stdin_read(uv_fs_t *read_req) {
