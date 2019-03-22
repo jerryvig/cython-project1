@@ -325,23 +325,19 @@ static char *crumb;
 
 void prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     CURL *ez = curl_multi_ez->ez_pool[0];
-    /* memory_t memoria;
-    memoria.memory = (char*)malloc(1);
-    memoria.size = 0;
 
-    curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)&memoria); */
     const char *crumb_url = "https://finance.yahoo.com/quote/AAPL/history";
     curl_easy_setopt(ez, CURLOPT_URL, crumb_url);
+
+    void *private;
+    curl_easy_getinfo(ez, CURLINFO_PRIVATE, &private);
 
     const CURLcode response = curl_easy_perform(ez);
     if (response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
     }
 
-    char *memoria_char;
-    curl_easy_getinfo(ez, CURLOPT_PRIVATE, &memoria_char);
-    memory_t *memoria = (memory_t*)memoria_char;
-    printf("memoria->memory = \"%s\"\n", memoria->memory);
+    memory_t *memoria = (memory_t*)private;
 
     crumb = (char*)malloc(128 * sizeof(char));
     memset(crumb, 0, 128);
