@@ -96,9 +96,6 @@ static void start_transfers(const char *ticker_string) {
         }
     } while (ticker!= NULL);
 
-    printf("first ticker = %s\n", ticker_list.strings[0]);
-    printf("ticker_list_length = %zu\n", ticker_list.size);
-
     for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < ticker_list.size); ++transfers) {
         fprintf(stderr, "Adding ticker '%s' to downloads...\n", ticker_list.strings[transfers]);
         add_download(ticker_list.strings[transfers], transfers);
