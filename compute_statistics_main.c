@@ -115,17 +115,13 @@ static void check_multi_info(void) {
     memory_t *buffer;
 
     while ((message = curl_multi_info_read(curl_multi_ez.curl_multi, &pending))) {
-        switch(message->msg) {
-            case CURLMSG_DONE:
-                ez = message->easy_handle;
-                curl_easy_getinfo(ez, CURLINFO_EFFECTIVE_URL, &done_url);
-                curl_easy_getinfo(ez, CURLINFO_PRIVATE, &buffer);
-                fprintf(stderr, "Finished fetching data for %s\n", done_url);
-
-                break;
-            default:
-                fprintf(stderr, "CURL message default.\n");
-                break;
+        if (message->msg == CURLMSG_DONE) {
+            ez = message->easy_handle;
+            curl_easy_getinfo(ez, CURLINFO_EFFECTIVE_URL, &done_url);
+            curl_easy_getinfo(ez, CURLINFO_PRIVATE, &buffer);
+            fprintf(stderr, "Finished fetching data for %s\n", done_url);
+        } else {
+            fprintf(stderr, "CURL message default.\n");
         }
     }
 }
@@ -199,6 +195,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
         default:
             abort();
     }
+    return 0;
 }
 
 static CURLM *create_and_init_curl_multi() {
