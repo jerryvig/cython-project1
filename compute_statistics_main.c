@@ -61,7 +61,7 @@ static void on_sigint(uv_signal_t *sig, int signum) {
 static void start_transfers(const char *ticker_string) {
     char sign_diff_print[512];
     char *ticker_list[16];
-    register int ticker_list_length;
+    size_t ticker_list_length = 0;
 
     char *ticker = strsep(&ticker_string, " ");
 
@@ -74,6 +74,9 @@ static void start_transfers(const char *ticker_string) {
             break;
         }
     }
+
+    printf("first ticker = %s\n", ticker_list[0]);
+    printf("ticker_list_length = %zu\n", ticker_list_length);
 }
 
 static void on_stdin_read(uv_fs_t *read_req) {
@@ -88,7 +91,9 @@ static void on_stdin_read(uv_fs_t *read_req) {
 
             //This will need to change here.
             //start the transfers here.
-            process_tickers(ticker_buffer, &curl_multi_ez, timestamps);
+            //process_tickers(ticker_buffer, &curl_multi_ez, timestamps);
+            start_transfers(ticker_buffer);
+
             clock_gettime(CLOCK_MONOTONIC, &end);
 
             printf("proc'ed in %.6f s\n",
