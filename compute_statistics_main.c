@@ -41,13 +41,13 @@ typedef struct {
     size_t size;
 } string_list_t;
 
-static string_list_t ticker_list;
-
 static void string_list_add(string_list_t *string_list, char *string) {
     string_list->size++;
     string_list->strings = (char**)realloc(string_list->strings, string_list->size * sizeof(char*));
     string_list->strings[string_list->size - 1] = string;
 }
+
+string_list_t ticker_list;
 
 static void init_watchers();
 
@@ -86,6 +86,8 @@ static void add_download(const char *ticker, size_t num) {
 }
 
 static void start_transfers(const char *ticker_string) {
+    puts("in start transfers");
+
     ticker_list.size = 0;
     ticker_list.strings = (char**)malloc(sizeof(char*));
 
@@ -101,7 +103,8 @@ static void start_transfers(const char *ticker_string) {
         add_download(ticker_list.strings[transfers], transfers);
     }
 
-    // free(ticker_list.strings);
+    puts("next ticker ");
+    puts(ticker_list.strings[transfers]);
 }
 
 static void on_stdin_read(uv_fs_t *read_req) {
@@ -172,7 +175,8 @@ static void check_multi_info(void) {
             fprintf(stderr, "Finished fetching data for %s\n", done_url);
 
             if (buffer) {
-                printf("data retrieved = \"%s\"\n", buffer->memory);
+                puts("data retrieved");
+                //printf("data retrieved = \"%s\"\n", buffer->memory);
 
                 //call into the processing of the data here.
                 //This is where you would launch worker threads on the uv work queue.
@@ -180,7 +184,20 @@ static void check_multi_info(void) {
 
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
 
+            puts(ticker_list.strings[transfers]);
+
             //if there are more transfers to be done, then continue with the transfers.
+            if (transfers < ticker_list.size) {
+                buffer->memory = (char*)malloc(1);
+                buffer->size = 0;
+
+                printf("transfers = %zu\n", transfers);
+                printf("first ticker = %s\n", ticker_list.strings[0]);
+
+                printf("going to add another download for %s\n", ticker_list.strings[transfers]);
+                printf("ticker_list.size = %zu\n", ticker_list.size);
+                add_download(ticker_list.strings[transfers], transfers++);
+            }
 
         } else {
             fprintf(stderr, "CURL message default.\n");
