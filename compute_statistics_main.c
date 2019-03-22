@@ -23,12 +23,13 @@ static uv_timer_t timeout;
 
 static char ticker_buffer[BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
+static char *crumb;
 static size_t stdin_len;
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
 static curl_multi_ez_t curl_multi_ez;
-static int transfers;
+static size_t transfers;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
@@ -69,6 +70,19 @@ static void on_sigint(uv_signal_t *sig, int signum) {
     uv_kill(getpid(), SIGTERM);
 }
 
+static void add_download(const char *ticker, int num) {
+    //round-robin assignment to ez_pool handles.
+    const int ez_pool_index = num % EZ_POOL_SIZE;
+    CURL *ez = curl_multi_ez.ez_pool[ez_pool_index];
+
+    char download_url[256] = {'\0'};
+    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
+
+    curl_easy_setopt(ez, CURLOPT_URL, download_url);
+    curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
+    fprintf(stderr, "Added download for ticker '%s'\n", ticker);
+}
+
 static void start_transfers(const char *ticker_string) {
     string_list_t ticker_list;
     ticker_list.size = 0;
@@ -84,6 +98,11 @@ static void start_transfers(const char *ticker_string) {
 
     printf("first ticker = %s\n", ticker_list.strings[0]);
     printf("ticker_list_length = %zu\n", ticker_list.size);
+
+    for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < ticker_list.size); ++transfers) {
+        fprintf(stderr, "Adding ticker '%s' to downloads...\n", ticker_list.strings[transfers]);
+        add_download(ticker_list.strings[transfers], transfers);
+    }
 
     free(ticker_list.strings);
 }
@@ -271,7 +290,7 @@ int main(void) {
     uv_signal_init(loop, &sigint_watcher);
     uv_signal_start(&sigint_watcher, on_sigint, SIGINT);
 
-    prime_crumb(&curl_multi_ez);
+    crumb = prime_crumb(&curl_multi_ez);
 
     init_watchers();
 
