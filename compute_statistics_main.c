@@ -70,9 +70,9 @@ static void on_sigint(uv_signal_t *sig, int signum) {
     uv_kill(getpid(), SIGTERM);
 }
 
-static void add_download(const char *ticker, int num) {
+static void add_download(const char *ticker, size_t num) {
     //round-robin assignment to ez_pool handles.
-    const int ez_pool_index = num % EZ_POOL_SIZE;
+    const size_t ez_pool_index = num % EZ_POOL_SIZE;
     CURL *ez = curl_multi_ez.ez_pool[ez_pool_index];
 
     char download_url[256] = {'\0'};
@@ -80,7 +80,7 @@ static void add_download(const char *ticker, int num) {
 
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
     curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
-    fprintf(stderr, "Added download for ticker '%s'\n", ticker);
+    fprintf(stderr, "Added download for ticker \"%s\".\n", ticker);
 }
 
 static void start_transfers(const char *ticker_string) {
@@ -97,7 +97,6 @@ static void start_transfers(const char *ticker_string) {
     } while (ticker!= NULL);
 
     for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < ticker_list.size); ++transfers) {
-        fprintf(stderr, "Adding ticker '%s' to downloads...\n", ticker_list.strings[transfers]);
         add_download(ticker_list.strings[transfers], transfers);
     }
 
@@ -173,6 +172,9 @@ static void check_multi_info(void) {
 
             if (buffer) {
                 printf("data retrieved = \"%s\"\n", buffer->memory);
+
+                //call into the processing of the data here.
+                //This is where you would launch worker threads on the uv work queue.
             }
         } else {
             fprintf(stderr, "CURL message default.\n");
