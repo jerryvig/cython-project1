@@ -48,7 +48,7 @@ static void string_list_add(string_list_t *string_list, char *string) {
     string_list->strings[string_list->size - 1] = string;
 }
 
-string_list_t ticker_list;
+static string_list_t ticker_list;
 
 static void init_watchers();
 
@@ -98,6 +98,10 @@ static void start_transfers(const char *ticker_string) {
     char *ticker_string_copy = (char*)calloc(strlen(ticker_string) + 1, sizeof(char));
     strcpy(ticker_string_copy, ticker_string);
     ticker_string_copy_start = ticker_string_copy;
+
+    if (ticker_list.strings != NULL) {
+        free(ticker_list.strings);
+    }
 
     ticker_list.size = 0;
     ticker_list.strings = (char**)malloc(sizeof(char*));
