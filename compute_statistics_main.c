@@ -157,9 +157,12 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     return context;
 }
 
+static void on_poll_handle_close(uv_handle_t *handle) {
+    free(handle);
+}
+
 static void destroy_curl_context(curl_context_t *context) {
-    uv_close((uv_handle_t*)&context->poll_handle, NULL);
-    free(context);
+    uv_close((uv_handle_t*)&context->poll_handle, on_poll_handle_close);
 }
 
 static void check_multi_info(void) {
@@ -266,6 +269,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
         case CURL_POLL_REMOVE:
             if (socketp) {
                 uv_poll_stop(&((curl_context_t*)socketp)->poll_handle);
+                fprintf(stderr, "about to destroy the curl context\n");
                 destroy_curl_context((curl_context_t*)socketp);
                 curl_multi_assign(curl_multi_ez.curl_multi, sock, NULL);
             }
