@@ -1,5 +1,6 @@
 #define _DEFAULT_SOURCE
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -150,6 +151,7 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     int r = uv_poll_init_socket(loop, &context->poll_handle, sockfd);
     if (r) {
         fprintf(stderr, "Failed to initialize poller on socket.\n");
+        assert(r == 0);
     }
     context->poll_handle.data = context;
     return context;
@@ -191,8 +193,7 @@ static void check_multi_info(void) {
                 buffer->size = 0;
 
                 printf("transfers = %zu\n", transfers);
-                printf("going to add another download for '%s'\n", ticker_list.strings[transfers]);
-
+                printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
                 add_download(ticker_list.strings[transfers], transfers, ez);
                 transfers++;
             }
