@@ -72,39 +72,40 @@ static void on_sigint(uv_signal_t *sig, int signum) {
     uv_kill(getpid(), SIGTERM);
 }
 
-static void add_download(const char *ticker, size_t num) {
-    //round-robin assignment to ez_pool handles.
+static void add_download(const char *ticker, size_t num, CURL *ez) {
     const size_t ez_pool_index = num % EZ_POOL_SIZE;
-    CURL *ez = curl_multi_ez.ez_pool[ez_pool_index];
+    if (ez == NULL) {
+        // do round-robin assignment if no ez handle is provided.
+        ez = curl_multi_ez.ez_pool[ez_pool_index];
+    }
 
     char download_url[256] = {'\0'};
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
 
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
+
     curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
     fprintf(stderr, "Added download for ticker \"%s\".\n", ticker);
 }
 
 static void start_transfers(const char *ticker_string) {
-    puts("in start transfers");
+    char *ticker_string_copy = (char*)calloc(strlen(ticker_string) + 1, sizeof(char));
+    strcpy(ticker_string_copy, ticker_string);
 
     ticker_list.size = 0;
     ticker_list.strings = (char**)malloc(sizeof(char*));
 
     char *ticker;
     do {
-        ticker = strsep(&ticker_string, " ");
+        ticker = strsep(&ticker_string_copy, " ");
         if (ticker != NULL) {
             string_list_add(&ticker_list, ticker);
         }
     } while (ticker!= NULL);
 
     for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < ticker_list.size); ++transfers) {
-        add_download(ticker_list.strings[transfers], transfers);
+        add_download(ticker_list.strings[transfers], transfers, NULL);
     }
-
-    puts("next ticker ");
-    puts(ticker_list.strings[transfers]);
 }
 
 static void on_stdin_read(uv_fs_t *read_req) {
@@ -175,7 +176,7 @@ static void check_multi_info(void) {
             fprintf(stderr, "Finished fetching data for %s\n", done_url);
 
             if (buffer) {
-                puts("data retrieved");
+                printf("data retrieved\n");
                 //printf("data retrieved = \"%s\"\n", buffer->memory);
 
                 //call into the processing of the data here.
@@ -184,19 +185,16 @@ static void check_multi_info(void) {
 
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
 
-            puts(ticker_list.strings[transfers]);
-
             //if there are more transfers to be done, then continue with the transfers.
-            if (transfers < ticker_list.size) {
+            if (buffer && transfers < ticker_list.size) {
                 buffer->memory = (char*)malloc(1);
                 buffer->size = 0;
 
                 printf("transfers = %zu\n", transfers);
-                printf("first ticker = %s\n", ticker_list.strings[0]);
+                printf("going to add another download for '%s'\n", ticker_list.strings[transfers]);
 
-                printf("going to add another download for %s\n", ticker_list.strings[transfers]);
-                printf("ticker_list.size = %zu\n", ticker_list.size);
-                add_download(ticker_list.strings[transfers], transfers++);
+                add_download(ticker_list.strings[transfers], transfers, ez);
+                transfers++;
             }
 
         } else {
