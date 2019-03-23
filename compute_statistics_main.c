@@ -52,7 +52,7 @@ string_list_t ticker_list;
 static void init_watchers();
 
 static void cleanup_curl_multi_ez() {
-    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
+    for (register int8_t i = 0; i < EZ_POOL_SIZE; ++i) {
         memory_t *private_data;
         CURL *ez = curl_multi_ez.ez_pool[i];
         curl_easy_getinfo(ez, CURLINFO_PRIVATE, &private_data);
@@ -270,6 +270,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
             }
             break;
         default:
+            fprintf(stderr, "ABOUT TO CALL ABORT() SYSTEM CALL\n");
             abort();
     }
     return 0;
@@ -286,7 +287,7 @@ static CURLM *create_and_init_curl_multi() {
 
 static void create_and_init_multi_ez() {
     curl_multi_ez.curl_multi = create_and_init_curl_multi();
-    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
+    for (register int8_t i = 0; i < EZ_POOL_SIZE; ++i) {
         curl_multi_ez.ez_pool[i] = create_and_init_curl();
     }
 }
