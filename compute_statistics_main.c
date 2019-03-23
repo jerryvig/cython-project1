@@ -10,7 +10,7 @@
 #include <uv.h>
 #include "compute_statistics.h"
 
-#define BUFFER_SIZE 128
+#define INPUT_BUFFER_SIZE 128
 
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
@@ -22,7 +22,7 @@ static uv_fs_t stdin_watcher;
 static uv_fs_t stdout_watcher;
 static uv_timer_t timeout;
 
-static char ticker_buffer[BUFFER_SIZE];
+static char ticker_buffer[INPUT_BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
 static char *crumb;
 static size_t stdin_len;
@@ -89,9 +89,15 @@ static void add_download(const char *ticker, size_t num, CURL *ez) {
     fprintf(stderr, "Added download for ticker \"%s\".\n", ticker);
 }
 
+static char *ticker_string_copy_start;
 static void start_transfers(const char *ticker_string) {
+    if (ticker_string_copy_start != NULL) {
+        free(ticker_string_copy_start);
+    }
+
     char *ticker_string_copy = (char*)calloc(strlen(ticker_string) + 1, sizeof(char));
     strcpy(ticker_string_copy, ticker_string);
+    ticker_string_copy_start = ticker_string_copy;
 
     ticker_list.size = 0;
     ticker_list.strings = (char**)malloc(sizeof(char*));
@@ -130,15 +136,17 @@ static void on_stdin_read(uv_fs_t *read_req) {
                    ((double)end.tv_sec + 1.0e-9 * end.tv_nsec) -
                    ((double)start.tv_sec + 1.0e-9 * start.tv_nsec));
         }
-        init_watchers();
+        //don't init the watchers again here. they should be inited again after retrieval
+        // and processing of the batch is complete.
+        //init_watchers();
     } else if (stdin_watcher.result < 0) {
         fprintf(stderr, "error opening stdin.\n");
     }
 }
 
 static void init_watchers(void) {
-    memset(ticker_buffer, 0, BUFFER_SIZE);
-    uv_buf_t stdin_buf = uv_buf_init(ticker_buffer, BUFFER_SIZE);
+    memset(ticker_buffer, 0, INPUT_BUFFER_SIZE);
+    uv_buf_t stdin_buf = uv_buf_init(ticker_buffer, INPUT_BUFFER_SIZE);
     uv_buf_t stdout_buf = uv_buf_init(prompt, strlen(prompt));
     uv_fs_write(loop, &stdout_watcher, STDOUT_FILENO, &stdout_buf, 1, -1, NULL);
     uv_fs_read(loop, &stdin_watcher, STDIN_FILENO, &stdin_buf, 1, -1, on_stdin_read);
@@ -192,15 +200,25 @@ static void check_multi_info(void) {
 
             //if there are more transfers to be done, then continue with the transfers.
             if (buffer && transfers < ticker_list.size) {
+                free(buffer->memory);
                 buffer->memory = (char*)malloc(1);
                 buffer->size = 0;
 
-                printf("transfers = %zu\n", transfers);
+                /// printf("transfers = %zu\n", transfers);
                 printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
                 add_download(ticker_list.strings[transfers], transfers, ez);
                 transfers++;
+            } else if (transfers >= ticker_list.size) {
+                //try this.
+                printf("in this else if block()\n");
+                // printf("transfers = %zu\n", transfers);
+                free(buffer->memory);
+                buffer->memory = (char*)malloc(1);
+                buffer->size = 0;
+                //transfers = 0;
+                //init watchers should only be called once after the last download completes.
+                init_watchers();
             }
-
         } else {
             fprintf(stderr, "CURL message default.\n");
         }
@@ -269,7 +287,7 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
         case CURL_POLL_REMOVE:
             if (socketp) {
                 uv_poll_stop(&((curl_context_t*)socketp)->poll_handle);
-                fprintf(stderr, "about to destroy the curl context\n");
+                fprintf(stderr, "destroying the cURL context.\n");
                 destroy_curl_context((curl_context_t*)socketp);
                 curl_multi_assign(curl_multi_ez.curl_multi, sock, NULL);
             }
