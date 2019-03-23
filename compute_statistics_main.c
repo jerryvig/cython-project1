@@ -70,6 +70,11 @@ static void on_sigint(uv_signal_t *sig, int signum) {
     uv_signal_stop(sig);
     uv_close((uv_handle_t*)sig, NULL);
     cleanup_curl_multi_ez();
+
+    if (ticker_list.strings != NULL) {
+        free(ticker_list.strings);
+    }
+
     uv_kill(getpid(), SIGTERM);
 }
 
