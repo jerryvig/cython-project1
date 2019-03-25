@@ -39,7 +39,7 @@ typedef struct curl_context_s {
 
 typedef struct {
     char **strings;
-    size_t size;
+    int16_t size;
 } string_list_t;
 
 static void string_list_add(string_list_t *string_list, char *string) {
@@ -119,7 +119,7 @@ static void start_transfers(const char *ticker_string) {
         }
     } while (ticker!= NULL);
 
-    for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < ticker_list.size); ++transfers) {
+    for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < (size_t)ticker_list.size); ++transfers) {
         add_download(ticker_list.strings[transfers], transfers, NULL);
     }
 }
@@ -208,7 +208,7 @@ static void check_multi_info(void) {
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
 
             //if there are more transfers to be done, then continue with the transfers.
-            if (buffer && transfers < ticker_list.size) {
+            if (buffer && transfers < (size_t)ticker_list.size) {
                 free(buffer->memory);
                 buffer->memory = (char*)malloc(1);
                 buffer->size = 0;
@@ -217,7 +217,7 @@ static void check_multi_info(void) {
                 printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
                 add_download(ticker_list.strings[transfers], transfers, ez);
                 transfers++;
-            } else if (transfers >= ticker_list.size) {
+            } else if (transfers >= (size_t)ticker_list.size) {
                 //try this.
                 printf("in this else if block()\n");
                 // printf("transfers = %zu\n", transfers);
