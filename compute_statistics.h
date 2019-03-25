@@ -11,6 +11,7 @@ typedef struct {
 typedef struct {
     memory_t *buffer;
     char *ticker_string;
+    CURL *ez;
 } private_data_t;
 
 typedef struct {

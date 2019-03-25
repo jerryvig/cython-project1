@@ -181,18 +181,16 @@ static void after_work(uv_work_t *job, int status) {
             free(private_data->buffer->memory);
             private_data->buffer->memory = (char*)malloc(1);
             private_data->buffer->size = 0;
-
-            // we need to bind ez to the object passed here.
-            // add_download(ticker_list.strings[transfers], transfers, ez);
-            add_download(ticker_list.strings[transfers], transfers, NULL);
+            add_download(ticker_list.strings[transfers], transfers, private_data->ez);
             transfers++;
         } else if (transfers == (size_t)ticker_list.size) {
             printf("in this else if block()\n");
             free(private_data->buffer->memory);
             private_data->buffer->memory = (char*)malloc(1);
             private_data->buffer->size = 0;
+            memset(private_data->ticker_string, 0, 16);
 
-            puts("calling init_wachers()\n");
+            puts("calling init_watchers()\n");
             init_watchers();
         }
         free(job);
@@ -202,7 +200,8 @@ static void after_work(uv_work_t *job, int status) {
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
     // printf("data = %s\n", private_data->buffer->memory);
-    printf("in do_work()\n");
+    char *ts = private_data->ticker_string;
+    printf("in do_work() for %s\n", ts);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {

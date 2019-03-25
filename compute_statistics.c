@@ -511,6 +511,8 @@ CURL *create_and_init_curl(void) {
     private_data->ticker_string = ticker_string;
 
     CURL *ez = curl_easy_init();
+    private_data->ez = ez;
+
     curl_easy_setopt(ez, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(ez, CURLOPT_COOKIEFILE, "");
     curl_easy_setopt(ez, CURLOPT_ACCEPT_ENCODING, "br, gzip");
