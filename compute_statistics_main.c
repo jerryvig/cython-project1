@@ -176,14 +176,33 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
 
 static void after_work(uv_work_t *job, int status) {
     if (!status) {
+        private_data_t *private_data = (private_data_t*)job->data;
+        if (private_data->buffer && transfers < (size_t)ticker_list.size) {
+            free(private_data->buffer->memory);
+            private_data->buffer->memory = (char*)malloc(1);
+            private_data->buffer->size = 0;
+
+            // we need to bind ez to the object passed here.
+            // add_download(ticker_list.strings[transfers], transfers, ez);
+            add_download(ticker_list.strings[transfers], transfers, NULL);
+            transfers++;
+        } else if (transfers == (size_t)ticker_list.size) {
+            printf("in this else if block()\n");
+            free(private_data->buffer->memory);
+            private_data->buffer->memory = (char*)malloc(1);
+            private_data->buffer->size = 0;
+
+            puts("calling init_wachers()\n");
+            init_watchers();
+        }
         free(job);
     }
 }
 
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
-    printf("data = %s\n", private_data->buffer->memory);
-    printf("in do_work() mother fucker\n");
+    // printf("data = %s\n", private_data->buffer->memory);
+    printf("in do_work()\n");
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {
@@ -221,29 +240,6 @@ static void check_multi_info(void) {
             }
 
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
-
-            //if there are more transfers to be done, then continue with the transfers.
-            if (private_data->buffer && transfers < (size_t)ticker_list.size) {
-                //This cleanup should now be done in after_work() or maybe after the joining the threads.
-                free(private_data->buffer->memory);
-                private_data->buffer->memory = (char*)malloc(1);
-                private_data->buffer->size = 0;
-
-                /// printf("transfers = %zu\n", transfers);
-                //printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
-                add_download(ticker_list.strings[transfers], transfers, ez);
-                transfers++;
-            } else if (transfers >= (size_t)ticker_list.size) {
-                //try this.
-                printf("in this else if block()\n");
-                // printf("transfers = %zu\n", transfers);
-                free(private_data->buffer->memory);
-                private_data->buffer->memory = (char*)malloc(1);
-                private_data->buffer->size = 0;
-                //transfers = 0;
-                //init watchers should only be called once after the last download completes.
-                init_watchers();
-            }
         } else {
             fprintf(stderr, "CURL message default.\n");
         }
