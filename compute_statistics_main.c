@@ -174,6 +174,18 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     return context;
 }
 
+static void after_work(uv_work_t *job, int status) {
+    if (!status) {
+        free(job);
+    }
+}
+
+static void do_work(uv_work_t *job) {
+    private_data_t *private_data = (private_data_t*)job->data;
+    printf("data = %s\n", private_data->buffer->memory);
+    printf("in do_work() mother fucker\n");
+}
+
 static void on_poll_handle_close(uv_handle_t *handle) {
     free(handle);
 }
@@ -199,22 +211,26 @@ static void check_multi_info(void) {
 
             if (private_data) {
                 printf("data retrieved\n");
-                //printf("data retrieved = \"%s\"\n", buffer->memory);
+                //printf("data retrieved = \"%s\"\n", private_data->buffer->memory);
 
                 //call into the processing of the data here.
                 //This is where you would launch worker threads on the uv work queue.
+                uv_work_t *job = (uv_work_t*)malloc(sizeof(uv_work_t));
+                job->data = (void*)private_data;
+                uv_queue_work(loop, job, do_work, after_work);
             }
 
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
 
             //if there are more transfers to be done, then continue with the transfers.
             if (private_data->buffer && transfers < (size_t)ticker_list.size) {
+                //This cleanup should now be done in after_work() or maybe after the joining the threads.
                 free(private_data->buffer->memory);
                 private_data->buffer->memory = (char*)malloc(1);
                 private_data->buffer->size = 0;
 
                 /// printf("transfers = %zu\n", transfers);
-                printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
+                //printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
                 add_download(ticker_list.strings[transfers], transfers, ez);
                 transfers++;
             } else if (transfers >= (size_t)ticker_list.size) {
