@@ -9,6 +9,11 @@ typedef struct {
 } memory_t;
 
 typedef struct {
+    memory_t *buffer;
+    char *ticker_string;
+} private_data_t;
+
+typedef struct {
     char avg_move_10_up[16];
     char avg_move_10_down[16];
     char change[16];

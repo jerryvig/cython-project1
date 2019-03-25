@@ -188,16 +188,16 @@ static void check_multi_info(void) {
     int pending;
 
     CURL *ez;
-    memory_t *buffer;
+    private_data_t *private_data;
 
     while ((message = curl_multi_info_read(curl_multi_ez.curl_multi, &pending))) {
         if (message->msg == CURLMSG_DONE) {
             ez = message->easy_handle;
             curl_easy_getinfo(ez, CURLINFO_EFFECTIVE_URL, &done_url);
-            curl_easy_getinfo(ez, CURLINFO_PRIVATE, &buffer);
+            curl_easy_getinfo(ez, CURLINFO_PRIVATE, &private_data);
             fprintf(stderr, "Finished fetching data for %s\n", done_url);
 
-            if (buffer) {
+            if (private_data) {
                 printf("data retrieved\n");
                 //printf("data retrieved = \"%s\"\n", buffer->memory);
 
@@ -208,10 +208,10 @@ static void check_multi_info(void) {
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
 
             //if there are more transfers to be done, then continue with the transfers.
-            if (buffer && transfers < (size_t)ticker_list.size) {
-                free(buffer->memory);
-                buffer->memory = (char*)malloc(1);
-                buffer->size = 0;
+            if (private_data->buffer && transfers < (size_t)ticker_list.size) {
+                free(private_data->buffer->memory);
+                private_data->buffer->memory = (char*)malloc(1);
+                private_data->buffer->size = 0;
 
                 /// printf("transfers = %zu\n", transfers);
                 printf("adding another download for '%s'\n", ticker_list.strings[transfers]);
@@ -221,9 +221,9 @@ static void check_multi_info(void) {
                 //try this.
                 printf("in this else if block()\n");
                 // printf("transfers = %zu\n", transfers);
-                free(buffer->memory);
-                buffer->memory = (char*)malloc(1);
-                buffer->size = 0;
+                free(private_data->buffer->memory);
+                private_data->buffer->memory = (char*)malloc(1);
+                private_data->buffer->size = 0;
                 //transfers = 0;
                 //init watchers should only be called once after the last download completes.
                 init_watchers();

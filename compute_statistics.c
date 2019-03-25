@@ -335,15 +335,15 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
         printf("curl_easy_perform() failed.....\n");
     }
 
-    memory_t *memoria = (memory_t*)private;
+    private_data_t *private_data = (private_data_t*)private;
 
     crumb = (char*)calloc(128, sizeof(char));
-    int crumb_failure = get_crumb(memoria->memory, crumb);
+    int crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
     // reset the memory buffer.
-    free(memoria->memory);
-    memoria->memory = (char*)malloc(1);
-    memoria->size = 0;
+    free(private_data->buffer);
+    private_data->buffer = (char*)malloc(1);
+    private_data->buffer->size = 0;
 
     if (crumb_failure) {
         fprintf(stderr, "Failed to prime crumb...\n");
@@ -506,6 +506,10 @@ CURL *create_and_init_curl(void) {
     char *ticker_string = (char*)malloc(16 * sizeof(char));
     memset(ticker_string, 0, 16);
 
+    private_data_t *private_data = (private_data_t*)malloc(sizeof(private_data));
+    private_data->buffer = buffer;
+    private_data->ticker_string = ticker_string;
+
     CURL *ez = curl_easy_init();
     curl_easy_setopt(ez, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     curl_easy_setopt(ez, CURLOPT_COOKIEFILE, "");
@@ -520,7 +524,7 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)buffer);
     curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
     curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)ticker_string);
-    curl_easy_setopt(ez, CURLOPT_PRIVATE, (void*)buffer);
+    curl_easy_setopt(ez, CURLOPT_PRIVATE, (void*)private_data);
     return ez;
 }
 
