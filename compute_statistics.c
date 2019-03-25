@@ -406,7 +406,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     const register int ticker_strlen = strlen(ticker_string);
     strncpy(ticker_str, ticker_string, ticker_strlen);
 
-    for (register int i = 0; i < ticker_strlen; ++i) {
+    for (register int8_t i = 0; i < ticker_strlen; ++i) {
         if (ticker_string[i] != '\n') {
             ticker_str[i] = toupper(ticker_str[i]);
         } else {
