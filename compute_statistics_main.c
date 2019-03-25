@@ -25,7 +25,7 @@ static uv_timer_t timeout;
 static char ticker_buffer[INPUT_BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
 static char *crumb;
-static size_t stdin_len;
+static int16_t stdin_len;
 static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
