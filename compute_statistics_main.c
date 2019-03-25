@@ -30,7 +30,9 @@ static char timestamps[2][12];
 static struct timespec start;
 static struct timespec end;
 static curl_multi_ez_t curl_multi_ez;
+
 static size_t transfers;
+static size_t completed_transfers;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
@@ -119,6 +121,7 @@ static void start_transfers(const char *ticker_string) {
         }
     } while (ticker!= NULL);
 
+    completed_transfers = 0;
     for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < (size_t)ticker_list.size); ++transfers) {
         add_download(ticker_list.strings[transfers], transfers, NULL);
     }
@@ -176,6 +179,7 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
 
 static void after_work(uv_work_t *job, int status) {
     if (!status) {
+        completed_transfers++;
         private_data_t *private_data = (private_data_t*)job->data;
         if (private_data->buffer && transfers < (size_t)ticker_list.size) {
             free(private_data->buffer->memory);
@@ -183,7 +187,7 @@ static void after_work(uv_work_t *job, int status) {
             private_data->buffer->size = 0;
             add_download(ticker_list.strings[transfers], transfers, private_data->ez);
             transfers++;
-        } else if (transfers == (size_t)ticker_list.size) {
+        } else if (transfers >= (size_t)ticker_list.size) {
             printf("in this else if block()\n");
             free(private_data->buffer->memory);
             private_data->buffer->memory = (char*)malloc(1);
@@ -191,7 +195,13 @@ static void after_work(uv_work_t *job, int status) {
             memset(private_data->ticker_string, 0, 16);
 
             puts("calling init_watchers()\n");
-            init_watchers();
+            // you need some check here to determine that everything is done.
+            printf("transfers = %zu\n", transfers);
+            printf("completed_transfers = %zu\n", completed_transfers);
+            if (completed_transfers == (size_t)ticker_list.size) {
+                printf("you are here\n");
+                init_watchers();
+            }
         }
         free(job);
     }
