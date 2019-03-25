@@ -339,9 +339,9 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
 
     crumb = (char*)calloc(128, sizeof(char));
     int crumb_failure = get_crumb(memoria->memory, crumb);
-    free(memoria->memory);
 
-    //reset the memory buffer.
+    // reset the memory buffer.
+    free(memoria->memory);
     memoria->memory = (char*)malloc(1);
     memoria->size = 0;
 
