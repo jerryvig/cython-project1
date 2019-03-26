@@ -37,7 +37,7 @@ typedef struct curl_context_s {
 static void init_watchers();
 
 static void cleanup_curl_multi_ez() {
-    for (register int i = 0; i < EZ_POOL_SIZE; ++i) {
+    for (register int8_t i = 0; i < EZ_POOL_SIZE; ++i) {
         curl_easy_cleanup(curl_multi_ez.ez_pool[i]);
     }
     curl_multi_cleanup(curl_multi_ez.curl_multi);
@@ -194,7 +194,7 @@ static CURLM *create_and_init_curl_multi() {
 
 static void create_and_init_multi_ez() {
     curl_multi_ez.curl_multi = create_and_init_curl_multi();
-    for (int i = 0; i < EZ_POOL_SIZE; ++i) {
+    for (int8_t i = 0; i < EZ_POOL_SIZE; ++i) {
         curl_multi_ez.ez_pool[i] = create_and_init_curl();
 
         memory_t *buffer = (memory_t*)malloc(sizeof(memory_t));
