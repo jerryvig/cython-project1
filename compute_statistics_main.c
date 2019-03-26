@@ -139,6 +139,7 @@ static void on_stdin_read(uv_fs_t *read_req) {
 
             start_transfers(ticker_buffer);
 
+            //The end point of the clock should be in do_work(), after_work() or similar.
             clock_gettime(CLOCK_MONOTONIC, &end);
 
             printf("proc'ed in %.6f s\n",
@@ -146,7 +147,7 @@ static void on_stdin_read(uv_fs_t *read_req) {
                    ((double)start.tv_sec + 1.0e-9 * start.tv_nsec));
         }
     } else if (stdin_watcher.result < 0) {
-        fprintf(stderr, "error opening stdin.\n");
+        fprintf(stderr, "error opening stdin...\n");
     }
 }
 
@@ -171,11 +172,11 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     return context;
 }
 
-void reset_private_data(private_data_t *private_data) {
+void reset_private_data(const private_data_t *private_data) {
     free(private_data->buffer->memory);
     private_data->buffer->memory = (char*)malloc(1);
     private_data->buffer->size = 0;
-    memset(private_data->ticker_string, 0, 16);
+    memset(private_data->ticker_string, 0, sizeof private_data->ticker_string);
 }
 
 static void after_work(uv_work_t *job, int status) {

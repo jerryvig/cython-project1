@@ -50,7 +50,7 @@ int get_title(const char *response_text, char *title);
 char *prime_crumb();
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez,
     char timestamps[][12]);
-void reset_private_data(private_data_t *private_data);
+void reset_private_data(const private_data_t *private_data);
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values,
     const CURL *curl, char timestamps[][12]);
 

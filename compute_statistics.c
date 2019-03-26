@@ -412,14 +412,9 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
 
     CURLcode curl_response = curl_easy_perform(curl);
 
-    //CURLcode *curl_response = (CURLcode*)curl_return_value;
     if (curl_response != CURLE_OK) {
         printf("curl_easy_perform() failed.....\n");
     }
-    //free(curl_return_value);
-
-    // clock_gettime(CLOCK_MONOTONIC, &end);
-    // printf("curl_thread proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
 
     double changes_daily[512];
     const int16_t changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
@@ -440,7 +435,7 @@ CURL *create_and_init_curl(void) {
     buffer->size = 0;
     private_data_t *private_data = (private_data_t*)malloc(sizeof(private_data_t));
     private_data->buffer = buffer;
-    memset(&private_data->ticker_string[0], 0, 16);
+    memset(private_data->ticker_string, 0, sizeof private_data->ticker_string);
 
     CURL *ez = curl_easy_init();
     private_data->ez = ez;
