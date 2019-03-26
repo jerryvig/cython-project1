@@ -209,7 +209,7 @@ static void after_work(uv_work_t *job, int status) {
 
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
-    printf("data = %s\n", private_data->buffer->memory);
+    // printf("data = %s\n", private_data->buffer->memory);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {
@@ -315,7 +315,6 @@ static int handle_socket(CURL *ez, curl_socket_t sock, int action, void *userp, 
         case CURL_POLL_REMOVE:
             if (socketp) {
                 uv_poll_stop(&((curl_context_t*)socketp)->poll_handle);
-                fprintf(stderr, "destroying the cURL context.\n");
                 destroy_curl_context((curl_context_t*)socketp);
                 curl_multi_assign(curl_multi_ez.curl_multi, sock, NULL);
             }
