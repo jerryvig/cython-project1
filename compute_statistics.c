@@ -371,41 +371,6 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     return crumb;
 }
 
-void run_stats_async(const char *ticker_string, sign_diff_pct *sign_diff_values, curl_multi_ez_t *curl_multi_ez,
-        char timestamps[][12]) {
-    char ticker_str[128];
-    memset(ticker_str, 0, 128);
-    register int ticker_strlen = strlen(ticker_string);
-    strncpy(ticker_str, ticker_string, ticker_strlen);
-
-    for (register int i = 0; i < ticker_strlen; ++i) {
-        if (ticker_string[i] != '\n') {
-            ticker_str[i] = toupper(ticker_str[i]);
-        } else {
-            ticker_str[i] = '\0';
-        }
-    }
-
-    char download_url[256];
-    memset(download_url, 0, 256);
-    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker_str, timestamps[1], timestamps[0], crumb);
-    fprintf(stderr, "url = %s\n", download_url);
-
-
-    //at this point this would have to be queued otherwise, several of the jobs can reset the URL
-    //on the same ez handle in the pool.
-    CURL *ez = curl_multi_ez->ez_pool[ez_pool_index];
-    curl_easy_setopt(ez, CURLOPT_URL, download_url);
-
-    memory_t dl_memoria;
-    dl_memoria.memory = (char*)malloc(1);
-    dl_memoria.size = 0;
-
-    curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)&dl_memoria);
-    curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)&(sign_diff_values->response_ticker[0]));
-    puts("at the end on rs_async()\n");
-}
-
 void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const CURL *curl, char timestamps[][12]) {
     char ticker_str[128];
     memset(ticker_str, 0, 128);
