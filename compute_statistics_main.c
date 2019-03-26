@@ -171,7 +171,7 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     return context;
 }
 
-static void reset_private_data(private_data_t *private_data) {
+void reset_private_data(private_data_t *private_data) {
     free(private_data->buffer->memory);
     private_data->buffer->memory = (char*)malloc(1);
     private_data->buffer->size = 0;

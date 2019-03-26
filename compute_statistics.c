@@ -158,7 +158,7 @@ void *qsort_thread_proc( void *args ) {
 }
 
 static void compute_sign_diff_pct(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
-    register int i;
+    register int16_t i;
     double changes_minus_one[changes_length - 2];
     double changes_0[changes_length - 2];
     changes_tuple changes_tuples[changes_length - 2];
@@ -322,10 +322,7 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     crumb = (char*)calloc(128, sizeof(char));
     int crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
-    // reset the memory buffer.
-    free(private_data->buffer);
-    private_data->buffer = (char*)malloc(1);
-    private_data->buffer->size = 0;
+    reset_private_data(private_data);
 
     if (crumb_failure) {
         fprintf(stderr, "Failed to prime crumb...\n");
