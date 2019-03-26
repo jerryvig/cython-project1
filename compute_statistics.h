@@ -44,6 +44,7 @@ void build_sign_diff_print_string(char sign_diff_print[],
     sign_diff_pct *sign_diff_values);
 CURL *create_and_init_curl(void);
 void get_timestamps(char timestamps[][12]);
+int get_title(const char *response_text, char *title);
 char *prime_crumb();
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez,
     char timestamps[][12]);

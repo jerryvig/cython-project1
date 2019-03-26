@@ -68,16 +68,22 @@ static int get_crumb(const char *response_text, char *crumb) {
     return 0;
 }
 
-static int get_title(const char *response_text, char *title) {
+int get_title(const char *response_text, char *title) {
+    printf("in get_title()\n");
     memset(title, 0, 128);
     const char* title_start = strstr(response_text, "<title>");
+    if (!title_start) {
+        fprintf(stderr, "Failed to find the <title> tag in the response.\n");
+        return 1;
+    }
     const char* parens_start = strstr(title_start, "(");
+
     const size_t diff = strlen(&title_start[7]) - strlen(parens_start);
     if (diff < 128) {
         strncpy(title, &title_start[7], diff);
         return 0;
     }
-    printf("Failed to parse the title from the response.\n");
+    fprintf(stderr, "Failed to parse the title from the response.\n");
     return 1;
 }
 

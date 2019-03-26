@@ -204,7 +204,7 @@ static void after_work(uv_work_t *job, int status) {
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
     // This is where the calls to begin processing the data should begin.
-
+    printf("buffer = %s\n", private_data->buffer->memory);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {
