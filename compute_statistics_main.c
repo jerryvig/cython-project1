@@ -185,6 +185,7 @@ static void after_work(uv_work_t *job, int status) {
             free(private_data->buffer->memory);
             private_data->buffer->memory = (char*)malloc(1);
             private_data->buffer->size = 0;
+            memset(private_data->ticker_string, 0, 16);
             add_download(ticker_list.strings[transfers], transfers, private_data->ez);
             transfers++;
         } else if (transfers >= (size_t)ticker_list.size) {
@@ -209,9 +210,7 @@ static void after_work(uv_work_t *job, int status) {
 
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
-    // printf("data = %s\n", private_data->buffer->memory);
-    char *ts = private_data->ticker_string;
-    printf("in do_work() for %s\n", ts);
+    printf("data = %s\n", private_data->buffer->memory);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {
