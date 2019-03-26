@@ -137,9 +137,6 @@ static void on_stdin_read(uv_fs_t *read_req) {
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
 
-            //This will need to change here.
-            //start the transfers here.
-            //process_tickers(ticker_buffer, &curl_multi_ez, timestamps);
             start_transfers(ticker_buffer);
 
             clock_gettime(CLOCK_MONOTONIC, &end);
@@ -148,9 +145,6 @@ static void on_stdin_read(uv_fs_t *read_req) {
                    ((double)end.tv_sec + 1.0e-9 * end.tv_nsec) -
                    ((double)start.tv_sec + 1.0e-9 * start.tv_nsec));
         }
-        //don't init the watchers again here. they should be inited again after retrieval
-        // and processing of the batch is complete.
-        //init_watchers();
     } else if (stdin_watcher.result < 0) {
         fprintf(stderr, "error opening stdin.\n");
     }
@@ -209,7 +203,8 @@ static void after_work(uv_work_t *job, int status) {
 
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
-    // printf("data = %s\n", private_data->buffer->memory);
+    // This is where the calls to begin processing the data should begin.
+
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {
