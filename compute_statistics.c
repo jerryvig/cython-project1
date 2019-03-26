@@ -264,7 +264,6 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
     char sign_diff_print[512];
     char *ticker = strsep(&ticker_string, " ");
 
-    //instead of using a while loop to process this sequentially, this should asynchronous.
     while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
         run_stats(ticker, &sign_diff_values, curl_multi_ez->ez_pool[0], timestamps);
@@ -298,7 +297,7 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
         char *filename = strstr(buffer, "filename=");
         char *period = strstr(&filename[9], ".");
         char *ticker = (char*)userdata;
-        memset(ticker, 0, 8);
+        memset(ticker, 0, 16);
         strncpy(ticker, &filename[9], strlen(&filename[9]) - strlen(period));
     }
     return nitems * size;
@@ -451,12 +450,9 @@ CURL *create_and_init_curl(void) {
     memory_t *buffer = (memory_t*)malloc(sizeof(memory_t));
     buffer->memory = (char*)malloc(1);
     buffer->size = 0;
-    char *ticker_string = (char*)malloc(16 * sizeof(char));
-    memset(ticker_string, 0, 16);
-
-    private_data_t *private_data = (private_data_t*)malloc(sizeof(private_data));
+    private_data_t *private_data = (private_data_t*)malloc(sizeof(private_data_t));
     private_data->buffer = buffer;
-    private_data->ticker_string = ticker_string;
+    memset(&private_data->ticker_string[0], 0, 16);
 
     CURL *ez = curl_easy_init();
     private_data->ez = ez;
@@ -473,7 +469,7 @@ CURL *create_and_init_curl(void) {
     curl_easy_setopt(ez, CURLOPT_WRITEFUNCTION, &write_callback);
     curl_easy_setopt(ez, CURLOPT_WRITEDATA, (void*)buffer);
     curl_easy_setopt(ez, CURLOPT_HEADERFUNCTION, &header_callback);
-    curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)ticker_string);
+    curl_easy_setopt(ez, CURLOPT_HEADERDATA, (void*)&(private_data->ticker_string));
     curl_easy_setopt(ez, CURLOPT_PRIVATE, (void*)private_data);
     return ez;
 }

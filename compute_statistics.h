@@ -10,7 +10,7 @@ typedef struct {
 
 typedef struct {
     memory_t *buffer;
-    char *ticker_string;
+    char ticker_string[16];
     CURL *ez;
 } private_data_t;
 
