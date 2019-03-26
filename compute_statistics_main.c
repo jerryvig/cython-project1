@@ -188,12 +188,11 @@ static void after_work(uv_work_t *job, int status) {
             private_data->buffer->size = 0;
             memset(private_data->ticker_string, 0, 16);
 
-            puts("calling init_watchers()\n");
             // you need some check here to determine that everything is done.
-            printf("transfers = %zu\n", transfers);
-            printf("completed_transfers = %zu\n", completed_transfers);
+            // printf("transfers = %zu\n", transfers);
+            // printf("completed_transfers = %zu\n", completed_transfers);
             if (completed_transfers == (size_t)ticker_list.size) {
-                printf("you are here\n");
+                puts("calling init_watchers()\n");
                 init_watchers();
             }
         }
@@ -213,10 +212,16 @@ static void do_work(uv_work_t *job) {
         return;
     }
 
-    for (int16_t i = 0; i < changes_length; ++i) {
+    /* for (int16_t i = 0; i < changes_length; ++i) {
         printf("changes[%d] = %f\n", i, changes_daily[i]);
     }
-    printf("changes_length = %d\n", changes_length);
+    printf("changes_length = %d\n", changes_length); */
+    sign_diff_pct sign_diff_values;
+    get_sigma_data(changes_daily, changes_length, &sign_diff_values);
+
+    char sign_diff_print[512] = {'\0'};
+    build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
+    printf("%s", sign_diff_print);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {
@@ -243,11 +248,7 @@ static void check_multi_info(void) {
             fprintf(stderr, "Finished fetching data for %s\n", done_url);
 
             if (private_data) {
-                printf("data retrieved\n");
-                //printf("data retrieved = \"%s\"\n", private_data->buffer->memory);
-
-                //call into the processing of the data here.
-                //This is where you would launch worker threads on the uv work queue.
+                // Queue up the worker thread to process the data.
                 uv_work_t *job = (uv_work_t*)malloc(sizeof(uv_work_t));
                 job->data = (void*)private_data;
                 uv_queue_work(loop, job, do_work, after_work);
