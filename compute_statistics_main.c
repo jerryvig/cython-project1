@@ -252,6 +252,7 @@ static void check_multi_info(void) {
                 uv_queue_work(loop, job, do_work, after_work);
             }
 
+            // remove the cURL ez handle from the cURL multi handle.
             curl_multi_remove_handle(curl_multi_ez.curl_multi, ez);
         } else {
             fprintf(stderr, "CURL message default.\n");
