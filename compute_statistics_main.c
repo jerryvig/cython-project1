@@ -171,31 +171,32 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     return context;
 }
 
+static void reset_private_data(private_data_t *private_data) {
+    free(private_data->buffer->memory);
+    private_data->buffer->memory = (char*)malloc(1);
+    private_data->buffer->size = 0;
+    memset(private_data->ticker_string, 0, 16);
+}
+
 static void after_work(uv_work_t *job, int status) {
     if (!status) {
-        completed_transfers++;
         private_data_t *private_data = (private_data_t*)job->data;
         if (private_data->buffer && transfers < (size_t)ticker_list.size) {
-            free(private_data->buffer->memory);
-            private_data->buffer->memory = (char*)malloc(1);
-            private_data->buffer->size = 0;
-            memset(private_data->ticker_string, 0, 16);
+            reset_private_data(private_data);
             add_download(ticker_list.strings[transfers], transfers, private_data->ez);
             transfers++;
         } else if (transfers >= (size_t)ticker_list.size) {
-            free(private_data->buffer->memory);
-            private_data->buffer->memory = (char*)malloc(1);
-            private_data->buffer->size = 0;
-            memset(private_data->ticker_string, 0, 16);
-
-            // you need some check here to determine that everything is done.
-            // printf("transfers = %zu\n", transfers);
-            // printf("completed_transfers = %zu\n", completed_transfers);
-            if (completed_transfers == (size_t)ticker_list.size) {
-                puts("calling init_watchers()\n");
-                init_watchers();
-            }
+            reset_private_data(private_data);
         }
+
+        // now check completed_transfers count to confirm that all transfers are done.
+        completed_transfers++;
+        if (completed_transfers == (size_t)ticker_list.size) {
+            //your profiling timer should stop here.
+            puts("=== calling init_watchers() ====");
+            init_watchers();
+        }
+
         free(job);
     }
 }
@@ -204,7 +205,7 @@ static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
 
     double changes_daily[512];
-    const int changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily);
+    const int16_t changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily);
 
     if (!changes_length) {
         printf("Failed to parse adj_close and changes data from response.\n");
@@ -217,7 +218,7 @@ static void do_work(uv_work_t *job) {
 
     char sign_diff_print[512] = {'\0'};
     build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
-    printf("%s", sign_diff_print);
+    fprintf(stderr, "%s", sign_diff_print);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {

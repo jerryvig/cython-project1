@@ -87,7 +87,7 @@ int get_title(const char *response_text, char *title) {
     return 1;
 }
 
-int get_adj_close_and_changes(char *response_text, double *changes) {
+int16_t get_adj_close_and_changes(char *response_text, double *changes) {
     register int16_t i = 0;
     register double adj_close;
     register double last_adj_close;
@@ -458,7 +458,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     // printf("curl_thread proc'ed in %.6f s\n", ((double)end.tv_sec + 1.0e-9*end.tv_nsec) - ((double)start.tv_sec + 1.0e-9*start.tv_nsec));
 
     double changes_daily[512];
-    const int changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
+    const int16_t changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
 
     free(dl_memoria.memory);
 
@@ -511,6 +511,9 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     sprintf(temp_str, "  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values->avg_move_10_down, sign_diff_values->avg_move_10_up);
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, TEMP_STRLEN);
+
+    printf("strlen(sign_diff_values->title) = \"%zu\"\n", strlen(sign_diff_values->title));
+
     sprintf(temp_str, "  \"title\": \"%s\"\n  \"resp_ticker\": %s\n", sign_diff_values->title, sign_diff_values->response_ticker);
     strcat(sign_diff_print, temp_str);
     memset(temp_str, 0, TEMP_STRLEN);

@@ -43,7 +43,7 @@ void build_sign_diff_print_json(char sign_diff_json[],
 void build_sign_diff_print_string(char sign_diff_print[],
     sign_diff_pct *sign_diff_values);
 CURL *create_and_init_curl(void);
-int get_adj_close_and_changes(char *response_text, double *changes);
+int16_t get_adj_close_and_changes(char *response_text, double *changes);
 void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values);
 void get_timestamps(char timestamps[][12]);
 int get_title(const char *response_text, char *title);
