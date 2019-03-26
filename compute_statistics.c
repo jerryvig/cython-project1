@@ -114,6 +114,7 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes) {
             strncpy(adj_close_str, &cols[1], strlen(&cols[1])
                 - strlen(last_column));
             if (strcmp(adj_close_str, "null") == 0) {
+                fprintf(stderr, "\"null\" found in data...returning 0...\n");
                 return 0;
             }
 
@@ -259,33 +260,9 @@ void get_sigma_data(const double *changes_daily, const int changes_length, sign_
     sprintf(sign_diff_values->record_count, "%d", changes_length);
 }
 
-static int ez_pool_index;
 void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char timestamps[][12]) {
     char sign_diff_print[512];
-    // char *ticker_list[16];
-    // register int ticker_list_length;
-
     char *ticker = strsep(&ticker_string, " ");
-
-    /* while (ticker!= NULL) {
-        ticker_list[ticker_list_length] = ticker;
-
-        ticker = strsep(&ticker_string, " ");
-        ticker_list_length++;
-        if (ticker_list_length > 15) {
-            break;
-        }
-    }
-
-    for (register int i = 0; i < ticker_list_length; ++i) {
-        //We kickoff the downloads here.
-        //initialize the next curl easy handle in the ez pool with the next url.
-
-        // you can setoff up to four simultaneously downloads, but you must block after sending four.
-        //we will use uv_queue_work().
-        sign_diff_pct sign_diff_values;
-        run_stats_async(ticker_list[i], &sign_diff_values, curl_multi_ez, timestamps);
-    } */
 
     //instead of using a while loop to process this sequentially, this should asynchronous.
     while (ticker != NULL) {
