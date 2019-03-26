@@ -208,8 +208,15 @@ static void do_work(uv_work_t *job) {
     double changes_daily[512];
     const int changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily);
 
-    printf("changes_length = %d\n", changes_length);
+    if (!changes_length) {
+        printf("Failed to parse adj_close and changes data from response.\n");
+        return;
+    }
 
+    for (int16_t i = 0; i < changes_length; ++i) {
+        printf("changes[%d] = %f\n", i, changes_daily[i]);
+    }
+    printf("changes_length = %d\n", changes_length);
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {

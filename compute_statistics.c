@@ -247,7 +247,7 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     sprintf(sign_diff_values->sign_diff_pct_20_down, "%.0f%%", pct_sum_20_down * 5.0);
 }
 
-static void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
+void get_sigma_data(const double *changes_daily, const int changes_length, sign_diff_pct *sign_diff_values) {
     const double stdev  = gsl_stats_sd(changes_daily, 1, (changes_length - 1));
     const double sigma_change = changes_daily[changes_length - 1]/stdev;
 
