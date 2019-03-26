@@ -204,7 +204,12 @@ static void after_work(uv_work_t *job, int status) {
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
     // This is where the calls to begin processing the data should begin.
-    printf("buffer = %s\n", private_data->buffer->memory);
+
+    double changes_daily[512];
+    const int changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily);
+
+    printf("changes_length = %d\n", changes_length);
+
 }
 
 static void on_poll_handle_close(uv_handle_t *handle) {

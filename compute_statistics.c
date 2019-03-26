@@ -87,7 +87,7 @@ int get_title(const char *response_text, char *title) {
     return 1;
 }
 
-static int get_adj_close_and_changes(char *response_text, double *changes) {
+int get_adj_close_and_changes(char *response_text, double *changes) {
     register int i = 0;
     register double adj_close;
     register double last_adj_close;
