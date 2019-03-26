@@ -189,7 +189,6 @@ static void after_work(uv_work_t *job, int status) {
             add_download(ticker_list.strings[transfers], transfers, private_data->ez);
             transfers++;
         } else if (transfers >= (size_t)ticker_list.size) {
-            printf("in this else if block()\n");
             free(private_data->buffer->memory);
             private_data->buffer->memory = (char*)malloc(1);
             private_data->buffer->size = 0;
