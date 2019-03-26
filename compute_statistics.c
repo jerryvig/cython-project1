@@ -410,15 +410,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&dl_memoria);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void*)&(sign_diff_values->response_ticker[0]));
 
-    //pthread_t curl_thread;
-    //void *curl_return_value;
-
-    //pthread_create( &curl_thread, NULL, curl_thread_proc, (void*)curl );
-
-    //Any asynchronous tasks would be implemented here.
-
-    //pthread_join( curl_thread, &curl_return_value );
-
     CURLcode curl_response = curl_easy_perform(curl);
 
     //CURLcode *curl_response = (CURLcode*)curl_return_value;

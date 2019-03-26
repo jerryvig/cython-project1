@@ -214,6 +214,7 @@ static void do_work(uv_work_t *job) {
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
+    strcpy(sign_diff_values.title, "N/A");
     get_sigma_data(changes_daily, changes_length, &sign_diff_values);
 
     char sign_diff_print[512] = {'\0'};
