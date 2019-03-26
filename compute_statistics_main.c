@@ -212,9 +212,9 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    loop = uv_default_loop();
-
     putenv("UV_THREADPOOL_SIZE=" STRINGIFY(THREAD_POOL_SIZE));
+
+    loop = uv_default_loop();
 
     uv_timer_init(loop, &timeout);
 
