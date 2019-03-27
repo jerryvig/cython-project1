@@ -135,15 +135,6 @@ static void on_stdin_read(uv_fs_t *read_req) {
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
             start_transfers(ticker_buffer);
-
-            fprintf(stderr, "started the transfers\n");
-
-            //The end point of the clock should be in do_work(), after_work() or similar.
-            /* clock_gettime(CLOCK_MONOTONIC, &end);
-
-            printf("proc'ed in %.6f s\n",
-                   ((double)end.tv_sec + 1.0e-9 * end.tv_nsec) -
-                   ((double)start.tv_sec + 1.0e-9 * start.tv_nsec)); */
         }
     } else if (stdin_watcher.result < 0) {
         fprintf(stderr, "error opening stdin...\n");
@@ -152,6 +143,11 @@ static void on_stdin_read(uv_fs_t *read_req) {
 
 static void init_watchers(void) {
     memset(ticker_buffer, 0, INPUT_BUFFER_SIZE);
+    if (ticker_list.strings != NULL) {
+        free(ticker_list.strings);
+        ticker_list.strings = NULL;
+    }
+
     uv_buf_t stdin_buf = uv_buf_init(ticker_buffer, INPUT_BUFFER_SIZE);
     uv_buf_t stdout_buf = uv_buf_init(prompt, strlen(prompt));
     uv_fs_write(loop, &stdout_watcher, STDOUT_FILENO, &stdout_buf, 1, -1, NULL);
@@ -165,8 +161,8 @@ static curl_context_t* create_curl_context(curl_socket_t sockfd) {
     int r = uv_poll_init_socket(loop, &context->poll_handle, sockfd);
     if (r) {
         fprintf(stderr, "Failed to initialize poller on socket.\n");
-        assert(r == 0);
     }
+    assert(r == 0);
     context->poll_handle.data = context;
     return context;
 }

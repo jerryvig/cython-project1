@@ -30,8 +30,8 @@ int compare_changes_tuples(const void *a, const void *b) {
 }
 
 void get_timestamps(char timestamps[][12]) {
-    memset(timestamps[0], 0, 12);
-    memset(timestamps[1], 0, 12);
+    memset(timestamps[0], 0, sizeof timestamps[0]);
+    memset(timestamps[1], 0, sizeof timestamps[1]);
     const time_t now = time(NULL);
     struct tm *now_tm = localtime(&now);
     now_tm->tm_sec = 0;
@@ -53,7 +53,7 @@ static int get_crumb(const char *response_text, char *crumb) {
     const char *colon_quote = strstr(crumbstore, ":\"");
     const char *end_quote = strstr(&colon_quote[2], "\"");
     char crumbclean[128];
-    memset(crumbclean, 0, 128);
+    memset(crumbclean, 0, sizeof crumbclean);
     strncpy(crumb, &colon_quote[2], strlen(&colon_quote[2]) -
         strlen(end_quote));
     const char *twofpos = strstr(crumb, "\\u002F");
@@ -70,7 +70,7 @@ static int get_crumb(const char *response_text, char *crumb) {
 
 int get_title(const char *response_text, char *title) {
     printf("in get_title()\n");
-    memset(title, 0, 128);
+    memset(title, 0, sizeof title);
     const char* title_start = strstr(response_text, "<title>");
     if (!title_start) {
         fprintf(stderr, "Failed to find the <title> tag in the response.\n");
