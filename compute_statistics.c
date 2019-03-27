@@ -319,7 +319,6 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
 
     private_data_t *private_data = (private_data_t*)private;
 
-    //crumb = (char*)calloc(128, sizeof(char));
     memset(crumb, 0, sizeof crumb);
     int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
@@ -378,7 +377,6 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
             printf("curl_easy_perform() failed.....\n");
         }
 
-        //crumb = (char*)malloc(128 * sizeof(char));
         memset(crumb, 0, 128);
         int crumb_failure = get_crumb(memoria.memory, crumb);
         if (crumb_failure) {

@@ -36,8 +36,11 @@ static curl_multi_ez_t curl_multi_ez;
 static size_t transfers;
 static size_t completed_transfers;
 
-static struct timespec startup_time_start;
-static struct timespec startup_time_end;
+/* static struct timespec startup_time_start;
+static struct timespec startup_time_end; */
+
+static uv_work_t jobs[THREAD_POOL_SIZE];
+static uint8_t job_index = 0;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
@@ -199,7 +202,8 @@ static void after_work(uv_work_t *job, int status) {
 
             init_watchers();
         }
-        free(job);
+        // free(job);
+        job->data = NULL;
     }
 }
 
@@ -256,9 +260,14 @@ static void check_multi_info(void) {
 
             if (private_data) {
                 // Queue up the worker thread to process the data.
-                uv_work_t *job = (uv_work_t*)malloc(sizeof(uv_work_t));
-                job->data = (void*)private_data;
-                uv_queue_work(loop, job, do_work, after_work);
+                // we could maybe do this without the malloc() using a pool of uv_work_t's.
+                //uv_work_t *job = (uv_work_t*)malloc(sizeof(uv_work_t));
+                //The problem here is that the job indexed this way could be in use,
+                //so you may be queueing up a uv_work_t object that is already on the queue.
+                uv_work_t job = jobs[job_index % THREAD_POOL_SIZE];
+                job.data = (void*)private_data;
+                uv_queue_work(loop, &job, do_work, after_work);
+                job_index++;
             }
 
             // remove the cURL ez handle from the cURL multi handle.
