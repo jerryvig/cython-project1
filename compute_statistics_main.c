@@ -89,11 +89,9 @@ static void add_download(const char *ticker, size_t num, CURL *ez) {
 
     char download_url[256] = {'\0'};
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
-
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
 
     curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
-    fprintf(stderr, "Added download for ticker \"%s\".\n", ticker);
 }
 
 static char *ticker_string_copy_start;
@@ -136,15 +134,16 @@ static void on_stdin_read(uv_fs_t *read_req) {
             printf("Got empty ticker string...\n");
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
-
             start_transfers(ticker_buffer);
 
+            fprintf(stderr, "started the transfers\n");
+
             //The end point of the clock should be in do_work(), after_work() or similar.
-            clock_gettime(CLOCK_MONOTONIC, &end);
+            /* clock_gettime(CLOCK_MONOTONIC, &end);
 
             printf("proc'ed in %.6f s\n",
                    ((double)end.tv_sec + 1.0e-9 * end.tv_nsec) -
-                   ((double)start.tv_sec + 1.0e-9 * start.tv_nsec));
+                   ((double)start.tv_sec + 1.0e-9 * start.tv_nsec)); */
         }
     } else if (stdin_watcher.result < 0) {
         fprintf(stderr, "error opening stdin...\n");
@@ -190,10 +189,15 @@ static void after_work(uv_work_t *job, int status) {
             reset_private_data(private_data);
         }
 
-        // now check completed_transfers count to confirm that all transfers are done.
+        // check completed_transfers count to confirm all transfers are done.
         completed_transfers++;
         if (completed_transfers == (size_t)ticker_list.size) {
-            //your profiling timer should stop here.
+            // getting end clock-time and printing total transfer time.
+            clock_gettime(CLOCK_MONOTONIC, &end);
+            fprintf(stderr, "proc'ed in %.6f s\n",
+                   ((double)end.tv_sec + 1.0e-9 * end.tv_nsec) -
+                   ((double)start.tv_sec + 1.0e-9 * start.tv_nsec));
+
             init_watchers();
         }
         free(job);
