@@ -92,6 +92,7 @@ static void add_download(const char *ticker, size_t num, CURL *ez) {
     }
 
     char download_url[256] = {'\0'};
+    // this format string can be pre-constructed to include the timestamps and crumb.
     sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
 
@@ -206,6 +207,13 @@ static void after_work(uv_work_t *job, int status) {
 
 static void do_work(uv_work_t *job) {
     private_data_t *private_data = (private_data_t*)job->data;
+
+    char first_nine[10] = {'\0'};
+    strncpy(first_nine, private_data->buffer->memory, 9);
+    if (strcmp(first_nine, "Date,Open") != 0) {
+        printf("Response does not contain historical data...\n");
+        return;
+    }
 
     double changes_daily[512];
     const int16_t changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily);
