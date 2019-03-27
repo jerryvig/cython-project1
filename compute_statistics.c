@@ -139,7 +139,7 @@ typedef struct {
     double *self_correlation;
 } gsl_correlation_args;
 
-void *gsl_correlation_thread_proc( void *gsl_args ) {
+void *gsl_correlation_thread_proc(void *gsl_args) {
     gsl_correlation_args *gsl_corr_args = (gsl_correlation_args*)gsl_args;
     const double sc = gsl_stats_correlation(gsl_corr_args->data1, gsl_corr_args->stride1, gsl_corr_args->data2, gsl_corr_args->stride2, gsl_corr_args->n);
     *(gsl_corr_args->self_correlation) = sc;
@@ -151,7 +151,7 @@ typedef struct {
     size_t count;
 } qsort_proc_args;
 
-void *qsort_thread_proc( void *args ) {
+void *qsort_thread_proc(void *args) {
     qsort_proc_args *qsort_args = (qsort_proc_args*)args;
     changes_tuple *changes_tuples = qsort_args->changes_tuples;
     qsort(changes_tuples, qsort_args->count, sizeof(changes_tuple), compare_changes_tuples);

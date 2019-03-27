@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <curl/curl.h>
 #include <uv.h>
 #include "compute_statistics.h"
@@ -33,6 +34,9 @@ static curl_multi_ez_t curl_multi_ez;
 
 static size_t transfers;
 static size_t completed_transfers;
+
+static struct timespec startup_time_start;
+static struct timespec startup_time_end;
 
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
@@ -348,7 +352,18 @@ static void create_and_init_multi_ez() {
     }
 }
 
+void *get_timestamps_thread_proc(void *args) {
+    get_timestamps(timestamps);
+}
+
+void *prime_crumb_thread_proc(void *args) {
+    curl_multi_ez_t *multi_ez = (curl_multi_ez_t*)args;
+    crumb = prime_crumb();
+}
+
 int main(void) {
+    //clock_gettime(CLOCK_MONOTONIC, &startup_time_start);
+
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         fprintf(stderr, "Failed to initialize cURL...\n");
         return EXIT_FAILURE;
@@ -361,13 +376,22 @@ int main(void) {
 
     create_and_init_multi_ez();
 
-    get_timestamps(timestamps);
+    pthread_t crumb_thread;
+    pthread_t timestamps_thread;
+    pthread_create(&crumb_thread, NULL, prime_crumb_thread_proc, (void*)&curl_multi_ez);
+    pthread_create(&timestamps_thread, NULL, get_timestamps_thread_proc, NULL);
 
     uv_signal_t sigint_watcher;
     uv_signal_init(loop, &sigint_watcher);
     uv_signal_start(&sigint_watcher, on_sigint, SIGINT);
 
-    crumb = prime_crumb(&curl_multi_ez);
+    pthread_join(timestamps_thread, NULL);
+    pthread_join(crumb_thread, NULL);
+
+    //clock_gettime(CLOCK_MONOTONIC, &startup_time_end);
+    //fprintf(stderr, "startup time = %.6f s\n",
+    //        ((double)end.tv_sec + 1.0e-9 * startup_time_end.tv_nsec) -
+    //        ((double)start.tv_sec + 1.0e-9 * startup_time_start.tv_nsec));
 
     init_watchers();
 
