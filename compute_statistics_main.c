@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <curl/curl.h>
+#include <sds.h>
 #include <uv.h>
 #include "compute_statistics.h"
 
@@ -99,15 +100,12 @@ static void add_download(const char *ticker, size_t num, CURL *ez) {
     curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
 }
 
-static char *ticker_string_copy_start;
+static sds sds_ticker_string;
 static void start_transfers(const char *ticker_string) {
-    if (ticker_string_copy_start != NULL) {
-        free(ticker_string_copy_start);
-    }
-
-    char *ticker_string_copy = (char*)calloc(strlen(ticker_string) + 1, sizeof(char));
-    strcpy(ticker_string_copy, ticker_string);
-    ticker_string_copy_start = ticker_string_copy;
+    sdsfree(sds_ticker_string);
+    sds_ticker_string = sdsnew(ticker_string);
+    sdstrim(sds_ticker_string, " \n");
+    sdstoupper(sds_ticker_string);
 
     if (ticker_list.strings != NULL) {
         free(ticker_list.strings);
@@ -118,7 +116,7 @@ static void start_transfers(const char *ticker_string) {
 
     char *ticker;
     do {
-        ticker = strsep(&ticker_string_copy, " ");
+        ticker = strsep(&sds_ticker_string, " ");
         if (ticker != NULL) {
             string_list_add(&ticker_list, ticker);
         }
