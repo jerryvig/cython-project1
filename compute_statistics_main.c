@@ -264,6 +264,7 @@ static void check_multi_info(void) {
                 //uv_work_t *job = (uv_work_t*)malloc(sizeof(uv_work_t));
                 //The problem here is that the job indexed this way could be in use,
                 //so you may be queueing up a uv_work_t object that is already on the queue.
+                //one solution could be to associate each ez handle with a uv_work_t.
                 uv_work_t job = jobs[job_index % THREAD_POOL_SIZE];
                 job.data = (void*)private_data;
                 uv_queue_work(loop, &job, do_work, after_work);
