@@ -44,7 +44,7 @@ void get_timestamps(char timestamps[][12]) {
     sprintf(timestamps[1], "%ld", ago_366_days);
 }
 
-static int get_crumb(const char *response_text, char *crumb) {
+static int8_t get_crumb(const char *response_text, char *crumb) {
     const char *crumbstore = strstr(response_text, "CrumbStore");
     if (crumbstore == NULL) {
         puts("Failed to find crumbstore....");
@@ -320,7 +320,7 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     private_data_t *private_data = (private_data_t*)private;
 
     crumb = (char*)calloc(128, sizeof(char));
-    int crumb_failure = get_crumb(private_data->buffer->memory, crumb);
+    int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
     reset_private_data(private_data);
 
