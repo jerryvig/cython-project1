@@ -363,7 +363,6 @@ void *prime_crumb_thread_proc(void *args) {
 
 int main(void) {
     //clock_gettime(CLOCK_MONOTONIC, &startup_time_start);
-
     if (curl_global_init(CURL_GLOBAL_ALL)) {
         fprintf(stderr, "Failed to initialize cURL...\n");
         return EXIT_FAILURE;
