@@ -62,7 +62,7 @@ static int8_t get_crumb(const char *response_text, char *crumb) {
         strncpy(crumbclean, crumb, twofpos - crumb);
         strcat(crumbclean, "%2F");
         strcat(crumbclean, &twofpos[6]);
-        memset(crumb, 0, 128);
+        memset(crumb, 0, sizeof crumb);
         strcpy(crumb, crumbclean);
     }
     return 0;
@@ -303,7 +303,7 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
     return nitems * size;
 }
 
-static char *crumb;
+static char crumb[128];
 
 char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     CURL *ez = curl_multi_ez->ez_pool[0];
@@ -319,7 +319,8 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
 
     private_data_t *private_data = (private_data_t*)private;
 
-    crumb = (char*)calloc(128, sizeof(char));
+    //crumb = (char*)calloc(128, sizeof(char));
+    memset(crumb, 0, sizeof crumb);
     int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
     reset_private_data(private_data);
@@ -377,7 +378,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
             printf("curl_easy_perform() failed.....\n");
         }
 
-        crumb = (char*)malloc(128 * sizeof(char));
+        //crumb = (char*)malloc(128 * sizeof(char));
         memset(crumb, 0, 128);
         int crumb_failure = get_crumb(memoria.memory, crumb);
         if (crumb_failure) {
