@@ -2,6 +2,7 @@
 #define COMPUTE_STATISTICS_H_
 
 #include <curl/curl.h>
+#include <uv.h>
 
 typedef struct {
     char *memory;
@@ -12,6 +13,7 @@ typedef struct {
     memory_t *buffer;
     char ticker_string[16];
     CURL *ez;
+    uv_work_t job;
 } private_data_t;
 
 typedef struct {

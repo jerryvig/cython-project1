@@ -39,9 +39,6 @@ static size_t completed_transfers;
 /* static struct timespec startup_time_start;
 static struct timespec startup_time_end; */
 
-static uv_work_t jobs[THREAD_POOL_SIZE];
-static uint8_t job_index = 0;
-
 typedef struct curl_context_s {
     uv_poll_t poll_handle;
     curl_socket_t sockfd;
@@ -180,7 +177,7 @@ void reset_private_data(const private_data_t *private_data) {
     memset(private_data->ticker_string, 0, sizeof private_data->ticker_string);
 }
 
-static void after_work(uv_work_t *job, int status) {
+void after_work(uv_work_t *job, int status) {
     if (!status) {
         private_data_t *private_data = (private_data_t*)job->data;
         if (private_data->buffer && transfers < (size_t)ticker_list.size) {
@@ -202,7 +199,6 @@ static void after_work(uv_work_t *job, int status) {
 
             init_watchers();
         }
-        // free(job);
         job->data = NULL;
     }
 }
@@ -260,15 +256,9 @@ static void check_multi_info(void) {
 
             if (private_data) {
                 // Queue up the worker thread to process the data.
-                // we could maybe do this without the malloc() using a pool of uv_work_t's.
-                //uv_work_t *job = (uv_work_t*)malloc(sizeof(uv_work_t));
-                //The problem here is that the job indexed this way could be in use,
-                //so you may be queueing up a uv_work_t object that is already on the queue.
-                //one solution could be to associate each ez handle with a uv_work_t.
-                uv_work_t job = jobs[job_index % THREAD_POOL_SIZE];
-                job.data = (void*)private_data;
-                uv_queue_work(loop, &job, do_work, after_work);
-                job_index++;
+                // Each private_data_t object has uv_work_t job associated with it.
+                private_data->job.data = (void*)private_data;
+                uv_queue_work(loop, &private_data->job, do_work, after_work);
             }
 
             // remove the cURL ez handle from the cURL multi handle.
