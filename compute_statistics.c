@@ -340,6 +340,7 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
             curl_easy_setopt(curl_multi_ez->ez_pool[i], CURLOPT_COOKIELIST, cookies_root->data);
         }
     }
+    curl_slist_free_all(cookies_root);
 
     return crumb;
 }

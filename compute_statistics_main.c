@@ -61,13 +61,15 @@ static void init_watchers();
 
 static void cleanup_curl_multi_ez() {
     for (register int8_t i = 0; i < EZ_POOL_SIZE; ++i) {
-        memory_t *private_data;
+        private_data_t *private_data;
         CURL *ez = curl_multi_ez.ez_pool[i];
         curl_easy_getinfo(ez, CURLINFO_PRIVATE, &private_data);
         if (private_data != NULL) {
-            free(private_data->memory);
+            free(private_data->buffer->memory);
+            free(private_data->buffer);
         }
         free(private_data);
+        curl_easy_cleanup(ez);
     }
     curl_multi_cleanup(curl_multi_ez.curl_multi);
     curl_global_cleanup();
@@ -76,6 +78,9 @@ static void cleanup_curl_multi_ez() {
 static void on_sigint(uv_signal_t *sig, int signum) {
     uv_signal_stop(sig);
     uv_close((uv_handle_t*)sig, NULL);
+    uv_cancel(&stdin_watcher);
+    uv_fs_req_cleanup(&stdin_watcher);
+    uv_fs_req_cleanup(&stdout_watcher);
     cleanup_curl_multi_ez();
 
     if (ticker_list.strings != NULL) {
