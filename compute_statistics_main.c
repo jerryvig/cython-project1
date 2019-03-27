@@ -194,10 +194,8 @@ static void after_work(uv_work_t *job, int status) {
         completed_transfers++;
         if (completed_transfers == (size_t)ticker_list.size) {
             //your profiling timer should stop here.
-            puts("=== calling init_watchers() ====");
             init_watchers();
         }
-
         free(job);
     }
 }
