@@ -91,16 +91,19 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes) {
     register int16_t i = 0;
     register double adj_close;
     register double last_adj_close;
+    register int64_t volume;
     char line[512];
     char *cols;
     char adj_close_str[128];
+    char volume_str[128];
     register char *last_column;
 
     register char *token = strtok(response_text, "\n");
     while (token) {
         if (i) {
-            memset(line, 0, 512);
-            memset(adj_close_str, 0, 128);
+            memset(line, 0, sizeof line);
+            memset(adj_close_str, 0, sizeof adj_close_str);
+            memset(volume_str, 0, sizeof volume_str);
             strcpy(line, token);
 
             cols = strstr(&line[1], ",");
@@ -113,12 +116,16 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes) {
             last_column = strstr(&cols[1], ",");
             strncpy(adj_close_str, &cols[1], strlen(&cols[1])
                 - strlen(last_column));
+            strcpy(volume_str, &last_column[1]);
+
             if (strcmp(adj_close_str, "null") == 0) {
                 fprintf(stderr, "\"null\" found in data...returning 0...\n");
                 return 0;
             }
 
             adj_close = atof(adj_close_str);
+            volume = atoll(volume_str);
+
             if (i > 1) {
                 changes[i-2] = (adj_close - last_adj_close)/last_adj_close;
             }
