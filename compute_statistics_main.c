@@ -209,7 +209,7 @@ static void get_volume_stats(const int64_t *daily_volume, const int16_t changes_
     printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
     printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
     printf("volume_ratio_60 = %.3f\n", volume_ratio_60);
-    printf("sigma_diff_val = %.3f\n", sigma_diff_val);
+    printf("sigma_volume_diff = %.3f\n", sigma_diff_val);
 }
 
 void after_work(uv_work_t *job, int status) {
