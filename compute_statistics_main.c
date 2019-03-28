@@ -259,8 +259,15 @@ static void do_work(uv_work_t *job) {
     //Make gsl calls here.
     double mean_volume_last_60_days = gsl_stats_long_mean(volume_last_60_days, 1, volume_count);
     double sd_volume_last_60_days = gsl_stats_long_sd(volume_last_60_days, 1, volume_count);
+    double volume_ratio_60 = ((double)last_volume)/mean_volume_last_60_days;
+
     printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
     printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
+    printf("volume_ratio_60 = %.3f\n", volume_ratio_60);
+
+    double sigma_diff_val = ((double)last_volume - mean_volume_last_60_days)/sd_volume_last_60_days;
+    printf("sigma_diff_val = %.3f\n", sigma_diff_val);
+
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
