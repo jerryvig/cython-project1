@@ -466,9 +466,8 @@ CURL *create_and_init_curl(void) {
 
 #define TEMP_STRLEN 128
 void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_diff_values) {
-    char temp_str[TEMP_STRLEN];
-    memset(sign_diff_print, 0, 512);
-    memset(temp_str, 0, TEMP_STRLEN);
+    char temp_str[TEMP_STRLEN] = {'\0'};
+    memset(sign_diff_print, 0, sizeof sign_diff_print);
 
     strcat(sign_diff_print, "===============================\n");
     sprintf(temp_str, "  \"avg_move_10_down\": %s\n  \"avg_move_10_up\": %s\n", sign_diff_values->avg_move_10_down, sign_diff_values->avg_move_10_up);
@@ -498,9 +497,8 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
 }
 
 void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_values) {
-    char temp_str[TEMP_STRLEN];
-    memset(sign_diff_json, 0, 512);
-    memset(temp_str, 0, TEMP_STRLEN);
+    char temp_str[TEMP_STRLEN] = {'\0'};
+    memset(sign_diff_json, 0, sizeof sign_diff_json);
 
     sprintf(temp_str, "{\"avg_move_10_down\":\"%s\",",
         sign_diff_values->avg_move_10_down);
