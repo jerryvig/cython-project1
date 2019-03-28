@@ -218,13 +218,19 @@ static void do_work(uv_work_t *job) {
         return;
     }
 
+    // It would be good to make these arrays dynamic without a fixed size.
     double changes_daily[512];
-    const int16_t changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily);
+    int64_t daily_volume[512];
+    const int16_t changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily, daily_volume);
 
     if (!changes_length) {
         printf("Failed to parse adj_close and changes data from response.\n");
         return;
     }
+
+    /* for (register int16_t i = 0; i < changes_length; ++i) {
+        printf("volume = %ld\n", daily_volume[i]);
+    } */
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);

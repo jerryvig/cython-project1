@@ -87,11 +87,10 @@ int get_title(const char *response_text, char *title) {
     return 1;
 }
 
-int16_t get_adj_close_and_changes(char *response_text, double *changes) {
+int16_t get_adj_close_and_changes(char *response_text, double *changes, int64_t *daily_volume) {
     register int16_t i = 0;
     register double adj_close;
     register double last_adj_close;
-    register int64_t volume;
     char line[512];
     char *cols;
     char adj_close_str[128];
@@ -124,10 +123,10 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes) {
             }
 
             adj_close = atof(adj_close_str);
-            volume = atoll(volume_str);
 
             if (i > 1) {
                 changes[i-2] = (adj_close - last_adj_close)/last_adj_close;
+                daily_volume[i-2] = atoll(volume_str);
             }
             last_adj_close = adj_close;
         }
@@ -424,7 +423,8 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
     }
 
     double changes_daily[512];
-    const int16_t changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily);
+    int64_t daily_volume[512];
+    const int16_t changes_length = get_adj_close_and_changes(dl_memoria.memory, changes_daily, daily_volume);
 
     free(dl_memoria.memory);
 
