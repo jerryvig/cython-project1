@@ -32,6 +32,8 @@ typedef struct {
     char sign_diff_pct_20_down[16];
     char title[128];
     char response_ticker[8];
+    char volume_ratio_60[16];
+    char sigma_volume_diff_60[16];
 } sign_diff_pct;
 
 #define EZ_POOL_SIZE 4

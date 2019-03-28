@@ -187,7 +187,7 @@ void reset_private_data(const private_data_t *private_data) {
     memset(private_data->ticker_string, 0, sizeof private_data->ticker_string);
 }
 
-static void get_volume_stats(const int64_t *daily_volume, const int16_t changes_length) {
+static void get_volume_stats(const int64_t *daily_volume, const int16_t changes_length, sign_diff_pct *sign_diff_values) {
     int64_t last_volume = daily_volume[changes_length - 1];
 
     int64_t volume_last_60_days[60];
@@ -209,7 +209,7 @@ static void get_volume_stats(const int64_t *daily_volume, const int16_t changes_
     printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
     printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
     printf("volume_ratio_60 = %.3f\n", volume_ratio_60);
-    printf("sigma_volume_diff = %.3f\n", sigma_diff_val);
+    printf("sigma_volume_diff_60 = %.3f\n", sigma_diff_val);
 }
 
 void after_work(uv_work_t *job, int status) {
@@ -260,12 +260,13 @@ static void do_work(uv_work_t *job) {
         return;
     }
 
-    // compute the volume statistics.
-    get_volume_stats(daily_volume, changes_length);
-
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
     strcpy(sign_diff_values.title, "N/A");
+
+    // compute the volume statistics.
+    get_volume_stats(daily_volume, changes_length, &sign_diff_values);
+
     get_sigma_data(changes_daily, changes_length, &sign_diff_values);
 
     char sign_diff_print[512] = {'\0'};
