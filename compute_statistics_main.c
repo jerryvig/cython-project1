@@ -231,9 +231,9 @@ static void do_work(uv_work_t *job) {
         return;
     }
 
-    /* for (register int16_t i = 0; i < changes_length; ++i) {
+    for (register int16_t i = 0; i < changes_length; ++i) {
         printf("volume = %ld\n", daily_volume[i]);
-    } */
+    }
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);

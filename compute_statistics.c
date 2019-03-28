@@ -102,7 +102,6 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes, int64_t 
         if (i) {
             memset(line, 0, sizeof line);
             memset(adj_close_str, 0, sizeof adj_close_str);
-            memset(volume_str, 0, sizeof volume_str);
             strcpy(line, token);
 
             cols = strstr(&line[1], ",");
@@ -115,7 +114,6 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes, int64_t 
             last_column = strstr(&cols[1], ",");
             strncpy(adj_close_str, &cols[1], strlen(&cols[1])
                 - strlen(last_column));
-            strcpy(volume_str, &last_column[1]);
 
             if (strcmp(adj_close_str, "null") == 0) {
                 fprintf(stderr, "\"null\" found in data...returning 0...\n");
@@ -126,6 +124,9 @@ int16_t get_adj_close_and_changes(char *response_text, double *changes, int64_t 
 
             if (i > 1) {
                 changes[i-2] = (adj_close - last_adj_close)/last_adj_close;
+
+                memset(volume_str, 0, sizeof volume_str);
+                strcpy(volume_str, &last_column[1]);
                 daily_volume[i-2] = atoll(volume_str);
             }
             last_adj_close = adj_close;
