@@ -26,6 +26,7 @@ static uv_timer_t timeout;
 
 static char ticker_buffer[INPUT_BUFFER_SIZE];
 static const char *prompt = "Enter ticker list: ";
+static sds sds_ticker_string;
 static char *crumb;
 static int16_t stdin_len;
 static char timestamps[2][12];
@@ -78,6 +79,8 @@ static void cleanup_curl_multi_ez() {
 static void on_sigint(uv_signal_t *sig, int signum) {
     uv_signal_stop(sig);
     uv_close((uv_handle_t*)sig, NULL);
+
+    sdsfree(sds_ticker_string);
     uv_cancel(&stdin_watcher);
     uv_fs_req_cleanup(&stdin_watcher);
     uv_fs_req_cleanup(&stdout_watcher);
@@ -105,9 +108,7 @@ static void add_download(const char *ticker, size_t num, CURL *ez) {
     curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
 }
 
-static sds sds_ticker_string;
 static void start_transfers(const char *ticker_string) {
-    sdsfree(sds_ticker_string);
     sds_ticker_string = sdsnew(ticker_string);
     sdstrim(sds_ticker_string, " \n");
     sdstoupper(sds_ticker_string);
@@ -126,6 +127,8 @@ static void start_transfers(const char *ticker_string) {
             string_list_add(&ticker_list, ticker);
         }
     } while (ticker!= NULL);
+
+    sdsfree(sds_ticker_string);
 
     completed_transfers = 0;
     for (transfers = 0; (transfers < EZ_POOL_SIZE && transfers < (size_t)ticker_list.size); ++transfers) {
