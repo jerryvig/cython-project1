@@ -219,7 +219,9 @@ static void do_work(uv_work_t *job) {
     char first_nine[10] = {'\0'};
     strncpy(first_nine, private_data->buffer->memory, 9);
     if (strcmp(first_nine, "Date,Open") != 0) {
-        printf("Response does not contain historical data...\n");
+        fprintf(stderr, "bad response buffer = \"%s\"\n", private_data->buffer->memory);
+        fprintf(stderr, "Response does not contain historical data...\n");
+
         return;
     }
 
@@ -256,7 +258,9 @@ static void do_work(uv_work_t *job) {
 
     //Make gsl calls here.
     double mean_volume_last_60_days = gsl_stats_long_mean(volume_last_60_days, 1, volume_count);
+    double sd_volume_last_60_days = gsl_stats_long_sd(volume_last_60_days, 1, volume_count);
     printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
+    printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
