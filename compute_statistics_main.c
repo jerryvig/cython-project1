@@ -30,6 +30,7 @@ static sds sds_ticker_string;
 static char *crumb;
 static int16_t stdin_len;
 static char timestamps[2][12];
+static char download_url_format[256];
 static struct timespec start;
 static struct timespec end;
 static curl_multi_ez_t curl_multi_ez;
@@ -101,8 +102,7 @@ static void add_download(const char *ticker, size_t num, CURL *ez) {
     }
 
     char download_url[256] = {'\0'};
-    // this format string can be pre-constructed to include the timestamps and crumb.
-    sprintf(download_url, "https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", ticker, timestamps[1], timestamps[0], crumb);
+    sprintf(download_url, download_url_format, ticker);
     curl_easy_setopt(ez, CURLOPT_URL, download_url);
 
     curl_multi_add_handle(curl_multi_ez.curl_multi, ez);
@@ -406,6 +406,9 @@ int main(void) {
 
     pthread_join(timestamps_thread, NULL);
     pthread_join(crumb_thread, NULL);
+
+    memset(download_url_format, 0, sizeof download_url_format);
+    sprintf(download_url_format, "https://query1.finance.yahoo.com/v7/finance/download/%%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s", timestamps[1], timestamps[0], crumb);
 
     //clock_gettime(CLOCK_MONOTONIC, &startup_time_end);
     //fprintf(stderr, "startup time = %.6f s\n",
