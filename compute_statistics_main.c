@@ -187,6 +187,31 @@ void reset_private_data(const private_data_t *private_data) {
     memset(private_data->ticker_string, 0, sizeof private_data->ticker_string);
 }
 
+static void get_volume_stats(const int64_t *daily_volume, const int16_t changes_length) {
+    int64_t last_volume = daily_volume[changes_length - 1];
+
+    int64_t volume_last_60_days[60];
+    int8_t volume_count = 0;
+    for (register int16_t i = changes_length - 2; (i > changes_length - 62 && i >= 0); --i) {
+        volume_last_60_days[volume_count] = daily_volume[i];
+        volume_count++;
+    }
+
+    // gsl statistics calls are made here.
+    double mean_volume_last_60_days = gsl_stats_long_mean(volume_last_60_days, 1, volume_count);
+    double sd_volume_last_60_days = gsl_stats_long_sd(volume_last_60_days, 1, volume_count);
+
+    double volume_ratio_60 = ((double)last_volume)/mean_volume_last_60_days;
+    double sigma_diff_val = ((double)last_volume - mean_volume_last_60_days)/sd_volume_last_60_days;
+
+    printf("==== volume stats ====\n");
+    printf("last_volume = %ld\n", last_volume);
+    printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
+    printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
+    printf("volume_ratio_60 = %.3f\n", volume_ratio_60);
+    printf("sigma_diff_val = %.3f\n", sigma_diff_val);
+}
+
 void after_work(uv_work_t *job, int status) {
     if (!status) {
         private_data_t *private_data = (private_data_t*)job->data;
@@ -235,39 +260,8 @@ static void do_work(uv_work_t *job) {
         return;
     }
 
-    /* for (register int16_t i = 0; i < changes_length; ++i) {
-        printf("volume = %ld\n", daily_volume[i]);
-    } */
-
-    //Do the volume computations inline here to start, and then move to function(s).
-    int64_t last_volume = daily_volume[changes_length - 1];
-    printf("last_volume = %ld\n", last_volume);
-
-    int64_t volume_last_60_days[60];
-    int8_t volume_count = 0;
-    for (register int16_t i = changes_length - 2; (i > changes_length - 62 && i >= 0); --i) {
-        volume_last_60_days[volume_count] = daily_volume[i];
-        volume_count++;
-    }
-
-    /* for (register int8_t j = 0; j < volume_count; ++j) {
-        printf("volume[%d] = %ld\n", j, volume_last_60_days[j]);
-    }
-
-    printf("volume count = %d\n", volume_count); */
-
-    //Make gsl calls here.
-    double mean_volume_last_60_days = gsl_stats_long_mean(volume_last_60_days, 1, volume_count);
-    double sd_volume_last_60_days = gsl_stats_long_sd(volume_last_60_days, 1, volume_count);
-    double volume_ratio_60 = ((double)last_volume)/mean_volume_last_60_days;
-
-    printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
-    printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
-    printf("volume_ratio_60 = %.3f\n", volume_ratio_60);
-
-    double sigma_diff_val = ((double)last_volume - mean_volume_last_60_days)/sd_volume_last_60_days;
-    printf("sigma_diff_val = %.3f\n", sigma_diff_val);
-
+    // compute the volume statistics.
+    get_volume_stats(daily_volume, changes_length);
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
