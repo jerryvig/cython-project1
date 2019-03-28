@@ -143,6 +143,7 @@ static void on_stdin_read(uv_fs_t *read_req) {
 
         if (!(stdin_len - 1)) {
             printf("Got empty ticker string...\n");
+            init_watchers();
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
             start_transfers(ticker_buffer);
@@ -231,9 +232,26 @@ static void do_work(uv_work_t *job) {
         return;
     }
 
-    for (register int16_t i = 0; i < changes_length; ++i) {
+    /* for (register int16_t i = 0; i < changes_length; ++i) {
         printf("volume = %ld\n", daily_volume[i]);
+    } */
+
+    //Do the volume computations inline here to start, and then move to function(s).
+    int64_t last_volume = daily_volume[changes_length - 1];
+    printf("last_volume = %ld\n", last_volume);
+
+    int64_t volume_last_60_days[60];
+    int8_t volume_count = 0;
+    for (register int16_t i = changes_length - 2; (i > changes_length - 62 && i >= 0); --i) {
+        volume_last_60_days[volume_count] = daily_volume[i];
+        volume_count++;
     }
+
+    for (register int8_t j = 0; j < volume_count; ++j) {
+        printf("volume[%d] = %ld\n", j, volume_last_60_days[j]);
+    }
+
+    printf("volume count = %d\n", volume_count);
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
