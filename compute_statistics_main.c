@@ -10,6 +10,7 @@
 #include <curl/curl.h>
 #include <sds.h>
 #include <uv.h>
+#include <gsl/gsl_statistics_long.h>
 #include "compute_statistics.h"
 
 #define INPUT_BUFFER_SIZE 128
@@ -247,11 +248,15 @@ static void do_work(uv_work_t *job) {
         volume_count++;
     }
 
-    for (register int8_t j = 0; j < volume_count; ++j) {
+    /* for (register int8_t j = 0; j < volume_count; ++j) {
         printf("volume[%d] = %ld\n", j, volume_last_60_days[j]);
     }
 
-    printf("volume count = %d\n", volume_count);
+    printf("volume count = %d\n", volume_count); */
+
+    //Make gsl calls here.
+    double mean_volume_last_60_days = gsl_stats_long_mean(volume_last_60_days, 1, volume_count);
+    printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
 
     sign_diff_pct sign_diff_values;
     strcpy(sign_diff_values.response_ticker, private_data->ticker_string);
