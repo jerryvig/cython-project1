@@ -273,7 +273,7 @@ void process_tickers(char *ticker_string, curl_multi_ez_t *curl_multi_ez, char t
     while (ticker != NULL) {
         sign_diff_pct sign_diff_values;
         run_stats(ticker, &sign_diff_values, curl_multi_ez->ez_pool[0], timestamps);
-        memset(sign_diff_print, 0, 512);
+        memset(sign_diff_print, 0, sizeof sign_diff_print);
         build_sign_diff_print_string(sign_diff_print, &sign_diff_values);
         printf("%s", sign_diff_print);
 
