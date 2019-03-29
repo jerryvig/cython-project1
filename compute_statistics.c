@@ -261,6 +261,11 @@ void get_sigma_data(const double *changes_daily, const int changes_length, sign_
 
     compute_sign_diff_pct(changes_daily, changes_length, sign_diff_values);
 
+    memset(sign_diff_values->change, 0, sizeof sign_diff_values->change);
+    memset(sign_diff_values->sigma, 0, sizeof sign_diff_values->sigma);
+    memset(sign_diff_values->sigma_change, 0, sizeof sign_diff_values->sigma_change);
+    memset(sign_diff_values->record_count, 0, sizeof sign_diff_values->record_count);
+
     sprintf(sign_diff_values->change, "%.3f%%", changes_daily[changes_length - 1] * 100);
     sprintf(sign_diff_values->sigma, "%.3f%%", stdev * 100);
     sprintf(sign_diff_values->sigma_change, "%.2f", sigma_change);
