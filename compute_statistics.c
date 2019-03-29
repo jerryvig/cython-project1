@@ -244,6 +244,16 @@ static void compute_sign_diff_pct(const double *changes_daily, const int changes
     const double avg_10_down = gsl_stats_mean(np_avg_10_down, 1, 10);
     const double stdev_10_down = gsl_stats_sd(np_avg_10_down, 1, 10);
 
+    memset(sign_diff_values->avg_move_10_up, 0, sizeof sign_diff_values->avg_move_10_up);
+    memset(sign_diff_values->avg_move_10_down, 0, sizeof sign_diff_values->avg_move_10_down);
+    memset(sign_diff_values->stdev_10_up, 0, sizeof sign_diff_values->stdev_10_up);
+    memset(sign_diff_values->stdev_10_down, 0, sizeof sign_diff_values->stdev_10_down);
+    memset(sign_diff_values->self_correlation, 0, sizeof sign_diff_values->self_correlation);
+    memset(sign_diff_values->sign_diff_pct_10_up, 0, sizeof sign_diff_values->sign_diff_pct_10_up);
+    memset(sign_diff_values->sign_diff_pct_10_down, 0, sizeof sign_diff_values->sign_diff_pct_10_down);
+    memset(sign_diff_values->sign_diff_pct_20_up, 0, sizeof sign_diff_values->sign_diff_pct_20_up);
+    memset(sign_diff_values->sign_diff_pct_20_down, 0, sizeof sign_diff_values->sign_diff_pct_20_down);
+
     sprintf(sign_diff_values->avg_move_10_up, "%.4f%%", avg_10_up * 100);
     sprintf(sign_diff_values->avg_move_10_down, "%.4f%%", avg_10_down * 100);
     sprintf(sign_diff_values->stdev_10_up, "%.4f%%", stdev_10_up * 100);
