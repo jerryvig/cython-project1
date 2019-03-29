@@ -203,14 +203,20 @@ static void get_volume_stats(const int64_t *daily_volume, const int16_t changes_
     double sd_volume_last_60_days = gsl_stats_long_sd(volume_last_60_days, 1, volume_count);
 
     double volume_ratio_60 = ((double)last_volume)/mean_volume_last_60_days;
-    double sigma_diff_val = ((double)last_volume - mean_volume_last_60_days)/sd_volume_last_60_days;
+    double sigma_volume_diff_60 = ((double)last_volume - mean_volume_last_60_days)/sd_volume_last_60_days;
 
-    printf("==== volume stats ====\n");
+    // sprintf the output onto the relevant sign_diff_values fields.
+    memset(sign_diff_values->volume_ratio_60, 0, sizeof sign_diff_values->volume_ratio_60);
+    memset(sign_diff_values->sigma_volume_diff_60, 0, sizeof sign_diff_values->sigma_volume_diff_60);
+    sprintf(sign_diff_values->volume_ratio_60, "%.3f", volume_ratio_60);
+    sprintf(sign_diff_values->sigma_volume_diff_60, "%.3f", sigma_volume_diff_60);
+
+    /* printf("==== volume stats ====\n");
     printf("last_volume = %ld\n", last_volume);
     printf("mean_volume_last 60 days = %.2f\n", mean_volume_last_60_days);
     printf("sd_volume_last 60 days = %.2f\n", sd_volume_last_60_days);
     printf("volume_ratio_60 = %.3f\n", volume_ratio_60);
-    printf("sigma_volume_diff_60 = %.3f\n", sigma_diff_val);
+    printf("sigma_volume_diff_60 = %.3f\n", sigma_volume_diff_60); */
 }
 
 void after_work(uv_work_t *job, int status) {

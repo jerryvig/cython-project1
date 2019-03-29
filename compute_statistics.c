@@ -500,6 +500,9 @@ void build_sign_diff_print_string(char sign_diff_print[], sign_diff_pct *sign_di
     memset(temp_str, 0, TEMP_STRLEN);
     sprintf(temp_str, "  \"stdev_10_down\": %s\n  \"stdev_10_up\": %s\n", sign_diff_values->stdev_10_down, sign_diff_values->stdev_10_up);
     strcat(sign_diff_print, temp_str);
+    memset(temp_str, 0, TEMP_STRLEN);
+    sprintf(temp_str, "  \"volume_ratio_60\": %s\n  \"sigma_volume_diff_60\": %s\n", sign_diff_values->volume_ratio_60, sign_diff_values->sigma_volume_diff_60);
+    strcat(sign_diff_print, temp_str);
 }
 
 void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_values) {
