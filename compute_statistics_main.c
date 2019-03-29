@@ -14,7 +14,8 @@
 #include "compute_statistics.h"
 
 #define INPUT_BUFFER_SIZE 128
-
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_RESET "\x1b[0m"
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
 #define THREAD_POOL_SIZE 4
@@ -143,7 +144,7 @@ static void on_stdin_read(uv_fs_t *read_req) {
         ticker_buffer[stdin_len - 1] = '\0';
 
         if (!(stdin_len - 1)) {
-            printf("Got empty ticker string...\n");
+            fprintf(stderr, ANSI_COLOR_RED "Error:" ANSI_COLOR_RESET " Got empty ticker string...\n");
             init_watchers();
         } else {
             clock_gettime(CLOCK_MONOTONIC, &start);
@@ -244,7 +245,7 @@ static void do_work(uv_work_t *job) {
     char first_nine[10] = {'\0'};
     strncpy(first_nine, private_data->buffer->memory, 9);
     if (strcmp(first_nine, "Date,Open") != 0) {
-        fprintf(stderr, "bad response buffer = \"%s\"\n", private_data->buffer->memory);
+        fprintf(stderr, ANSI_COLOR_RED "Error:" ANSI_COLOR_RESET " bad response buffer = \"%s\"\n", private_data->buffer->memory);
         fprintf(stderr, "Response does not contain historical data...\n");
 
         return;
@@ -256,7 +257,7 @@ static void do_work(uv_work_t *job) {
     const int16_t changes_length = get_adj_close_and_changes(private_data->buffer->memory, changes_daily, daily_volume);
 
     if (!changes_length) {
-        printf("Failed to parse adj_close and changes data from response.\n");
+        fprintf(stderr, ANSI_COLOR_RED "Error:" ANSI_COLOR_RESET "Failed to parse adj_close and changes data from response.\n");
         return;
     }
 
