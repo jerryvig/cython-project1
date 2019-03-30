@@ -341,7 +341,7 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     private_data_t *private_data = (private_data_t*)private;
 
     memset(crumb, 0, sizeof crumb);
-    const int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
+    const register int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
     reset_private_data(private_data);
 
@@ -405,7 +405,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
             return;
         }
 
-        const int title_failure = get_title(memoria.memory, sign_diff_values->title);
+        const register int title_failure = get_title(memoria.memory, sign_diff_values->title);
         if (title_failure) {
             return;
         }
