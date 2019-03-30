@@ -69,7 +69,6 @@ static int8_t get_crumb(const char *response_text, char *crumb) {
 }
 
 int get_title(const char *response_text, char *title) {
-    printf("in get_title()\n");
     memset(title, 0, sizeof title);
     const char* title_start = strstr(response_text, "<title>");
     if (!title_start) {
@@ -342,7 +341,7 @@ char *prime_crumb(curl_multi_ez_t *curl_multi_ez) {
     private_data_t *private_data = (private_data_t*)private;
 
     memset(crumb, 0, sizeof crumb);
-    int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
+    const int8_t crumb_failure = get_crumb(private_data->buffer->memory, crumb);
 
     reset_private_data(private_data);
 
@@ -406,7 +405,7 @@ void run_stats(const char *ticker_string, sign_diff_pct *sign_diff_values, const
             return;
         }
 
-        int title_failure = get_title(memoria.memory, sign_diff_values->title);
+        const int title_failure = get_title(memoria.memory, sign_diff_values->title);
         if (title_failure) {
             return;
         }
