@@ -569,6 +569,9 @@ void build_sign_diff_print_json(char sign_diff_json[], sign_diff_pct *sign_diff_
         sign_diff_values->stdev_10_down);
     strcat(sign_diff_json, temp_str);
     memset(temp_str, 0, TEMP_STRLEN);
-    sprintf(temp_str, "\"stdev_10_up\":\"%s\"}", sign_diff_values->stdev_10_up);
+    sprintf(temp_str, "\"stdev_10_up\":\"%s\",", sign_diff_values->stdev_10_up);
+    strcat(sign_diff_json, temp_str);
+    memset(temp_str, 0, TEMP_STRLEN);
+    sprintf(temp_str, "\"volume_ratio_60\":\"%s\",", sign_diff_values->volume_ratio_60);
     strcat(sign_diff_json, temp_str);
 }
