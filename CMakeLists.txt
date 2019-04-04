@@ -7,7 +7,7 @@ target_compile_options(compute_statistics PUBLIC -O3 -Wall -Wextra -pedantic -st
 
 add_executable(stats_fastcgi.fcgi stats_fastcgi.c compute_statistics.c)
 target_link_libraries(stats_fastcgi.fcgi fcgi curl gsl gslcblas pthread)
-target_compile_options(stats_fastcgi.fcgi PUBLIC -O3 -Wall -Wextra -pedantic -std=c11)
+target_compile_options(stats_fastcgi.fcgi PUBLIC -O3 -Wall -Wextra -pedantic)
 
 add_library(stats_uwsgi SHARED stats_uwsgi.c compute_statistics.c)
 target_link_libraries(stats_uwsgi curl gsl gslcblas pthread)
